@@ -1,11 +1,12 @@
 import numpy as np
 from Screen import *
-import noise
+# import noise
+from perlin_noise import PerlinNoise
 import math
 
 
 class Tile:
-    def __init__(self, pos, place, size, points, screen: Screen):
+    def __init__(self, pos, place, size, points, screen: Screen, noise: PerlinNoise):
         self.screen = screen
         self.size = size
         self.pos = np.array(pos)
@@ -17,14 +18,10 @@ class Tile:
         self.points = np.array(points) + pos
         self.stroke_color = (110)
 
-        # self.height = abs((noise.pnoise2(self.pos[0] / 100, self.pos[1] / 100, 1, 0.1) + 1) / 2)
-        # if dist_to_center > max_dist_to_center * 0.6:
-        #     self.height *= limit(abs((dist_to_center - max_dist_to_center) / max_dist_to_center) * 2, 0, 1)
-        #     print(abs((dist_to_center - max_dist_to_center) / max_dist_to_center))
 
-
-        self.height = noise.pnoise2(self.pos[0] / 300 + 500, self.pos[1] / 300 + 450, 1, 0.1) + noise.pnoise2(self.pos[0] / 300 + 1000, self.pos[1] / 300, 1, 0.1)/2
-
+        # self.height = noise.pnoise2(self.pos[0] / 300 + 500, self.pos[1] / 300 + 450, 1, 0.1) + noise.pnoise2(self.pos[0] / 300 + 1000, self.pos[1] / 300, 1, 0.1)/2
+        self.height = noise([self.pos[0] / 300 + 500, self.pos[1] / 300 + 450]) * 1.5
+        print(self.height)
         # dist_to_center = math.dist(pos, (screen.get_width() / 2, screen.get_height() / 2))
         # max_dist_to_center = math.dist((0, 0), (screen.get_width() / 2, screen.get_height() / 2))
 
@@ -36,8 +33,8 @@ class Tile:
         #     self.height *= limit(abs(2-(dist_to_center - max_dist_to_center) / max_dist_to_center) * 2, 0, 1)
 
         if self.height > 0.1:
-            # pass
-            self.height += abs(noise.snoise2(self.pos[0] / 100, self.pos[1] / 100, 1, 0.1) * 0.02)
+            pass
+            # self.height += abs(noise.snoise2(self.pos[0] / 100, self.pos[1] / 100, 1, 0.1) * 0.02)
             # self.height += abs(noise.pnoise2(self.pos[0] / 100+ 1000, self.pos[1] / 100, 1, 0.1) * 0.3)
 
         if self.height < -0.1:

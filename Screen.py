@@ -1,10 +1,11 @@
-### todo
-# - alphas :)
-#   + text
-# - rotation to rectacles, like dashed line
-# - correct logging
-# - a lot
-# - sleep
+# todo
+#  - alphas :)
+#       + text
+#  - rotation to rectangles, like dashed line
+#  - correct logging
+#  - a lot
+#  - sleep
+# -
 
 """
  NOTE: Strokes don't support alpha
@@ -56,14 +57,14 @@ class Screen:
         "  --text "
         self.current_text_color = (0, 0, 0)
         self.current_text_stroke_color = (0, 0, 0)
-        self.current_text_stroke_tickness = 2
+        self.current_text_stroke_thickness = 2
         self.text_stroke_active = False
 
     # the loop function that redraws every frame
     def loop(self):
         while self.run:
             for event in pygame.event.get():
-                if event.type == pygame.QUIT:
+                if event.type == pygame.QUIT or pygame.K_ESCAPE in self.get_pressed_keys() or pygame.KSCAN_ESCAPE in self.get_pressed_keys():
                     self.run = False
                 if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
                     self.key_pressed()
@@ -195,14 +196,6 @@ class Screen:
         self.current_color = self.drawColor(color)
         self.filled = True
 
-    def stroke(self, r, g, b):
-        if (g == -1):
-            g = r
-            b = r
-        color = (r, g, b)
-        self.current_stroke_color = format_color(color)
-        self.stroke_active = True
-
     def stroke(self, color):
         '''
          Currently alpha is just partialy supported for strokes
@@ -233,7 +226,7 @@ class Screen:
     def text_stroke(self, color, thickness=None):
         self.current_text_stroke_color = format_color(color)
         self.text_stroke_active = True
-        if thickness: self.current_text_stroke_tickness = thickness
+        if thickness: self.current_text_stroke_thickness = thickness
 
     def toggle_text_stroke(self, active):
         self.text_stroke_active = active
@@ -310,12 +303,12 @@ class Screen:
         if self.text_stroke_active:
             outlineSurf = self.txt_font.render(txt, antialiasing, self.current_text_stroke_color)
             offsets = [(ox, oy)
-                       for ox in range(-self.current_text_stroke_tickness, 2 * self.current_text_stroke_tickness,
-                                       int(self.current_text_stroke_tickness / 2) if int(
-                                           self.current_text_stroke_tickness / 2) > 0 else self.current_text_stroke_tickness)
-                       for oy in range(-self.current_text_stroke_tickness, 2 * self.current_text_stroke_tickness,
-                                       int(self.current_text_stroke_tickness / 2) if int(
-                                           self.current_text_stroke_tickness / 2) > 0 else self.current_text_stroke_tickness)
+                       for ox in range(-self.current_text_stroke_thickness, 2 * self.current_text_stroke_thickness,
+                                       int(self.current_text_stroke_thickness / 2) if int(
+                                           self.current_text_stroke_thickness / 2) > 0 else self.current_text_stroke_thickness)
+                       for oy in range(-self.current_text_stroke_thickness, 2 * self.current_text_stroke_thickness,
+                                       int(self.current_text_stroke_thickness / 2) if int(
+                                           self.current_text_stroke_thickness / 2) > 0 else self.current_text_stroke_thickness)
                        if ox != 0 or ox != 0]
             for ox, oy in offsets:
                 px, py = x, y

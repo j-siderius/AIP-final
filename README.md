@@ -1,2 +1,3 @@
 # AIP-final
-a thing
+
+Final project for the CreaTe MOD6 course AI Programming.

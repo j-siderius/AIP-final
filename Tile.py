@@ -79,6 +79,7 @@ class Tile:
         if math.dist(self.screen.get_mouse_pos(), self.pos) <= self.size/2:
             for tile in self.bordering_tiles:
                 tile.display(True)
+            print(len(self.bordering_tiles))
 
 
 def limit(value, min, max):

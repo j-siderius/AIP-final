@@ -19,11 +19,14 @@ import numpy as np
 
 
 class Screen:
-    def __init__(self, width, height, loopFunction, frameRate=60, title=None, key_pressed_func=None, key_hold_func=None,
+    def __init__(self, width: int, height: int, loopFunction, frameRate=60, title=None, key_pressed_func=None, key_hold_func=None,
                  mouse_pressed_func=None, mouse_dragged_func=None, mouse_released_func=None):
         # setup screen
         pygame.init()
-        self.screen = pygame.display.set_mode((width, height))
+        if width == height == 0:
+            self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+        else:
+            self.screen = pygame.display.set_mode((width, height))
         if title: Screen.set_title(title)
 
         # input variables 
@@ -137,6 +140,9 @@ class Screen:
 
     def get_height(self):
         return self.window_height
+
+    def get_size(self):
+        return self.screen.get_size()
 
     def get_mouse_pressed(self):
         return pygame.mouse.get_pressed()

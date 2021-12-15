@@ -136,10 +136,12 @@ class Screen:
         return self.get_wanted_frameRate() / self.get_frameRate()
 
     def get_width(self):
-        return self.window_width
+        w, h = self.get_size()
+        return w
 
     def get_height(self):
-        return self.window_height
+        w, h = self.get_size()
+        return h
 
     def get_size(self):
         return self.screen.get_size()
@@ -198,16 +200,16 @@ class Screen:
             g = r
             b = r
         color = (r, g, b)
-        self.current_stroke_color = Screen.format_color(color)
+        self.current_stroke_color = format_color(color)
         self.stroke_active = True
 
     def stroke(self, color):
         '''
          Currently alpha is just partialy supported for strokes
         '''
-        color = Screen.format_color(color)
+        color = format_color(color)
         if color == None: return
-        self.current_stroke_color = Screen.format_color(color)
+        self.current_stroke_color = format_color(color)
         self.stroke_active = True
 
     def stroke_size(self, thickness):
@@ -226,10 +228,10 @@ class Screen:
         self.txt_font = font
 
     def text_color(self, color):
-        self.current_text_color = Screen.format_color(color)
+        self.current_text_color = format_color(color)
 
     def text_stroke(self, color, thickness=None):
-        self.current_text_stroke_color = Screen.format_color(color)
+        self.current_text_stroke_color = format_color(color)
         self.text_stroke_active = True
         if thickness: self.current_text_stroke_tickness = thickness
 
@@ -297,7 +299,7 @@ class Screen:
     def text(self, x, y, txt, centered=True, color=None, font=None, surface=None, antialiasing=True):
         if font is None: font = self.txt_font
         if surface is None: surface = self.get_screen()
-        color = Screen.format_color(color)
+        color = format_color(color)
         if color is None: color = self.current_text_color
 
         try:
@@ -440,7 +442,7 @@ class Screen:
 
         if stroke_color or stroke_tickness:
             stroke_active = True
-        stroke_color = Screen.format_color(stroke_color)
+        stroke_color = format_color(stroke_color)
         if stroke_color is None:
             stroke_color = self.current_stroke_color
         if stroke_tickness is None:
@@ -521,11 +523,11 @@ class Screen:
         else:
             filled = False
         color = self.drawColor(color)
-        stroke_color = Screen.format_color(stroke_color)
+        stroke_color = format_color(stroke_color)
         if stroke_color is None: stroke_color = color
 
         # alpha
-        draw_color = Screen.format_color_3(color)
+        draw_color = format_color_3(color)
 
         if self.filled or filled:
             draw.filled_polygon(surface, points, draw_color)
@@ -560,64 +562,69 @@ class Screen:
 
         return color
 
-    # enums
-    class Mouse_button(Enum):  # for some reason doesn't work
-        left = 1
-        scroll = 2
-        right = 3
-        scroll_up = 4
-        scroll_down = 5
 
-    def format_color(color):
-        '''
-         formates color to the (r,g,b,a) format
-        '''
-        # if no color is selected use the current color
-        if color == None: return None
-        # if just 1 value is entered make the r,g and b the same. so 255 -> (255,255,255) = white
-        try:
-            if (len(color) == 1):
-                color = (color[0], color[0], color[0])
-            elif (len(color) == 2):
-                color = (color[0], color[0], color[0], color[1])
-        except:  # if it isn't a tuple
-            color = int(color)
-            color = (color, color, color)
+# enums
+class MouseButton(Enum):
+    left = 1
+    scroll = 2
+    right = 3
+    scroll_up = 4
+    scroll_down = 5
 
-        if len(color) < 4:
-            color = (color[0], color[1], color[2], 255)
-        return color
 
-    def format_color_3(color):
-        '''
-         Formates color to the (r,g,b) format,
-         By doing so removing the alpha
-        '''
-        # if no color is selected use the current color
-        if color == None: return None
-        # if just 1 value is entered make the r,g and b the same. so 255 -> (255,255,255) = white
-        try:
-            if (len(color) == 1):
-                color = (color[0], color[0], color[0])
-            elif (len(color) == 2):
-                color = (color[0], color[0], color[0], color[1])
-        except:  # if it isn't a tuple
-            color = (color, color, color)
+def format_color(color):
+    '''
+     formates color to the (r,g,b,a) format
+    '''
+    # if no color is selected use the current color
+    if color == None: return None
+    # if just 1 value is entered make the r,g and b the same. so 255 -> (255,255,255) = white
+    try:
+        if (len(color) == 1):
+            color = (color[0], color[0], color[0])
+        elif (len(color) == 2):
+            color = (color[0], color[0], color[0], color[1])
+    except:  # if it isn't a tuple
+        color = int(color)
+        color = (color, color, color)
 
-        if len(color) == 4:
-            color = (color[0], color[1], color[2])
-        return color
+    if len(color) < 4:
+        color = (color[0], color[1], color[2], 255)
+    return color
 
-    def opposite_color(color):
-        """
-        Returns the opposite color.\n
-        Usefull for color keying.
-        """
-        if len(color) <= 2: color = Screen.format_color(color)
-        if len(color) == 3:
-            return (255 - color[0], 255 - color[1], 255 - color[2])
-        elif len(color) == 4:
-            return (255 - color[0], 255 - color[1], 255 - color[2], color[3])
+
+def format_color_3(color):
+    '''
+     Formates color to the (r,g,b) format,
+     By doing so removing the alpha
+    '''
+    # if no color is selected use the current color
+    if color == None: return None
+    # if just 1 value is entered make the r,g and b the same. so 255 -> (255,255,255) = white
+    try:
+        if (len(color) == 1):
+            color = (color[0], color[0], color[0])
+        elif (len(color) == 2):
+            color = (color[0], color[0], color[0], color[1])
+    except:  # if it isn't a tuple
+        color = (color, color, color)
+
+    if len(color) == 4:
+        color = (color[0], color[1], color[2])
+    return color
+
+
+def opposite_color(color):
+    """
+    Returns the opposite color.\n
+    Usefull for color keying.
+    """
+    if len(color) <= 2: color = format_color(color)
+    if len(color) == 3:
+        return (255 - color[0], 255 - color[1], 255 - color[2])
+    elif len(color) == 4:
+        return (255 - color[0], 255 - color[1], 255 - color[2], color[3])
+
 
 def lerp_2D(vector1, vector2, factor):
     """
@@ -646,12 +653,12 @@ def lerp_color(color1, color2, factor):
     elif factor < 0:
         factor = 0
 
-    color1 = Screen.format_color(color1)
-    color2 = Screen.format_color(color2)
+    color1 = format_color(color1)
+    color2 = format_color(color2)
 
     r = (color2[0] - color1[0]) * factor + color1[0]
     g = (color2[1] - color1[1]) * factor + color1[1]
     b = (color2[2] - color1[2]) * factor + color1[2]
     a = (color2[3] - color1[3]) * factor + color1[3]
 
-    return Screen.format_color((r, g, b, a))
+    return format_color((r, g, b, a))

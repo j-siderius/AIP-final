@@ -15,3 +15,5 @@ buidling:
   <li>wall stacking leads to stronger wall.
 
 <ul>
+ 
+ linkie naar perlin-noise lib: https://pypi.org/project/perlin-noise/

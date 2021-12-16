@@ -1,0 +1,13 @@
+## Project description
+
+Turn-based strategic survival game
+
+The player is dropped into a randomly generated, hexagonal world (perlin noise height map).
+Players goal is to survive a number of nights in this land, until rescue arrives.
+Every night, enemies will spawn and try to chase down the player (A* pathfinding).
+During the day, player can build walls by harvesting resources and finding strategic environments.
+Plot twist: time only moves, when you move.
+
+
+Player is controlled using a modified Wii Nunchuck (made bluetooth compatible).
+

@@ -11,3 +11,8 @@ Plot twist: time only moves, when you move.
 
 Player is controlled using a modified Wii Nunchuck (made bluetooth compatible).
 
+Player movement:?
+    W
+ Q     E
+ A     D
+    S

@@ -24,7 +24,10 @@ class Tile:
         max_dist_to_center = math.dist((0, 0), (width / 2, height / 2))
 
         # center the landmass in the middle, needs rework
-        self.height = (self.height + 1) * limit((max_dist_to_center - dist_to_center) / (max_dist_to_center * 0.3), 0, 1) - 1
+        self.height = (self.height + 1) * limit((max_dist_to_center - dist_to_center) / (max_dist_to_center * 0.3), 0, 1.3) - 1
+        if pos[1] < size or pos[1] > screen.get_height() - size:
+            self.height -= 0.2
+            if self.height > -0.1: self.height = -0.15
 
         if self.height > 0.1:
             self.height += abs(noise([self.pos[0] / 100 + 1000, self.pos[1] / 100]) * 0.3)

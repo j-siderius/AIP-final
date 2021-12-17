@@ -248,8 +248,8 @@ class Screen:
         # it's done this way, because alpha's are in this case on just one color and this is a lot faster
         draw_surface = pygame.Surface((radius * 2, radius * 2))
         alpha = color[3]
-        draw_color = Screen.format_color_3(color)
-        color_key = Screen.opposite_color(draw_color)
+        draw_color = format_color_3(color)
+        color_key = opposite_color(draw_color)
         draw_surface.fill(color_key)
         draw_surface.set_colorkey(color_key)
 

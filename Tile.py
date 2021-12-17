@@ -13,6 +13,7 @@ class Tile:
         self.x = place[0]
         self.y = place[1]
         self.bordering_tiles = []
+        self.walkable = False
 
         self.color = (0, 100, 0)
         self.points = np.array(points) + pos
@@ -29,15 +30,16 @@ class Tile:
 
         if (pos[1] < size or pos[1] > screen.get_height() - size) and self.height > 0:
             self.height -= 0.2
-            if self.height > 0: self.height = -0.15
-
-        if self.height < 0:
+            if self.height > 0: self.height = 0
+        if self.height < 0:  # water
             self.color = lerp_color((51, 153, 255), (0, 105, 148), limit(-self.height * 2.5, 0, 1))
-        elif self.height < 0.4:
+        elif self.height < 0.45:  # land
             self.color = (0, 190, 0)
-        elif self.height < 0.65:
+            self.walkable = True
+        elif self.height < 0.7:  # grey mountain
             self.color = format_color(120 * (1 - (self.height - 0.4) / 0.25 / 4))
-        else:
+            self.walkable = True
+        else:  # snow
             self.color = (255, 255, 255)  # lerp_color((175, 175, 175), (255, 255, 255), (self.height - 0.65) / 0.1)
 
         self.isWater = self.height < 0
@@ -71,6 +73,9 @@ class Tile:
             self.higlight()
             # for tile in self.bordering_tiles:
             #     tile.higlight()
+
+    def is_walkable(self):
+        return self.walkable
 
 
 def limit(value, min, max):

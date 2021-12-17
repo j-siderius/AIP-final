@@ -9,7 +9,8 @@ During the day, player can build walls by harvesting resources and finding strat
 Plot twist: time only moves, when you move.
 
 
-Player is controlled using a modified Wii Nunchuck (made bluetooth compatible).
+Player is controlled using a modified Wii Nunchuck (connected to arduino).
+the day/night cycle is visualized by half a LED circle
 
 Player movement:?
     W

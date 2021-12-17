@@ -14,6 +14,7 @@ class Tile:
         self.y = place[1]
         self.bordering_tiles = []
         self.walkable = False
+        self.walkspeed = 0
 
         self.color = (0, 100, 0)
         self.points = np.array(points) + pos
@@ -36,9 +37,11 @@ class Tile:
         elif self.height < 0.45:  # land
             self.color = (0, 190, 0)
             self.walkable = True
+            self.walkspeed = 1
         elif self.height < 0.7:  # grey mountain
             self.color = format_color(120 * (1 - (self.height - 0.4) / 0.25 / 4))
             self.walkable = True
+            self.walkspeed = 0.5
         else:  # snow
             self.color = (255, 255, 255)  # lerp_color((175, 175, 175), (255, 255, 255), (self.height - 0.65) / 0.1)
 
@@ -74,8 +77,11 @@ class Tile:
             # for tile in self.bordering_tiles:
             #     tile.higlight()
 
+    # returns the walkspeed if a tile is walkable, otherwise return False
     def is_walkable(self):
-        return self.walkable
+        if self.walkable:
+            return self.walkspeed
+        else: return False
 
 
 def limit(value, min, max):

@@ -39,9 +39,11 @@ class Player:
         else:
             # assign player position to the found grass tile
             print(f"Starting tile found: ({tileX},{tileY})")
-            print(tile.is_walkable())
             hex_size = self.field.get_hex_size()
-            # points are arranged in the following manner: [0]=bottom-right, [1]=bottom-left, [2]=middle-left,
-            # [3]=top-left, [4]=top-right, [5]=middle-right
-            self.x = self.field.get_tile(tileX, tileY).get_points()[4][0] - (self.field.get_hex_width() / 3)
-            self.y = self.field.get_tile(tileX, tileY).get_points()[2][1]
+            self.align_player(tileX, tileY)
+
+    def align_player(self, x, y):
+        # points are arranged in the following manner: [0]=bottom-right, [1]=bottom-left, [2]=middle-left,
+        # [3]=top-left, [4]=top-right, [5]=middle-right
+        self.x = self.field.get_tile(x, y).get_points()[4][0] - (self.field.get_hex_width() / 3)
+        self.y = self.field.get_tile(x, y).get_points()[2][1]

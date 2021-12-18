@@ -12,37 +12,40 @@ class Field:
                 print(f"Field could not be initialized, because field_size or hex_amount is none!!!")
                 return
             hex_width = (field_size[0]) / (hex_amount[0] - 0.34)
-            self.hex_size = hex_width / (1.5 * math.cos(0)) * 2
+            hex_size = hex_width / (1.5 * math.cos(0)) * 2
 
             if hex_amount[1] == 0:
                 hex_amount = (hex_amount[0], int(hex_amount[0] * (field_size[1] / field_size[0])) - 3)
             field_size = hex_amount
-            field_pos = (field_pos[0] - self.hex_size / 4, field_pos[1] - self.hex_size / 2)
+            field_pos = (field_pos[0] - hex_size / 4, field_pos[1] - hex_size / 2)
         else:
             field_size = (23, 20)
 
         self.tiles = []
         self.screen = screen
         y_offset = 0
-        self.hex_size = hex_width / (1.5 * math.cos(0)) * 2
-        hex_height = self.hex_size * math.sin((2 * math.pi) / 3)
+        hex_size = hex_width / (1.5 * math.cos(0)) * 2
+        hex_height = hex_size * math.sin((2 * math.pi) / 3)
 
         noise = PerlinNoise(octaves=1, seed=random.randint(1, 100))
 
-        points = [[self.hex_size / 2 * math.cos((2 * math.pi) / 6 * i), self.hex_size / 2 * math.sin((2 * math.pi) / 6 * i)] for i in range(1, 7)]
+        points = [[hex_size / 2 * math.cos((2 * math.pi) / 6 * i), hex_size / 2 * math.sin((2 * math.pi) / 6 * i)] for i in range(1, 7)]
 
         for x in range(0, field_size[0]):
             self.tiles.append([])
             for y in range(0, field_size[1]):
                 self.tiles[x].append(
-                    Tile((x * hex_width + self.hex_size / 2 + field_pos[0], y * hex_height + y_offset + hex_height / 2 + field_pos[1]), (x, y)
-                         , self.hex_size, points, screen, noise))
+                    Tile((x * hex_width + hex_size / 2 + field_pos[0], y * hex_height + y_offset + hex_height / 2 + field_pos[1]), (x, y)
+                         , hex_size, points, screen, noise))
 
             y_offset = hex_height / 2 if x % 2 == 0 else 0
 
         for tiles in self.tiles:
             for tile in tiles:
                 tile.init(self.tiles, field_size)
+
+        self.hex_size = hex_size
+        self.hex_width = hex_width
 
         print(f"{self.hex_size = }, {len(self.tiles) = }, {field_size = }")
 
@@ -62,3 +65,6 @@ class Field:
     # returns the size of a hex (to base other objects off of)
     def get_hex_size(self):
         return self.hex_size
+
+    def get_hex_width(self):
+        return self.hex_width

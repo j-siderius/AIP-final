@@ -3,6 +3,7 @@ from Screen import *
 # import noise
 from perlin_noise import PerlinNoise
 import math
+import helper
 
 
 class Tile:
@@ -17,6 +18,8 @@ class Tile:
         self.walkspeed = 0
 
         self.color = (0, 100, 0)
+        # points are arranged in the following manner: [0]=bottom-right, [1]=bottom-left, [2]=middle-left,
+        # [3]=top-left, [4]=top-right, [5]=middle-right
         self.points = np.array(points) + pos
         self.stroke_color = (110, 110, 110)
 
@@ -74,6 +77,7 @@ class Tile:
     def debug(self, mouse):
         if math.dist(mouse, self.pos) <= self.size * 0.5:
             self.higlight()
+            helper.print_debug(f"({self.x},{self.y})")
             # for tile in self.bordering_tiles:
             #     tile.higlight()
 
@@ -82,6 +86,9 @@ class Tile:
         if self.walkable:
             return self.walkspeed
         else: return False
+
+    def get_points(self):
+        return self.points
 
 
 def limit(value, min, max):

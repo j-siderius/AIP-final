@@ -71,3 +71,9 @@ class Field:
 
     def highlight_tile(self, tileX, tileY):
         self.tiles[tileX][tileY].highlight()
+
+    def get_current_mouse_tile(self):
+        for tile_row in self.tiles:
+            for tile in tile_row:
+                if tile.debug(self.screen.get_mouse_pos()):
+                    return tile

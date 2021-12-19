@@ -80,6 +80,7 @@ class Tile:
             helper.print_debug(f"({self.x},{self.y})")
             # for tile in self.bordering_tiles:
             #     tile.higlight()
+            return True
 
     # returns the walkspeed if a tile is walkable, otherwise return False
     def is_walkable(self):

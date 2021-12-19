@@ -68,3 +68,6 @@ class Field:
 
     def get_hex_width(self):
         return self.hex_width
+
+    def highlight_tile(self, tileX, tileY):
+        self.tiles[tileX][tileY].highlight()

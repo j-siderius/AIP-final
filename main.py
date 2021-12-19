@@ -19,6 +19,7 @@ class program:
     def loop(self):
         self.screen.background(139, 69, 19)
         self.field.display()
+        self.player.update()
         self.player.display()
 
 

@@ -101,10 +101,10 @@ class Field:
 
     def display(self, screen):
         self.tiles_group.draw(screen.get_screen())
-        self.tiles_group.update(screen.get_mouse_pos())
-        # for tile_row in self.tiles:
-        #     for tile in tile_row:
-        #         tile.display()
+        # self.tiles_group.update(screen.get_mouse_pos())
+        for tile_row in self.tiles:
+            for tile in tile_row:
+                tile.display()
         #
         # for tile_row in self.tiles:
         #     for tile in tile_row:

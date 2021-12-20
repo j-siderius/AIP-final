@@ -36,9 +36,10 @@ class Field:
             field_size = hex_amount
             # field_pos = (field_pos[0] - hex_size / 4, field_pos[1] - hex_size / 2)
         else:
-            field_size = (23, 20)
             hex_size = hex_width / 2  # / (1.5 * math.cos(0)) * 2
-            hex_height = math.sqrt(3) * hex_size
+            hex_height = round(math.sqrt(3) * hex_size)
+            hex_size = round(hex_size)
+            field_size = (math.ceil(field_size[0] / (hex_width + hex_width/2) * 2), math.ceil(field_size[1] / hex_height)+1)
 
         self.tiles = []
         self.screen = screen
@@ -74,8 +75,8 @@ class Field:
                 #          , hex_size, points, screen, noise, sprite_dict))
 
                 self.tiles[x].append(
-                    Tile((x * round(hex_width * (3/4)) + hex_width/4, y * hex_height - hex_height/2 + y_offset), (x, y),
-                         hex_size, points, screen, noise, sprite_dict))
+                    Tile(pos=(x * round(hex_width * (3/4)) + hex_width/4, y * hex_height - hex_height/2 + y_offset), place=(x, y),
+                         size=(hex_width, hex_height), radius=hex_size, screen=screen, noise=noise, sprite_dict=sprite_dict))
 
             y_offset = hex_height / 2 if x % 2 == 0 else 0
 

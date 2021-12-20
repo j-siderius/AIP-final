@@ -10,7 +10,7 @@ class program:
         # self.screen = Screen(584, 592, self.loop, title="Test Terrain")
         self.screen = Screen(0, 0, self.loop, title="Test Terrain")
 
-        self.field = Field(self.screen, field_pos=(0, 0), hex_width='auto', field_size=(self.screen.get_size()), hex_amount=(80, 0))
+        self.field = Field(self.screen, field_pos=(0, 0), hex_width=4*12, field_size=(self.screen.get_size()), hex_amount=(80, 0))
 
         self.screen.start()
 

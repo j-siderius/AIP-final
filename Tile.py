@@ -9,10 +9,11 @@ import math
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, pos, place, size, points, screen: Screen, noise: PerlinNoise, sprite_dict: dict):
+    def __init__(self, pos, place, size, radius, screen: Screen, noise: PerlinNoise, sprite_dict: dict):
         super().__init__()
         self.screen = screen
         self.size = size
+        self.radius = radius
         self.pos = np.array(pos)
         self.x = place[0]
         self.y = place[1]
@@ -32,9 +33,12 @@ class Tile(pygame.sprite.Sprite):
         self.height -= (dist_center_x ** 2) / ((width * 0.5) ** 2) - 0.2
         self.height -= (dist_center_y ** 2) / ((height * 0.6) ** 2) - 0.2
 
-        if (pos[1] < size or pos[1] > screen.get_height() - size) and self.height > 0:
+        if (pos[1] < size[1] or pos[1] > screen.get_height() - size[1]) and self.height > 0:
             self.height -= 0.2
-            if self.height > 0: self.height = 0
+            if self.height > 0: self.height = -1
+
+        # if pos[1] > self.screen.get_size()[1] - size*2:
+        #     self.height = -1
 
         # if self.height < -0.3:  # deep water
         #     self.image = sprite_dict["deep_water"].copy()
@@ -60,8 +64,6 @@ class Tile(pygame.sprite.Sprite):
         self.rect.center = self.pos
 
         self.isWater = self.height < 0
-        # if self.isWater:
-        #     self.points = self.points + 2
 
     def init(self, tiles, fieldSize):
         pass

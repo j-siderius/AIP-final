@@ -17,6 +17,7 @@ from pygame import gfxdraw as draw
 from enum import Enum
 import time
 import numpy as np
+from pygame.locals import *
 
 
 class Screen:
@@ -25,7 +26,9 @@ class Screen:
         # setup screen
         pygame.init()
         if width == height == 0:
-            self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+            # self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+            flags = FULLSCREEN | DOUBLEBUF
+            self.screen = pygame.display.set_mode((width, height), flags, 8)
         else:
             self.screen = pygame.display.set_mode((width, height))
         if title: Screen.set_title(title)
@@ -272,11 +275,11 @@ class Screen:
         # it's done this way, because alpha's are in this case on just one color and this is a lot faster
         draw_surface = pygame.Surface((w, h))
         alpha = color[3]
-        draw_color = Screen.format_color_3(color)
+        draw_color = format_color_3(color)
 
         # if self.filled or color[0] == -1: pygame.draw.rect(surface, color, pygame.Rect(x,y, w, h))
         if self.filled or filled:
-            if border_radius > 0:
+            if border_radius > 1:
                 pygame.draw.rect(surface, color, pygame.Rect(x, y, w, h), border_radius=border_radius, border_top_right_radius=border_top_right_radius
                                  , border_bottom_left_radius=border_bottom_left_radius, border_top_left_radius=border_top_left_radius,
                                  border_bottom_right_radius=border_bottom_right_radius)
@@ -377,7 +380,7 @@ class Screen:
         for i in range(0, height, step):
             if float(i) % float(step * 2) == 0:
                 if self.filled or filled:
-                    pygame.Surface.fill(line_surface, Screen.format_color_3(color), pygame.Rect(0, i, width, step))
+                    pygame.Surface.fill(line_surface, format_color_3(color), pygame.Rect(0, i, width, step))
 
                 if self.stroke_active: pygame.draw.rect(line_surface, self.current_stroke_color,
                                                         pygame.Rect(0, i, width, step), self.current_stroke_thickness,
@@ -410,8 +413,8 @@ class Screen:
 
         draw_surface = pygame.Surface((radius * 2, radius * 2))
         alpha = color[3]
-        draw_color = Screen.format_color_3(color)
-        color_key = Screen.opposite_color(draw_color)
+        draw_color = format_color_3(color)
+        color_key = opposite_color(draw_color)
         draw_surface.fill(color_key)
         draw_surface.set_colorkey(color_key)
 
@@ -459,8 +462,8 @@ class Screen:
         # alpha
         draw_surface = pygame.Surface((width, height))
         alpha = color[3]
-        draw_color = Screen.format_color_3(color)
-        color_key = Screen.opposite_color(draw_color)
+        draw_color = format_color_3(color)
+        color_key = opposite_color(draw_color)
         draw_surface.fill(color_key)
         draw_surface.set_colorkey(color_key)
 
@@ -469,8 +472,8 @@ class Screen:
         stroke_cutout = pygame.Surface((width, height))
 
         stroke_alpha = stroke_color[3]
-        draw_stroke_color = Screen.format_color_3(self.current_stroke_color)
-        stroke_color_key = Screen.opposite_color(draw_stroke_color)
+        draw_stroke_color = format_color_3(self.current_stroke_color)
+        stroke_color_key = opposite_color(draw_stroke_color)
 
         stroke_surface.fill(stroke_color_key)
         stroke_surface.set_colorkey(stroke_color_key)
@@ -547,8 +550,7 @@ class Screen:
         except:  # if it isn't a tuple
             color = (color, color, color)
 
-        if color[
-            0] == -1: self.filled = False  # old, still posible, but just old, tho it is faster. so you dcan use it ;)
+        if color[0] == -1: self.filled = False  # old, still possible, but just old, tho it is faster. so you dcan use it ;)
 
         if len(color) < 4:
             color = (color[0], color[1], color[2], 255)

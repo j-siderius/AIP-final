@@ -40,8 +40,11 @@ class Field:
             "grass": pygame.image.load("./Sprites/Tiles/grass.png").convert_alpha(),
             "hills": pygame.image.load("./Sprites/Tiles/hills.png").convert_alpha(),
             "mountain": pygame.image.load("./Sprites/Tiles/mountain.png").convert_alpha(),
-            "SmallerMountain": pygame.image.load("./Sprites/Tiles/SmallerMountain.png").convert_alpha()
+            "SmallerMountain": pygame.image.load("./Sprites/Tiles/SmallerMountain.png").convert_alpha(),
             # "snow": pygame.image.load("./Sprites/Tiles/snow.png"),
+
+            "selected_grass": pygame.image.load("./Sprites/Selected_tilles/grass.png").convert_alpha(),
+            "selected_hills": pygame.image.load("./Sprites/Selected_tilles/hills.png").convert_alpha(),
         }
         for key, sprite in sprite_dict.items():
             width = hex_width
@@ -92,11 +95,11 @@ class Field:
 
     def display(self, screen):
         self.tiles_group.draw(screen.get_screen())
-        # self.tiles_group.update(screen.get_mouse_pos())
+        self.tiles_group.update(screen.get_mouse_pos())
         # for tile_row in self.tiles:
         #     for tile in tile_row:
         #         tile.display()
         #
         # for tile_row in self.tiles:
         #     for tile in tile_row:
-        #         tile.debug(self.screen.get_mouse_pos())
+        #         tile.mouse_pointer(self.screen.get_mouse_pos())

@@ -20,6 +20,9 @@ class Tile(pygame.sprite.Sprite):
         self.bordering_tiles = []
         self.walkable = False
 
+        self.sprite_dict = sprite_dict
+        self.image_name = ""
+        self.highlight = False
 
         self.color = (0, 100, 0)
         self.stroke_color = (110, 110, 110)
@@ -49,10 +52,12 @@ class Tile(pygame.sprite.Sprite):
             self.color = (0, 190, 0)
             self.walkable = True
             self.image = sprite_dict["grass"]
+            self.image_name = "grass"
         elif self.height < 0.7:  # grey mountain
             self.color = format_color(120 * (1 - (self.height - 0.4) / 0.25 / 4))
             self.walkable = True
             self.image = sprite_dict["hills"]
+            self.image_name = "hills"
         else:  # snow
             self.color = (255, 255, 255)  # lerp_color((175, 175, 175), (255, 255, 255), (self.height - 0.65) / 0.1)
             self.image = sprite_dict["mountain" if random.choices([True, False]) else "SmallerMountain"]
@@ -65,8 +70,8 @@ class Tile(pygame.sprite.Sprite):
 
         self.hex_rect = pygame.Rect((0, 0), size)  # (self.rect.bottomleft - np.array([-size[0]/2, -size[1]/2])), size)
         self.hex_rect.bottomleft = self.rect.bottomleft
-        self.hex_rect.move_ip(0,-3)
-        self.points = np.array(points) + self.hex_rect.center
+        self.hex_rect.move_ip(0, -3)
+        self.points = np.array(points) + self.hex_rect.center + np.array([0, -2])
 
         self.isWater = self.height < 0
 
@@ -96,15 +101,26 @@ class Tile(pygame.sprite.Sprite):
         # self.screen.rect(self.hex_rect.x, self.hex_rect.y, self.hex_rect.width, self.hex_rect.height, color=(255, 0, 0, 0))
 
     #
-    def higlight(self):
-        self.screen.aapolygon(self.points, (int(limit(self.color[0] * 2, 0, 255)), int(limit(self.color[1] * 2, 0, 255)),
-                                            int(limit(self.color[2] * 2, 0, 255))), stroke_color=self.stroke_color)
-    #
-    def debug(self, mouse):
-        if math.dist(mouse, self.pos) <= self.radius:
+    def higlight(self, color=(255,100)):
+        self.screen.aapolygon(self.points, color, stroke_color=self.stroke_color)
+        # self.screen.aapolygon(self.points, (int(limit(self.color[0] * 2, 0, 255)), int(limit(self.color[1] * 2, 0, 255)),
+        #                                     int(limit(self.color[2] * 2, 0, 255))), stroke_color=self.stroke_color)
+
+    def update(self, mouse):
+        if self.isOver(mouse) and self.is_walkable() and not self.highlight:
+            self.highlight = True
+            self.image = self.sprite_dict[f"selected_{self.image_name}"]
+        elif not self.isOver(mouse) and self.highlight:
+            self.highlight = False
+            self.image = self.sprite_dict[self.image_name]
+
+    # TEMP
+    def mouse_pointer(self, mouse):
+        if self.isOver(mouse) and not self.isWater:
             self.higlight()
-            # for tile in self.bordering_tiles:
-            #     tile.higlight()
+
+    def isOver(self, point):
+        return math.dist(point, self.pos) <= self.radius
 
     def is_walkable(self):
         return self.walkable

@@ -44,7 +44,10 @@ class Field:
             for tile in tiles:
                 tile.init(self.tiles, field_size)
 
-        print(f"{hex_size = }, {len(self.tiles) = }, {field_size = }")
+        self.hex_size = hex_size
+        self.hex_width = hex_width
+
+        print(f"{self.hex_size = }, {len(self.tiles) = }, {field_size = }")
 
     def display(self):
         for tile_row in self.tiles:
@@ -54,3 +57,23 @@ class Field:
         for tile_row in self.tiles:
             for tile in tile_row:
                 tile.debug(self.screen.get_mouse_pos())
+
+    # returns the tile object at given coordinates
+    def get_tile(self, tileX, tileY):
+        return self.tiles[int(tileX)][int(tileY)]
+
+    # returns the size of a hex (to base other objects off of)
+    def get_hex_size(self):
+        return self.hex_size
+
+    def get_hex_width(self):
+        return self.hex_width
+
+    def highlight_tile(self, tileX, tileY):
+        self.tiles[tileX][tileY].highlight()
+
+    def get_current_mouse_tile(self):
+        for tile_row in self.tiles:
+            for tile in tile_row:
+                if tile.debug(self.screen.get_mouse_pos()):
+                    return tile

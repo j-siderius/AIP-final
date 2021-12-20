@@ -17,6 +17,7 @@ from pygame import gfxdraw as draw
 from enum import Enum
 import time
 import numpy as np
+from pygame.locals import *
 
 
 class Screen:
@@ -25,7 +26,9 @@ class Screen:
         # setup screen
         pygame.init()
         if width == height == 0:
-            self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+            # self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+            flags = FULLSCREEN | DOUBLEBUF
+            self.screen = pygame.display.set_mode((width, height), flags, 8)
         else:
             self.screen = pygame.display.set_mode((width, height))
         if title: Screen.set_title(title)

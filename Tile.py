@@ -77,7 +77,6 @@ class Tile:
     def debug(self, mouse):
         if math.dist(mouse, self.pos) <= self.size * 0.5:
             self.higlight()
-            helper.print_debug(f"({self.x},{self.y})")
             # for tile in self.bordering_tiles:
             #     tile.higlight()
             return True

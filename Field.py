@@ -60,7 +60,7 @@ class Field:
 
     # returns the tile object at given coordinates
     def get_tile(self, tileX, tileY):
-        return self.tiles[tileX][tileY]
+        return self.tiles[int(tileX)][int(tileY)]
 
     # returns the size of a hex (to base other objects off of)
     def get_hex_size(self):

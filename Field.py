@@ -58,7 +58,7 @@ class Field:
         }
         for key, sprite in sprite_dict.items():
             width = hex_width
-            height = hex_width * sprite.get_height() / sprite.get_width()  # keep ratio
+            height = round(hex_width * sprite.get_height() / sprite.get_width())  # keep ratio
             # height = hex_height
             # width = hex_height * sprite.get_width() / sprite.get_height()
             sprite_dict[key] = pygame.transform.scale(sprite, (width, height))

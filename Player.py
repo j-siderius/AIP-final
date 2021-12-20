@@ -1,21 +1,23 @@
 import random
-
+from Field import Field
 import helper
 
 
 class Player:
 
-    def __init__(self, screen, field_size, field, hex_amount):
+    def __init__(self, screen, field_size, field: Field):
         self.screen = screen
         self.field = field
+        hex_amount = field.field_size
 
         self.field_size = field_size
 
         self.x, self.y = None, None
         self.xPos, self.yPos = 0, 0
-        self.radius = (field_size[0] / hex_amount[0]) / 2.3  # base this on hex_size of Tiles
+        self.radius = self.field.hex_size / 2.3  # base this on hex_size of Tiles
         # assign starting position to a viable tile
         self.find_starting_tile(int(hex_amount[0] / 2), int(hex_amount[1] / 2))
+        print(f"{hex_amount[0]/2 = } {hex_amount[1]/2 = }")
 
         self.color = (255, 0, 0)
 
@@ -57,5 +59,6 @@ class Player:
         # [3]=top-left, [4]=top-right, [5]=middle-right
         self.xPos = x
         self.yPos = y
-        self.x = self.field.get_tile(x, y).get_points()[4][0] - (self.field.get_hex_width() / 3)
-        self.y = self.field.get_tile(x, y).get_points()[2][1]
+        self.x, self.y = self.field.get_tile(x,y).get_center()
+        # self.x = self.field.get_tile(x, y).get_points()[4][0] - (self.field.get_hex_width() / 3)
+        # self.y = self.field.get_tile(x, y).get_points()[2][1]

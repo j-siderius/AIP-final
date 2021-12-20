@@ -128,7 +128,7 @@ class Tile(pygame.sprite.Sprite):
             self.higlight()
 
     def isOver(self, point):
-        return math.dist(point, self.pos) <= self.radius
+        return math.dist(point, self.hex_rect.center) <= self.radius
 
     # returns the walkspeed if a tile is walkable, otherwise return False
     def is_walkable(self):

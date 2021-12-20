@@ -8,27 +8,27 @@ import random
 
 class Field:
     def __init__(self, screen, hex_width=25, field_pos=(0, 0), field_size=None, hex_amount=None):
-        print(f"{field_size = }")
         if hex_width == 'auto':
             if field_size is None or hex_amount is None:
                 print(f"Field could not be initialized, because field_size or hex_amount is none!!!")
                 return
 
-            hex_width = (field_size[0] / hex_amount[0]) * 4/3
-            hex_size = hex_width / 2
-            hex_height = round(math.sqrt(3) * hex_size)
-            hex_size = round(hex_size)
-            hex_width = round(hex_width)
+            self.hex_width = (field_size[0] / hex_amount[0]) * 4/3
+            self.hex_size = self.hex_width / 2
+            hex_height = round(math.sqrt(3) * self.hex_size)
+            self.hex_size = round(self.hex_size)
+            self.hex_width = round(self.hex_width)
 
             if hex_amount[1] == 0:
                 hex_amount = (hex_amount[0], int(hex_amount[0] * (field_size[1] / field_size[0]))-3)
 
-            field_size = hex_amount
+            self.field_size = hex_amount
         else:
-            hex_size = hex_width / 2
-            hex_height = round(math.sqrt(3) * hex_size)
-            hex_size = round(hex_size)
-            field_size = (math.ceil((field_size[0] + hex_width/4) / (hex_width + hex_width/2) * 2), math.ceil(field_size[1] / hex_height)+1)
+            self.hex_width = hex_width
+            self.hex_size = hex_width / 2
+            hex_height = round(math.sqrt(3) * self.hex_size)
+            self.hex_size = round(self.hex_size)
+            self.field_size = (math.ceil((field_size[0] + self.hex_width/4) / (self.hex_width + self.hex_width/2) * 2), math.ceil(field_size[1] / hex_height)+1)
 
         self.tiles = []
         self.screen = screen
@@ -47,30 +47,30 @@ class Field:
             "selected_hills": pygame.image.load("./Sprites/Selected_tilles/hills.png").convert_alpha(),
         }
         for key, sprite in sprite_dict.items():
-            width = hex_width
-            height = round(hex_width * sprite.get_height() / sprite.get_width())  # keep ratio
+            width = self.hex_width
+            height = round(self.hex_width * sprite.get_height() / sprite.get_width())  # keep ratio
             sprite_dict[key] = pygame.transform.scale(sprite, (width, height))
 
         noise = PerlinNoise(octaves=1, seed=random.randint(1, 100))
 
-        points = [[hex_size * math.cos((2 * math.pi) / 6 * i), hex_size * math.sin((2 * math.pi) / 6 * i)] for i in range(1, 7)]
+        points = [[self.hex_size * math.cos((2 * math.pi) / 6 * i), self.hex_size * math.sin((2 * math.pi) / 6 * i)] for i in range(1, 7)]
 
-        for x in range(0, field_size[0]):
+        for x in range(0, self.field_size[0]):
             self.tiles.append([])
-            for y in range(0, field_size[1]):
+            for y in range(0, self.field_size[1]):
                 # self.tiles[x].append(
-                #     Tile((x * hex_width*(3/4) + hex_size / 2 + field_pos[0], y * hex_height + y_offset + hex_height / 2 + field_pos[1]), (x, y)
-                #          , hex_size, points, screen, noise, sprite_dict))
+                #     Tile((x * self.hex_width*(3/4) + self.hex_size / 2 + field_pos[0], y * hex_height + y_offset + hex_height / 2 + field_pos[1]), (x, y)
+                #          , self.hex_size, points, screen, noise, sprite_dict))
 
                 self.tiles[x].append(
-                    Tile(pos=(x * round(hex_width * (3/4)) + hex_width/4, y * hex_height - hex_height/2 + y_offset), place=(x, y),
-                         size=(hex_width, hex_height), radius=hex_size, points=points, screen=screen, noise=noise, sprite_dict=sprite_dict))
+                    Tile(pos=(x * round(self.hex_width * (3/4)) + self.hex_width/4, y * hex_height - hex_height/2 + y_offset), place=(x, y),
+                         size=(self.hex_width, hex_height), radius=self.hex_size, points=points, screen=screen, noise=noise, sprite_dict=sprite_dict))
 
             y_offset = hex_height / 2 if x % 2 == 0 else 0
 
         for tiles in self.tiles:
             for tile in tiles:
-                tile.init(self.tiles, field_size)
+                tile.init(self.tiles, self.field_size)
 
         self.tiles_list = []
         self.water_tiles = []
@@ -91,10 +91,7 @@ class Field:
 
         self.water_group.draw(screen.get_screen())
 
-        print(f"{hex_size = }, {len(self.tiles) = }, {field_size = }")
-
-        self.hex_size = hex_size
-        self.hex_width = hex_width
+        print(f"{self.hex_size = }, {len(self.tiles) = }, {self.field_size = }")
 
     def display(self, screen):
         self.tiles_group.draw(screen.get_screen())

@@ -17,6 +17,9 @@ class program:
     def loop(self):
         self.screen.background(139, 69, 19)
         self.field.display(self.screen)
+        self.screen.text_font(20)
+        self.screen.text_color(0)
+        self.screen.text(5, 5, f"{self.screen.get_frameRate():.2f}", False)
 
 
 if __name__ == '__main__':

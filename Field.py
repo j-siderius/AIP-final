@@ -53,8 +53,13 @@ class Field:
             "grass": pygame.image.load("./Sprites/Tiles/grass.png"),
             "hills": pygame.image.load("./Sprites/Tiles/hills.png"),
             "mountain": pygame.image.load("./Sprites/Tiles/mountain.png"),
-            # "SmallerMountain": pygame.image.load("./Sprites/Tiles/SmallerMountain.png")
+            "SmallerMountain": pygame.image.load("./Sprites/Tiles/SmallerMountain.png")
             # "snow": pygame.image.load("./Sprites/Tiles/snow.png"),
+            # "deep_water": pygame.image.load("./Sprites/Other tiles/deep_water.png"),
+            # "water": pygame.image.load("./Sprites/Other tiles/shallow_water.png"),
+            # "grass": pygame.image.load("./Sprites/Other tiles/light_grass.png"),
+            # "hills": pygame.image.load("./Sprites/Other tiles/dark_grass.png"),
+            # "mountain": pygame.image.load("./Sprites/Other tiles/mountain.png"),
         }
         for key, sprite in sprite_dict.items():
             width = hex_width
@@ -76,7 +81,7 @@ class Field:
 
                 self.tiles[x].append(
                     Tile(pos=(x * round(hex_width * (3/4)) + hex_width/4, y * hex_height - hex_height/2 + y_offset), place=(x, y),
-                         size=(hex_width, hex_height), radius=hex_size, screen=screen, noise=noise, sprite_dict=sprite_dict))
+                         size=(hex_width, hex_height), radius=hex_size, points=points, screen=screen, noise=noise, sprite_dict=sprite_dict))
 
             y_offset = hex_height / 2 if x % 2 == 0 else 0
 
@@ -84,23 +89,10 @@ class Field:
             for tile in tiles:
                 tile.init(self.tiles, field_size)
 
-        #
-
-        #
-
-        # self.tiles_list = [tiles for tiles in self.tiles]
         self.tiles_list = []
         for tiles in self.tiles:
             self.tiles_list.extend(tiles)
         self.tiles_list.sort()
-        print(self.tiles_list)
-        # tiles_list = []
-        # for y in range(0, len(self.tiles[0])):
-        #     for x in range(0, len(self.tiles)):
-        #         tiles_list.append(self.tiles[x][y])
-        self.tile_groups = [pygame.sprite.Group() for tile in self.tiles_list]
-        for group, tile in zip(self.tile_groups, self.tiles_list):
-            group.add(tile)
 
         self.tiles_group = pygame.sprite.Group()
         self.tiles_group.add(self.tiles_list)
@@ -108,8 +100,6 @@ class Field:
         print(f"{hex_size = }, {len(self.tiles) = }, {field_size = }")
 
     def display(self, screen):
-        # for group in self.tile_groups:
-        #     group.draw(screen.get_screen())
         self.tiles_group.draw(screen.get_screen())
         self.tiles_group.update(screen.get_mouse_pos())
         # for tile_row in self.tiles:

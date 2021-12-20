@@ -14,3 +14,28 @@ class Serial:
 
     def send(self, argument):
         self.port.write(argument.encode())
+
+'''
+Arduino code:
+    String incomingBytes;
+    
+    void setup() {
+      Serial.begin(9600);
+      pinMode(LED_BUILTIN, OUTPUT);
+    }
+    
+    void loop() {
+      if (Serial.available() > 0) {
+        incomingBytes = Serial.readStringUntil('\n');
+        if (incomingBytes == "on") {
+          Serial.write("LED ON");
+          digitalWrite(LED_BUILTIN, LOW);
+        } else if (incomingBytes == "off") {
+          Serial.write("LED OFF");
+          digitalWrite(LED_BUILTIN, HIGH);
+        } else {
+          Serial.write("invalid");
+        }
+      }
+    }
+'''

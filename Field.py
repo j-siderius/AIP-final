@@ -38,33 +38,48 @@ class Field:
             "deep_water": pygame.image.load("./Sprites/Borderless_Tilles/deep_water.png").convert_alpha(),
             "water": pygame.image.load("./Sprites/Borderless_Tilles/water.png").convert_alpha(),
             "grass": pygame.image.load("./Sprites/Tiles/grass.png").convert_alpha(),
-            "hills": pygame.image.load("./Sprites/Tiles/hills.png").convert_alpha(),
+            "hills": [pygame.image.load("./Sprites/Tiles/hills.png").convert_alpha(),
+                      pygame.image.load("./Sprites/Tiles/hills2.png").convert_alpha()],
             "mountain": pygame.image.load("./Sprites/Tiles/mountain.png").convert_alpha(),
-            "SmallerMountain": pygame.image.load("./Sprites/Tiles/SmallerMountain.png").convert_alpha(),
             # "snow": pygame.image.load("./Sprites/Tiles/snow.png"),
 
+            # resources:
+            "forest": pygame.image.load("./Sprites/Tiles/forest.png").convert_alpha(),
+            "large_forest": pygame.image.load("./Sprites/Tiles/large_forest.png").convert_alpha(),
+            "foresthills": pygame.image.load("./Sprites/Tiles/foresthills.png").convert_alpha(),
+            "large_foresthills": pygame.image.load("./Sprites/Tiles/large_foresthills.png").convert_alpha(),
+
+            # highlighted tiles:
             "selected_grass": pygame.image.load("./Sprites/Selected_tilles/grass.png").convert_alpha(),
             "selected_hills": pygame.image.load("./Sprites/Selected_tilles/hills.png").convert_alpha(),
+            "selected_forest": pygame.image.load("./Sprites/Selected_tilles/forest.png").convert_alpha(),
+            "selected_large_forest": pygame.image.load("./Sprites/Selected_tilles/large_forest.png").convert_alpha(),
+            "selected_foresthills": pygame.image.load("./Sprites/Selected_tilles/foresthills.png").convert_alpha(),
+            # TODO make a selected for this one
+            "selected_large_foresthills": pygame.image.load("./Sprites/Selected_tilles/foresthills.png").convert_alpha(),
         }
         for key, sprite in sprite_dict.items():
-            width = self.hex_width
-            height = round(self.hex_width * sprite.get_height() / sprite.get_width())  # keep ratio
-            sprite_dict[key] = pygame.transform.scale(sprite, (width, height))
+            if isinstance(sprite, list):
+                for i, element in enumerate(sprite):
+                    width = self.hex_width
+                    height = round(self.hex_width * element.get_height() / element.get_width())  # keep ratio
+                    sprite_dict[key][i] = pygame.transform.scale(element, (width, height))
+            else:
+                width = self.hex_width
+                height = round(self.hex_width * sprite.get_height() / sprite.get_width())  # keep ratio
+                sprite_dict[key] = pygame.transform.scale(sprite, (width, height))
 
-        noise = PerlinNoise(octaves=1, seed=random.randint(1, 100))
+        noise = PerlinNoise(octaves=1, seed=random.randint(1, 200))
+        resource_noise = PerlinNoise(octaves=2, seed=random.randint(1, 200))
 
         points = [[self.hex_size * math.cos((2 * math.pi) / 6 * i), self.hex_size * math.sin((2 * math.pi) / 6 * i)] for i in range(1, 7)]
 
         for x in range(0, self.field_size[0]):
             self.tiles.append([])
             for y in range(0, self.field_size[1]):
-                # self.tiles[x].append(
-                #     Tile((x * self.hex_width*(3/4) + self.hex_size / 2 + field_pos[0], y * hex_height + y_offset + hex_height / 2 + field_pos[1]), (x, y)
-                #          , self.hex_size, points, screen, noise, sprite_dict))
-
                 self.tiles[x].append(
                     Tile(pos=(x * round(self.hex_width * (3/4)) + self.hex_width/4, y * hex_height - hex_height/2 + y_offset), place=(x, y),
-                         size=(self.hex_width, hex_height), radius=self.hex_size, points=points, screen=screen, noise=noise, sprite_dict=sprite_dict))
+                         size=(self.hex_width, hex_height), radius=self.hex_size, points=points, screen=screen, noise=noise, resource_noise=resource_noise, sprite_dict=sprite_dict))
 
             y_offset = hex_height / 2 if x % 2 == 0 else 0
 

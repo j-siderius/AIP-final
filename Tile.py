@@ -6,11 +6,11 @@ from Screen import *
 # import noise
 from perlin_noise import PerlinNoise
 import math
-import helper
+from enum import Enum
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, pos, place, size, radius, points, screen: Screen, noise: PerlinNoise, sprite_dict: dict):
+    def __init__(self, pos, place, size, radius, points, screen: Screen, noise: PerlinNoise, resource_noise: PerlinNoise, sprite_dict: dict):
         super().__init__()
         self.screen = screen
         self.size = size
@@ -29,7 +29,9 @@ class Tile(pygame.sprite.Sprite):
         self.color = (0, 100, 0)
         self.stroke_color = (110, 110, 110)
 
-        self.height = noise([self.pos[0] / 300 + 500, self.pos[1] / 300 + 450]) * 1.5
+        self.height = noise([self.pos[0] / 300, self.pos[1] / 300]) * 1.5
+        self.resource_value = resource_noise([self.pos[0]/300, self.pos[1]/300])
+        print(self.resource_value)
 
         # make the height drop off at the edges:
         width, height = self.screen.get_size()
@@ -42,11 +44,6 @@ class Tile(pygame.sprite.Sprite):
             self.height -= 0.2
             if self.height > 0: self.height = -1
 
-        # if pos[1] > self.screen.get_size()[1] - size*2:
-        #     self.height = -1
-
-        # if self.height < -0.3:  # deep water
-        #     self.image = sprite_dict["deep_water"].copy()
         if self.height < 0:  # water
             self.color = lerp_color((51, 153, 255), (0, 105, 148), limit(-self.height * 2.5, 0, 1))
             self.image = sprite_dict["water"]
@@ -59,15 +56,38 @@ class Tile(pygame.sprite.Sprite):
         elif self.height < 0.7:  # grey mountain
             self.color = format_color(120 * (1 - (self.height - 0.4) / 0.25 / 4))
             self.walkable = True
-            self.image = sprite_dict["hills"]
+            self.index_of_sprite = random.randint(0, len(sprite_dict["hills"])-1)
+            self.image = sprite_dict["hills"][self.index_of_sprite]
             self.image_name = "hills"
             self.walkspeed = 0.5
         else:  # snow
             self.color = (255, 255, 255)  # lerp_color((175, 175, 175), (255, 255, 255), (self.height - 0.65) / 0.1)
             self.image = sprite_dict["mountain" if random.choices([True, False]) else "SmallerMountain"]
 
-        if self.height < 0:
+        self.isWater = self.height < 0
+
+        self.resource: Resource = Resource.none
+        if self.isWater:
             self.pos = self.pos + 1
+        elif self.is_walkable():
+            # resources:
+            if self.resource_value > 0.2: #large forest
+                self.resource = Resource.large_forest
+                if self.image_name == "hills":
+                    self.image_name = "large_foresthills"
+                    self.image = sprite_dict[self.image_name]
+                else:
+                    self.image_name = "large_forest"
+                    self.image = sprite_dict[self.image_name]
+                    self.walkspeed = 0.5
+            elif self.resource_value > 0.05:
+                self.resource = Resource.forest
+                if self.image_name == "hills":
+                    self.image_name = "foresthills"
+                    self.image = sprite_dict[self.image_name]
+                else:
+                    self.image_name = "forest"
+                    self.image = sprite_dict[self.image_name]
 
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
@@ -76,12 +96,9 @@ class Tile(pygame.sprite.Sprite):
         self.hex_rect.bottomleft = self.rect.bottomleft
         self.hex_rect.move_ip(0, -3)
 
-        # points are arranged in the following manner: [0]=bottom-right, [1]=bottom-left, [2]=middle-left,
-        # [3]=top-left, [4]=top-right, [5]=middle-right
-        # aka, starting right and then clockwise.
+        # points are arranged in the following manner: [0]=bottom-right, [1]=bottom-left, [2]=middle-left, [3]=top-left, [4]=top-right,
+        # [5]=middle-right. aka, starting right and then clockwise.
         self.points = np.array(points) + self.hex_rect.center + np.array([0, -2])
-
-        self.isWater = self.height < 0
 
     def init(self, tiles, fieldSize):
         if self.y > 0: self.bordering_tiles.append(tiles[int(self.x)][int(self.y - 1)])
@@ -101,26 +118,20 @@ class Tile(pygame.sprite.Sprite):
         # else:
         #     self.screen.aapolygon(self.points, self.color, stroke_color=self.stroke_color)
 
-        #test if circle
-        # self.screen.circle(self.hex_rect.centerx, self.hex_rect.centery, self.radius/2, color=(255,0,0, 100))
-        # self.screen.dashed_line((self.hex_rect.centerx - self.size[0]/2, self.hex_rect.centery), (self.hex_rect.centerx + self.size[0]/2, self.hex_rect.centery), 2, 1)
-        # self.screen.stroke((0,100))
-        # self.screen.stroke_size(1)
-        # self.screen.rect(self.hex_rect.x, self.hex_rect.y, self.hex_rect.width, self.hex_rect.height, color=(255, 0, 0, 0))
-
-    #
     def higlight(self, color=(255,100)):
         self.screen.aapolygon(self.points, color, stroke_color=self.stroke_color)
-        # self.screen.aapolygon(self.points, (int(limit(self.color[0] * 2, 0, 255)), int(limit(self.color[1] * 2, 0, 255)),
-        #                                     int(limit(self.color[2] * 2, 0, 255))), stroke_color=self.stroke_color)
 
     def update(self, mouse):
+        # TODO make a selection img of the new hills2
         if self.isOver(mouse) and self.is_walkable() and not self.highlight:
             self.highlight = True
             self.image = self.sprite_dict[f"selected_{self.image_name}"]
         elif not self.isOver(mouse) and self.highlight:
             self.highlight = False
-            self.image = self.sprite_dict[self.image_name]
+            if isinstance(self.sprite_dict[self.image_name], list):
+                self.image = self.sprite_dict[self.image_name][self.index_of_sprite]
+            else:
+                self.image = self.sprite_dict[self.image_name]
 
     # TEMP
     def mouse_pointer(self, mouse):
@@ -157,3 +168,11 @@ def limit(value, min, max):
         value = max
 
     return value
+
+
+class Resource(Enum):
+    none = -1
+    forest = 0
+    large_forest = 1
+    rock = 2
+    large_rock = 3

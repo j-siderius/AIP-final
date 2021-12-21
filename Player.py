@@ -3,6 +3,7 @@ import pygame
 from Field import Field
 import helper
 
+#TODO update coastal waters aswell
 
 class Player:
 
@@ -18,7 +19,6 @@ class Player:
         self.radius = self.field.hex_size / 2.3  # base this on hex_size of Tiles
         # assign starting position to a viable tile
         self.find_starting_tile(int(hex_amount[0] / 2), int(hex_amount[1] / 2))
-        print(f"{hex_amount[0]/2 = } {hex_amount[1]/2 = }")
 
         self.inventory = dict()
 
@@ -28,6 +28,13 @@ class Player:
         self.screen.stroke_size(0)
         self.screen.stroke(self.color)
         self.screen.circle(self.x, self.y, self.radius, self.color)
+
+        # inventory menu
+        menu_txt = []
+        for key, value in self.inventory.items():
+            menu_txt.append(f"{key}: {value}")
+        width, height = self.screen.get_size()
+        self.screen.text_array(width - 100, 20, menu_txt, 255, background_color=0)
 
     # def update(self):
     #     self.player_input(self.screen.get_mouse_pos(), self.screen.get_mouse_pressed(), self.screen.get_pressed_keys())
@@ -47,7 +54,6 @@ class Player:
                         self.inventory[resource] += 1
                     else:
                         self.inventory[resource] = 1
-
 
     def move_player(self, targetTileX, targetTileY):
         neighbours = self.field.get_tile(self.xPos, self.yPos).bordering_tiles
@@ -69,10 +75,6 @@ class Player:
             self.align_player(tileX, tileY)
 
     def align_player(self, x, y):
-        # points are arranged in the following manner: [0]=bottom-right, [1]=bottom-left, [2]=middle-left,
-        # [3]=top-left, [4]=top-right, [5]=middle-right
         self.xPos = x
         self.yPos = y
-        self.x, self.y = self.field.get_tile(x,y).get_center()
-        # self.x = self.field.get_tile(x, y).get_points()[4][0] - (self.field.get_hex_width() / 3)
-        # self.y = self.field.get_tile(x, y).get_points()[2][1]
+        self.x, self.y = self.field.get_tile(x, y).get_center()

@@ -7,6 +7,7 @@ from Screen import *
 from perlin_noise import PerlinNoise
 import math
 from enum import Enum
+from settings import Settings
 
 
 class Tile(pygame.sprite.Sprite):
@@ -41,11 +42,12 @@ class Tile(pygame.sprite.Sprite):
 
         if (pos[1] < size[1] or pos[1] > screen.get_height() - size[1]) and self.height > 0:
             self.height -= 0.2
-            if self.height > 0: self.height = -1
+            if self.height > 0: self.height = -0.1
 
         if self.height < 0:  # water
             self.color = lerp_color((51, 153, 255), (0, 105, 148), limit(-self.height * 2.5, 0, 1))
-            self.image = sprite_dict["water"]
+            # self.image = sprite_dict["water"]
+            self.image = sprite_dict["water"][limit(round(-self.height * (7 + Settings.WATER_DROP_OFF_SCALING*4)), 0, 7)]
         elif self.height < 0.45:  # land
             self.color = (0, 190, 0)
             self.walkable = True

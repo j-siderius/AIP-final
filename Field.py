@@ -35,13 +35,15 @@ class Field:
         y_offset = 0
 
         sprite_dict = {
-            "deep_water": pygame.image.load("./Sprites/Borderless_Tilles/deep_water.png").convert_alpha(),
-            "water": pygame.image.load("./Sprites/Borderless_Tilles/water.png").convert_alpha(),
+            # "deep_water": pygame.image.load("./Sprites/Borderless_Tilles/deep_water.png").convert_alpha(),
+            # "water": pygame.image.load("./Sprites/Borderless_Tilles/water.png").convert_alpha(),
             "grass": pygame.image.load("./Sprites/Tiles/grass.png").convert_alpha(),
             "hills": [pygame.image.load("./Sprites/Tiles/hills.png").convert_alpha(),
                       pygame.image.load("./Sprites/Tiles/hills2.png").convert_alpha()],
             "mountain": pygame.image.load("./Sprites/Tiles/mountain.png").convert_alpha(),
-            # "snow": pygame.image.load("./Sprites/Tiles/snow.png"),
+
+            # water
+            "water": [pygame.image.load(f"./Sprites/water/water{i}.png").convert_alpha() for i in range(0, 8)],
 
             # resources:
             "forest": pygame.image.load("./Sprites/Tiles/forest.png").convert_alpha(),

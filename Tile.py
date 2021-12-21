@@ -31,7 +31,6 @@ class Tile(pygame.sprite.Sprite):
 
         self.height = noise([self.pos[0] / 300, self.pos[1] / 300]) * 1.5
         self.resource_value = resource_noise([self.pos[0]/300, self.pos[1]/300])
-        print(self.resource_value)
 
         # make the height drop off at the edges:
         width, height = self.screen.get_size()
@@ -72,19 +71,22 @@ class Tile(pygame.sprite.Sprite):
         elif self.is_walkable():
             # resources:
             if self.resource_value > 0.2: #large forest
-                self.resource = Resource.large_forest
                 if self.image_name == "hills":
-                    self.image_name = "large_foresthills"
-                    self.image = sprite_dict[self.image_name]
+                    self.image_name = "foresthills"
+                    self.index_of_sprite = random.randint(0, len(sprite_dict[self.image_name]) - 1)
+                    self.image = sprite_dict[self.image_name][self.index_of_sprite]
+                    self.resource = Resource.forest
                 else:
                     self.image_name = "large_forest"
                     self.image = sprite_dict[self.image_name]
+                    self.resource = Resource.large_forest
                     self.walkspeed = 0.5
             elif self.resource_value > 0.05:
                 self.resource = Resource.forest
                 if self.image_name == "hills":
                     self.image_name = "foresthills"
-                    self.image = sprite_dict[self.image_name]
+                    self.index_of_sprite = random.randint(0, len(sprite_dict[self.image_name]) - 1)
+                    self.image = sprite_dict[self.image_name][self.index_of_sprite]
                 else:
                     self.image_name = "forest"
                     self.image = sprite_dict[self.image_name]
@@ -122,10 +124,13 @@ class Tile(pygame.sprite.Sprite):
         self.screen.aapolygon(self.points, color, stroke_color=self.stroke_color)
 
     def update(self, mouse):
-        # TODO make a selection img of the new hills2
         if self.isOver(mouse) and self.is_walkable() and not self.highlight:
+            if isinstance(self.sprite_dict[f"selected_{self.image_name}"], list):
+                self.image = self.sprite_dict[f"selected_{self.image_name}"][self.index_of_sprite]
+            else:
+                self.image = self.sprite_dict[f"selected_{self.image_name}"]
             self.highlight = True
-            self.image = self.sprite_dict[f"selected_{self.image_name}"]
+
         elif not self.isOver(mouse) and self.highlight:
             self.highlight = False
             if isinstance(self.sprite_dict[self.image_name], list):

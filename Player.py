@@ -40,7 +40,6 @@ class Player:
     #     self.player_input(self.screen.get_mouse_pos(), self.screen.get_mouse_pressed(), self.screen.get_pressed_keys())
 
     def mouse_pressed(self, mousePos, button):
-        print(button)
         if button == 1:
             pressed_tile = self.field.get_tile_from_point(mousePos)
             self.move_player(pressed_tile.x, pressed_tile.y)

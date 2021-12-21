@@ -31,7 +31,7 @@ class Screen:
             self.screen = pygame.display.set_mode((width, height), flags, 8)
         else:
             self.screen = pygame.display.set_mode((width, height))
-        if title: Screen.set_title(title)
+        if title: self.set_title(title)
 
         # input variables 
         self.window_width = width
@@ -70,19 +70,19 @@ class Screen:
                 if event.type == pygame.QUIT or pygame.K_ESCAPE in self.get_pressed_keys() or pygame.KSCAN_ESCAPE in self.get_pressed_keys():
                     self.run = False
                 if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
-                    self.key_pressed()
+                    self.key_pressed_event()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.mouse_pressed(event.button)
+                    self.mouse_pressed_event(event.button)
                 if event.type == pygame.MOUSEBUTTONUP:
-                    self.mouse_released(event.button)
+                    self.mouse_released_event(event.button)
 
             self.elapsed_time = time.perf_counter() - self.old_time
 
             # main loop
             if self.elapsed_time > 1 / self.frameRate:
                 self.old_time = time.perf_counter()
-                if self.mouse_dragged_func: self.key_hold()
-                if self.mouse_dragged_func: self.mouse_dragged()
+                if self.mouse_dragged_func: self.key_hold_event()
+                if self.mouse_dragged_func: self.mouse_dragged_event()
 
                 # call the loop function
                 self.loopFunction()
@@ -98,29 +98,28 @@ class Screen:
         self.run = False
 
     # events
-    def key_pressed(self):
+    def key_pressed_event(self):
         # keypressed, the function is called and the active keys are given. the key can be found using pygame.KSCAN_W
         if self.key_pressed_func is not None:
             active_keys = self.get_pressed_keys()
 
             self.key_pressed_func(active_keys)
 
-    def key_hold(self):
+    def key_hold_event(self):
         if self.key_hold_func is not None:
             active_keys = self.get_pressed_keys()
             if len(active_keys) > 0:
                 self.key_hold_func(active_keys)
 
-    def mouse_pressed(self, button):  # 3 == right button, 1 == left button, 2 scroll button
+    def mouse_pressed_event(self, button):  # 3 == right button, 1 == left button, 2 scroll button
         if self.mouse_pressed_func is not None: self.mouse_pressed_func(button)
 
-    def mouse_released(self, button):
+    def mouse_released_event(self, button):
         if self.mouse_released_func is not None: self.mouse_released_func(button)
 
-    def mouse_dragged(self):
+    def mouse_dragged_event(self):
         if self.get_mouse_pressed()[0]:
             self.mouse_dragged_func(self.get_mouse_pos())
-
 
     # settings
     def setframeRate(self, frameRate):
@@ -234,7 +233,7 @@ class Screen:
     def toggle_text_stroke(self, active):
         self.text_stroke_active = active
 
-    def set_title(title):
+    def set_title(self, title):
         pygame.display.set_caption(title)
 
     # drawing

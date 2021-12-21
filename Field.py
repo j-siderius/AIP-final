@@ -135,8 +135,8 @@ class Field:
     def highlight_tile(self, tileX, tileY):
         self.tiles[tileX][tileY].highlight()
 
-    def get_current_mouse_tile(self):
+    def get_tile_from_point(self, point):
         for tile_row in self.tiles:
             for tile in tile_row:
-                if tile.isOver(self.screen.get_mouse_pos()):
+                if tile.isOver(point):
                     return tile

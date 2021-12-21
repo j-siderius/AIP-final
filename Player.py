@@ -1,4 +1,5 @@
 import random
+import pygame
 from Field import Field
 import helper
 
@@ -19,6 +20,8 @@ class Player:
         self.find_starting_tile(int(hex_amount[0] / 2), int(hex_amount[1] / 2))
         print(f"{hex_amount[0]/2 = } {hex_amount[1]/2 = }")
 
+        self.inventory = dict()
+
         self.color = (255, 0, 0)
 
     def display(self):
@@ -26,14 +29,25 @@ class Player:
         self.screen.stroke(self.color)
         self.screen.circle(self.x, self.y, self.radius, self.color)
 
-    def update(self):
-        self.player_input(self.screen.get_mouse_pos(), self.screen.get_mouse_pressed(), self.screen.get_pressed_keys())
-        pass
+    # def update(self):
+    #     self.player_input(self.screen.get_mouse_pos(), self.screen.get_mouse_pressed(), self.screen.get_pressed_keys())
 
-    def player_input(self, mousePos, mousePressed, keyPresses):
-        if mousePressed[0]:
-            pressedTile = self.field.get_current_mouse_tile()
-            self.move_player(pressedTile.x, pressedTile.y)
+    def mouse_pressed(self, mousePos, button):
+        print(button)
+        if button == 1:
+            pressed_tile = self.field.get_tile_from_point(mousePos)
+            self.move_player(pressed_tile.x, pressed_tile.y)
+        elif button == 3:
+            pressed_tile = self.field.get_tile_from_point(mousePos)
+
+            if pressed_tile in self.field.get_tile(self.xPos, self.yPos).bordering_tiles:
+                resource = pressed_tile.mine_resource()
+                if resource is not None:
+                    if resource in self.inventory:
+                        self.inventory[resource] += 1
+                    else:
+                        self.inventory[resource] = 1
+
 
     def move_player(self, targetTileX, targetTileY):
         neighbours = self.field.get_tile(self.xPos, self.yPos).bordering_tiles

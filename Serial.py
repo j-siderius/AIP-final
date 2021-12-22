@@ -6,9 +6,12 @@ import math
 class Serial:
     def __init__(self, port, baud_rate):
         self.port = serial.Serial(port, baud_rate, timeout=0)
-        self.ledBool = True
-        self.joyX, self.joyY, self.joyC, self.joyZ, self.joyC, self.joyAccX, self.joyAccY, self.joyAccZ = \
+        self.dayNightCycle = 0
+        self.health = 0
+        self.joyX, self.joyY, self.joyC, self.joyZ, self.joyAccX, self.joyAccY, self.joyAccZ = \
             None, None, False, False, None, None, None
+        self.send('DAYNIGHT' + str(self.dayNightCycle) + "\n")
+        self.send('HEALTH' + str(self.health) + "\n")
 
     def update(self):
         waiting = self.port.in_waiting
@@ -20,18 +23,18 @@ class Serial:
                 # angle = math.degrees(math.atan2((JoyY-128), (JoyX-128))) + 180.0
             elif 'STATUS' in msg:
                 print(msg)
-            else:
+            elif 'INVALID' in msg:
                 print('Serial error')
 
         # test code
-        if 18 in Screen.Screen.get_pressed_keys(self):
-            print('O Pressed')
-            if self.ledBool:
-                self.send("on\n")
-                self.ledBool = False
+        if 18 in Screen.Screen.get_pressed_keys(self):  # press O
+            self.send('DAYNIGHT' + str(self.dayNightCycle) + "\n")
+            if self.dayNightCycle < 11:
+                self.dayNightCycle = 0
             else:
-                self.send("off\n")
-                self.ledBool = True
+                self.dayNightCycle += 1
+        elif 11 in Screen.Screen.get_pressed_keys(self):  # press H
+            self.send('HEALTH' + str(self.health) + "\n")
 
     def send(self, argument):
         arg = bytes(argument.encode())
@@ -53,7 +56,7 @@ CRGB leds[NUM_LEDS];
 
 int Red = 0xFF0000;
 int Green = 0x00FF00;
-int Blue = 0x0000FF;
+int Blue = 0x0A0AFF;
 int LightBlue = 0x00000D;
 int Yellow = 0xAFFF00;
 int White = 0xAAAAAA;

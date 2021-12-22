@@ -99,9 +99,10 @@ int Black = 0x000000;
 Accessory nunchuck1;
 
 unsigned long ledMillis, controllerMillis;
+String incomingBytes;
 int sunMoonPhase = 0; //from 0 to 11, describes the sun and moon phase >> 0=beginning of day, 5=end of daytime, 6=beginning of night, 11=end of nighttime
-int healthTracker = 0; //full health=0, half health=2, dead=4
-int _controllerUpdateRate = 17; //Hz=1/(millis*1000)
+int healthTracker = 1; //full health=4, half health=2, dead=0
+int _controllerUpdateRate = 10; //Hz=1/(millis*1000) >> 17
 
 void setup() {
   Serial.begin(115200);
@@ -119,52 +120,80 @@ void setup() {
 }
 
 void loop() {
-  unsigned long curMillis = millis();
-  
-  // LED loop
-  if (curMillis > ledMillis + 1000) {
-    ledMillis = curMillis;
-
-    //health tracker
-    leds[0] = Red;
-    leds[1] = Red;
-    leds[2] = Red;
-    leds[3] = Green;
-    for (int i = 4; i > -1; i--) {
-      if (healthTracker - 1 >= i) leds[i] = Red;
-      else leds[i] = Green;
-    }
-
-    // divider LEDs
-    leds[4] = leds[11] = Black;
-
-    // sky
-    for (int j = 5; j < 11; j++) {
-      if (sunMoonPhase < 6) leds[j] = Blue; //day
-      else leds[j] = LightBlue; //night
-    }
-
-    // day/night cycle
-    if (sunMoonPhase < 6) { //day
-      leds[sunMoonPhase + 5] = Yellow;
-    } else if (sunMoonPhase > 5 && sunMoonPhase < 12) { //night
-      leds[sunMoonPhase - 1] = White;
-    }
-
-    if (sunMoonPhase >= 11) {
-      sunMoonPhase = 0;
-    } else {
-      sunMoonPhase++;
-    }
-
-    FastLED.show();
+  if (Serial.available() > 0) {
+    serialLoop();
   }
 
-  // controller loop
+  unsigned long curMillis = millis();
+  if (curMillis > ledMillis + 100) {
+    ledMillis = curMillis;
+    ledLoop();
+  }
   if (curMillis > controllerMillis + _controllerUpdateRate) {
     controllerMillis = curMillis;
-    nunchuck1.readData();    // Read inputs and update maps
-    nunchuck1.printInputs(); // Print all inputs
+    controllerLoop();
   }
 }
+
+void serialLoop() {
+  incomingBytes = Serial.readStringUntil('\n');
+
+  //decoding
+  if (incomingBytes.indexOf("DAYNIGHT") >= 0) {
+    //daynight update
+    sunMoonPhase = incomingBytes.substring(8).toInt();
+  }
+  if (incomingBytes.indexOf("HEALTH") >= 0) {
+    //health update
+    healthTracker = incomingBytes.substring(6).toInt();
+  }
+}
+
+void ledLoop() {
+  FastLED.clear();
+
+  // divider LEDs
+  leds[4] = leds[11] = Black;
+
+  // sky
+  for (int i = 5; i < 11; i++) {
+    if (sunMoonPhase < 6) leds[i] = Blue; //day
+    else leds[i] = LightBlue; //night
+  }
+
+  // day/night cycle
+  if (sunMoonPhase < 6) { //day
+    leds[sunMoonPhase + 5] = Yellow;
+  } else if (sunMoonPhase > 5 && sunMoonPhase < 12) { //night
+    leds[sunMoonPhase - 1] = White;
+  }
+
+
+  //health tracker.
+  //full health=4, half health=2, dead=0
+  if (healthTracker == 0) {
+    leds[0] = leds[1] = leds[2] = leds[3] = Red;
+  } else if (healthTracker == 1) {
+    leds[0] = leds[1] = leds[2] = Red;
+    leds[3] = Green;
+  } else if (healthTracker == 2) {
+    leds[0] = leds[1] = Red;
+    leds[2] = leds[3] = Green;
+  } else if (healthTracker == 3) {
+    leds[0] = Red;
+    leds[1] = leds[2] = leds[3] = Green;
+  } else if (healthTracker >= 4) {
+    leds[0] = leds[1] = leds[2] = leds[3] = Green;
+  }
+
+  FastLED.show();
+
+  Serial.println("TESTING");
+}
+
+void controllerLoop() {
+  nunchuck1.readData();    // Read inputs and update maps
+  nunchuck1.printInputs(); // Print all inputs
+}
+
 '''

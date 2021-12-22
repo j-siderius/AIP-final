@@ -18,7 +18,7 @@ class program:
 
     def loop(self):
         self.field.display(self.screen)
-        # self.player.update()
+        self.player.update()
         self.player.display()
 
         self.screen.toggle_stroke(False)

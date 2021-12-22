@@ -154,6 +154,7 @@ class Tile(pygame.sprite.Sprite):
         elif self.resource == ResourceTiles.large_forest:
             self.resource = ResourceTiles.forest
             resource = Resources.wood
+            self.walkspeed = 1
 
             if self.original_image_name == "hills":
                 self.image_name = "foresthills"
@@ -180,6 +181,9 @@ class Tile(pygame.sprite.Sprite):
         if self.walkable:
             return self.walkspeed
         else: return False
+
+    def get_neighbours(self):
+        return self.bordering_tiles
 
     def get_points(self):
         return self.points

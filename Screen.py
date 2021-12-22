@@ -138,6 +138,9 @@ class Screen:
     def get_delta_time(self):
         return self.get_wanted_frameRate() / self.get_frameRate()
 
+    def get_elapsed_time(self):
+        return self.elapsed_time
+
     def get_width(self):
         w, h = self.get_size()
         return w
@@ -570,13 +573,13 @@ class Screen:
         return color
 
 
-# enums
-class MouseButton(Enum):
-    left = 1
-    scroll = 2
-    right = 3
-    scroll_up = 4
-    scroll_down = 5
+# # enums
+# class MouseButton(Enum):
+#     left = 1
+#     scroll = 2
+#     right = 3
+#     scroll_up = 4
+#     scroll_down = 5
 
 
 def format_color(color):
@@ -631,6 +634,15 @@ def opposite_color(color):
         return (255 - color[0], 255 - color[1], 255 - color[2])
     elif len(color) == 4:
         return (255 - color[0], 255 - color[1], 255 - color[2], color[3])
+
+
+def lerp(value1, value2, factor):
+    if factor > 1:
+        factor = 1
+    elif factor < 0:
+        factor = 0
+
+    return value2 - value1 * factor + value1
 
 
 def lerp_2D(vector1, vector2, factor):

@@ -19,13 +19,15 @@ class Tile(pygame.sprite.Sprite):
         self.x = place[0]
         self.y = place[1]
         self.bordering_tiles = []
+
         self.walkable = False
         self.walkspeed = 0
+        self.is_wall = False
+        self.hitpoints = 0
 
         self.sprite_dict = sprite_dict
         self.index_of_sprite = None
         self.image_name = ""
-        self.original_image_name = ""  # without the resource on it
         self.highlight = False
 
         self.color = (0, 100, 0)
@@ -59,8 +61,6 @@ class Tile(pygame.sprite.Sprite):
         else:  # snow
             self.image_name = "mountain"
 
-        self.original_image_name = self.image_name
-
         self.isWater = self.height < 0
 
         self.resource: ResourceTiles = ResourceTiles.none
@@ -68,20 +68,22 @@ class Tile(pygame.sprite.Sprite):
             self.pos = self.pos + 1
         elif self.is_walkable():
             # resources:
-            if self.resource_value > 0.2:  # large forest
-                if self.image_name == "hills":
-                    self.image_name = "foresthills"
+            # if self.resource_value > 0.2:  # large forest
+            #     if self.image_name == "hills":
+            #         self.image_name = "foresthills"
+            #         self.resource = ResourceTiles.forest
+            #     else:
+            #         self.image_name = "large_forest"
+            #         self.resource = ResourceTiles.large_forest
+            #         self.walkspeed = 0.5
+            if self.resource_value > 0.05:
+                if "hills" in self.image_name or self.resource_value < 0.2:
+                    self.image_name = f"forest_{self.image_name}"
                     self.resource = ResourceTiles.forest
                 else:
-                    self.image_name = "large_forest"
+                    self.image_name = f"large_forest_{self.image_name}"
                     self.resource = ResourceTiles.large_forest
                     self.walkspeed = 0.5
-            elif self.resource_value > 0.05:
-                self.resource = ResourceTiles.forest
-                if self.image_name == "hills":
-                    self.image_name = "foresthills"
-                else:
-                    self.image_name = "forest"
 
         self.coastal_tile = False
 
@@ -116,50 +118,61 @@ class Tile(pygame.sprite.Sprite):
             if self.pos[1] > tile.pos[1] and tile.isWater:
                 self.coastal_tile = True
 
-    def display(self):
-        if self.isWater:
-            self.screen.aapolygon(self.points, self.color)  # , stroke_color=self.stroke_color)
-        # else:
-        #     self.screen.aapolygon(self.points, self.color, stroke_color=self.stroke_color)
-
-    def higlight(self, color=(255,100)):
+    def higlight(self, color=(255,100)): # still w.i.p. waiting for the new cursor
         # self.screen.aapolygon(self.points, color, stroke_color=self.stroke_color)
         if f"selected_{self.image_name}" in self.sprite_dict.keys():
             self.highlight = True
             self.change_image(f"selected_{self.image_name}")
 
-
     def update(self, mouse):
         if self.isOver(mouse) and self.is_walkable() and not self.highlight:
             self.highlight = True
             self.change_image(f"selected_{self.image_name}")
-
         elif not self.isOver(mouse) and self.highlight:
             self.highlight = False
             self.change_image(self.image_name)
 
-    # TEMP
-    def mouse_pointer(self, mouse):
-        if self.isOver(mouse) and not self.isWater:
-            self.higlight()
+    def has_resources(self):
+        return self.resource != ResourceTiles.none
+
+    def can_build(self):
+        return self.is_walkable()
+
+    def has_structure(self):
+        return self.is_wall
+
+    def build_wall(self):
+        self.hitpoints = 100
+        self.is_wall = True
+        self.image_name = f"wall_{self.image_name}"
+        self.change_image(self.image_name)
+
+    def destroy_structure(self):
+        if self.is_wall:
+            self.hitpoints = 0
+            self.is_wall = False
+            self.image_name = self.image_name.replace("wall_", "")
+            self.change_image(f"selected_{self.image_name}")
+
+            if self.coastal_tile:
+                self.field.update_coastal_waters()
+
 
     def mine_resource(self):
         resource = None
         if self.resource == ResourceTiles.forest:
             self.resource = ResourceTiles.none
             resource = Resources.wood
-            self.image_name = self.original_image_name
+            self.image_name = self.image_name.replace("forest_", "")
             self.change_image(self.image_name)
 
         elif self.resource == ResourceTiles.large_forest:
             self.resource = ResourceTiles.forest
             resource = Resources.wood
-            self.walkspeed = 1
+            self.image_name = self.image_name.replace("large_", "")
 
-            if self.original_image_name == "hills":
-                self.image_name = "foresthills"
-            else:
-                self.image_name = "forest"
+            if "hills" not in self.image_name:
+                self.walkspeed = 1
             self.change_image(f"selected_{self.image_name}")
 
         if resource and self.coastal_tile:
@@ -178,7 +191,7 @@ class Tile(pygame.sprite.Sprite):
 
     # returns the walkspeed if a tile is walkable, otherwise return False
     def is_walkable(self):
-        if self.walkable:
+        if self.walkable and not self.is_wall:
             return self.walkspeed
         else: return False
 

@@ -32,7 +32,7 @@ class Player:
         self.from_tile = self.current_tile
         self.target_tile = None
 
-        self.inventory = dict()
+        self.inventory = {Resources.wood: 100}  # dict()
 
         self.color = (255, 0, 0)
 
@@ -67,21 +67,32 @@ class Player:
         if button == MouseButton.left and not self.is_walking:
             pressed_tile = self.field.get_tile_from_point(mousePos)
             self.move_player(pressed_tile.x, pressed_tile.y)
-        elif button == MouseButton.right and not self.is_walking:
+
+        elif button == MouseButton.right and not self.is_walking:  # right mouse button
             pressed_tile = self.field.get_tile_from_point(mousePos)
 
             if pressed_tile in self.current_tile.get_neighbours():
-                resource = pressed_tile.mine_resource()
-                if resource is not None:
-                    if resource in self.inventory:
-                        self.inventory[resource] += 1
-                    else:
-                        self.inventory[resource] = 1
+                # resource mining
+                if pressed_tile.has_resources():
+                    resource = pressed_tile.mine_resource()
+                    if resource is not None:
+                        if resource in self.inventory:
+                            self.inventory[resource] += 1
+                        else:
+                            self.inventory[resource] = 1
+
+                elif pressed_tile.can_build():  # building
+                    # wooden wall
+                    if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
+                        self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
+                        pressed_tile.build_wall()
+                elif pressed_tile.has_structure():
+                    pressed_tile.destroy_structure()
 
     def move_player(self, targetTileX, targetTileY):
         neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
-            if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).walkable:
+            if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME

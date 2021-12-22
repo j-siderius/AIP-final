@@ -5,12 +5,10 @@ import Tile
 from Field import Field
 from settings import *
 from Screen import *
-import time
 import helper
 
 # TODO
 #   - add break timer, so like it cost time to break something (prob do it with the cursor highlight thingy)
-#   - walk niet meer teleporteren maken, maar dat die echt loopt.
 
 
 class Player:

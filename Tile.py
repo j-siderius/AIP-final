@@ -9,8 +9,9 @@ from settings import *
 
 
 class Tile(pygame.sprite.Sprite):
-    def __init__(self, pos, place, size, radius, points, screen: Screen, noise: PerlinNoise, resource_noise: PerlinNoise, sprite_dict: dict):
+    def __init__(self, pos, place, size, radius, points, screen: Screen, noise: PerlinNoise, resource_noise: PerlinNoise, sprite_dict: dict, field):
         super().__init__()
+        self.field = field
         self.screen = screen
         self.size = size
         self.radius = radius
@@ -82,7 +83,7 @@ class Tile(pygame.sprite.Sprite):
                 else:
                     self.image_name = "forest"
 
-        print(self.image_name)
+        self.coastal_tile = False
 
         if self.image_name in self.sprite_dict.keys() and isinstance(self.sprite_dict[self.image_name], list) and self.index_of_sprite is None:
             self.index_of_sprite = random.randint(0, len(sprite_dict[self.image_name]) - 1)
@@ -111,6 +112,10 @@ class Tile(pygame.sprite.Sprite):
             if self.x > 0 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y + 1)])
             if self.x < fieldSize[0] - 1 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y + 1)])
 
+        for tile in self.bordering_tiles:
+            if self.pos[1] > tile.pos[1] and tile.isWater:
+                self.coastal_tile = True
+
     def display(self):
         if self.isWater:
             self.screen.aapolygon(self.points, self.color)  # , stroke_color=self.stroke_color)
@@ -118,7 +123,11 @@ class Tile(pygame.sprite.Sprite):
         #     self.screen.aapolygon(self.points, self.color, stroke_color=self.stroke_color)
 
     def higlight(self, color=(255,100)):
-        self.screen.aapolygon(self.points, color, stroke_color=self.stroke_color)
+        # self.screen.aapolygon(self.points, color, stroke_color=self.stroke_color)
+        if f"selected_{self.image_name}" in self.sprite_dict.keys():
+            self.highlight = True
+            self.change_image(f"selected_{self.image_name}")
+
 
     def update(self, mouse):
         if self.isOver(mouse) and self.is_walkable() and not self.highlight:
@@ -151,6 +160,9 @@ class Tile(pygame.sprite.Sprite):
             else:
                 self.image_name = "forest"
             self.change_image(f"selected_{self.image_name}")
+
+        if resource and self.coastal_tile:
+            self.field.update_coastal_waters()
 
         return resource
 

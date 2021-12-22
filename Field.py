@@ -35,8 +35,6 @@ class Field:
         y_offset = 0
 
         sprite_dict = {
-            # "deep_water": pygame.image.load("./Sprites/Borderless_Tilles/deep_water.png").convert_alpha(),
-            # "water": pygame.image.load("./Sprites/Borderless_Tilles/water.png").convert_alpha(),
             "grass": pygame.image.load("./Sprites/Tiles/grass.png").convert_alpha(),
             "hills": [pygame.image.load("./Sprites/Tiles/hills.png").convert_alpha(),
                       pygame.image.load("./Sprites/Tiles/hills2.png").convert_alpha()],
@@ -81,7 +79,8 @@ class Field:
             for y in range(0, self.field_size[1]):
                 self.tiles[x].append(
                     Tile(pos=(x * round(self.hex_width * (3/4)) + self.hex_width/4, y * hex_height - hex_height/2 + y_offset), place=(x, y),
-                         size=(self.hex_width, hex_height), radius=self.hex_size, points=points, screen=screen, noise=noise, resource_noise=resource_noise, sprite_dict=sprite_dict))
+                         size=(self.hex_width, hex_height), radius=self.hex_size, points=points, screen=screen, noise=noise,
+                         resource_noise=resource_noise, sprite_dict=sprite_dict, field=self))
 
             y_offset = hex_height / 2 if x % 2 == 0 else 0
 
@@ -91,6 +90,7 @@ class Field:
 
         self.tiles_list = []
         self.water_tiles = []
+        self.coastal_tiles = []
         for tiles in self.tiles:
             for tile in tiles:
                 if not tile.isWater:
@@ -111,15 +111,15 @@ class Field:
         print(f"{self.hex_size = }, {len(self.tiles) = }, {self.field_size = }")
 
     def display(self, screen):
-        self.tiles_group.draw(screen.get_screen())
         self.tiles_group.update(screen.get_mouse_pos())
-        # for tile_row in self.tiles:
-        #     for tile in tile_row:
-        #         tile.display()
-        #
+        self.tiles_group.draw(screen.get_screen())
+
         # for tile_row in self.tiles:
         #     for tile in tile_row:
         #         tile.mouse_pointer(self.screen.get_mouse_pos())
+
+    def update_coastal_waters(self):
+        self.water_group.draw(self.screen.get_screen())
 
     # returns the tile object at given coordinates
     def get_tile(self, tileX, tileY):

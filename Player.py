@@ -3,7 +3,9 @@ import pygame
 from Field import Field
 import helper
 
-#TODO update coastal waters aswell
+# TODO
+#   - add break timer, so like it cost time to break something (prob do it with the cursor highlight thingy)
+
 
 class Player:
 

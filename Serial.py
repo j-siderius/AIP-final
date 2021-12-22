@@ -1,3 +1,5 @@
+import time
+
 import serial
 import Screen
 import math
@@ -12,29 +14,61 @@ class Serial:
             None, None, False, False, None, None, None
         self.send('DAYNIGHT' + str(self.dayNightCycle) + "\n")
         self.send('HEALTH' + str(self.health) + "\n")
+        self.waitTime = 0
 
     def update(self):
         waiting = self.port.in_waiting
         if waiting > 0:
-            msg = self.port.read(waiting).decode('ascii')
-            if 'NUNCHUCK' in msg:
-                print(msg[msg.index('JoyX:'): msg.index('\r\n')])
-                # calculating angle values for selection:
-                # angle = math.degrees(math.atan2((JoyY-128), (JoyX-128))) + 180.0
-            elif 'STATUS' in msg:
-                print(msg)
-            elif 'INVALID' in msg:
-                print('Serial error')
+            try:
+                msg = self.port.read(waiting).decode('ascii')
+
+                if 'NUNCHUCK' in msg:
+                    print(msg)
+                    # print(msg[msg.index('JoyX:'): msg.index('\r\n')])
+                    # self.joyX = msg[msg.index('JoyX:  ')+7: msg.index('  | JoyY:')]
+                    # self.joyY = msg[msg.index('JoyY:  ')+7: msg.index('  | Ax:')]
+                    # self.joyAccX = msg[msg.index('Ax:  ')+7: msg.index('  | Ay:')]
+                    # self.joyAccY = msg[msg.index('Ay:  ')+7: msg.index('  | Az:')]
+                    # self.joyAccZ = msg[msg.index('Az:  ')+7: msg.index('  | Buttons:')]
+                    # # calculating angle values for selection:
+                    # angle = math.degrees(math.atan2((self.JoyY-128), (self.JoyX-128))) + 180.0
+                else:
+                    print(msg)
+
+            except UnicodeDecodeError:
+                print("Serial error")
 
         # test code
-        if 18 in Screen.Screen.get_pressed_keys(self):  # press O
-            self.send('DAYNIGHT' + str(self.dayNightCycle) + "\n")
+        if time.perf_counter() > self.waitTime + 2.000:
+            self.waitTime = time.perf_counter()
+
+            self.updateDayNight(self.dayNightCycle)
             if self.dayNightCycle < 11:
-                self.dayNightCycle = 0
-            else:
                 self.dayNightCycle += 1
-        elif 11 in Screen.Screen.get_pressed_keys(self):  # press H
+            else:
+                self.dayNightCycle = 0
+
             self.send('HEALTH' + str(self.health) + "\n")
+
+        if 11 in Screen.Screen.get_pressed_keys(self):  # press H
+            print("H pressed")
+            self.health += 1
+            self.send('HEALTH' + str(self.health) + "\n")
+
+    def updateDayNight(self, time):
+        """
+        Updates the time of the LED clock
+        time value from 0 to 11, describes the sun and moon phase >> 0=beginning of day,
+        5=end of daytime, 6=beginning of night, 11=end of nighttime
+        """
+        self.send('DAYNIGHT' + str(time) + "\n")
+
+    def updateHealth(self, health):
+        """
+        Updates the health of the LED clock
+        full health=4, half health=2, dead
+        """
+        self.send('HEALTH' + str(health) + "\n")
 
     def send(self, argument):
         arg = bytes(argument.encode())
@@ -54,8 +88,8 @@ class Serial:
 #define COLOR_ORDER RGB
 CRGB leds[NUM_LEDS];
 
-int Red = 0xFF0000;
-int Green = 0x00FF00;
+int Red = 0x0A0000;
+int Green = 0x000A00;
 int Blue = 0x0A0AFF;
 int LightBlue = 0x00000D;
 int Yellow = 0xAFFF00;

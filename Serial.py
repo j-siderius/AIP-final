@@ -7,6 +7,8 @@ class Serial:
     def __init__(self, port, baud_rate):
         self.port = serial.Serial(port, baud_rate, timeout=0)
         self.ledBool = True
+        self.joyX, self.joyY, self.joyC, self.joyZ, self.joyC, self.joyAccX, self.joyAccY, self.joyAccZ = \
+            None, None, False, False, None, None, None
 
     def update(self):
         waiting = self.port.in_waiting

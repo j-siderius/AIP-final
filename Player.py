@@ -5,6 +5,7 @@ import helper
 
 # TODO
 #   - add break timer, so like it cost time to break something (prob do it with the cursor highlight thingy)
+#   - walk niet meer teleporteren maken, maar dat die echt loopt.
 
 
 class Player:
@@ -32,11 +33,14 @@ class Player:
         self.screen.circle(self.x, self.y, self.radius, self.color)
 
         # inventory menu
-        menu_txt = []
+        menu_txt = ["Inventory: "]
         for key, value in self.inventory.items():
             menu_txt.append(f"{key}: {value}")
+        # if len(menu_txt) == 1:
+        #     menu_txt.append("Empty")
+        self.screen.text_font(25)
         width, height = self.screen.get_size()
-        self.screen.text_array(width - 100, 20, menu_txt, 255, background_color=0)
+        self.screen.text_array(width - 110, 20, menu_txt, 255, background_color=0)
 
     # def update(self):
     #     self.player_input(self.screen.get_mouse_pos(), self.screen.get_mouse_pressed(), self.screen.get_pressed_keys())

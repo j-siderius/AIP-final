@@ -331,29 +331,38 @@ class Screen:
                 center = [0, 0]
             surface.blit(textSurf, (x - center[0], y - center[1]))
 
-    def text_array(self, x, y, txt_array, color=None, font=None, background_color=None, surface=None, antialias=True):  # not updated anymore!!!!
-        if font == None: font = self.txt_font
-        if surface == None: surface = self.get_screen()
+    def text_array(self, x, y, txt_array, color=None, font=None, background_color=None, surface=None, antialias=True, centeredX=True):
+        if font is None: font = self.txt_font
+        if surface is None: surface = self.get_screen()
         color = self.drawColor(color)
         background_color = format_color(background_color)
 
+        max_width = 0
+        height = 0
         try:
             for txt in txt_array:
                 txt = str(txt)
+                text_width, text_height = font.size(txt)
+                max_width = max(max_width, text_width)
+                height += text_height
         except:
             print("!!!!!  ----- the text in text() can't be converted to string -----  !!!!!")
+            return False
 
-        for txt in txt_array[::-1]:
+        if not centeredX:
+            x += max_width/2
+
+        if background_color:
+            background_surface = pygame.Surface((max_width + 10, height))
+            background_surface.fill(background_color)
+            surface.blit(background_surface, (x - 5 - max_width/2, y))
+
+        for txt in txt_array[::]:
             text_width, text_height = font.size(txt)
             x_ = x - text_width / 2
-            y -= text_height / 2
             textsurface = font.render(txt, antialias, color)
-            if background_color:
-                background_surface = pygame.Surface((textsurface.get_width() + 10, textsurface.get_height()))
-                background_surface.fill(background_color)
-                surface.blit(background_surface,(x_ - 5, y))
             surface.blit(textsurface, (x_, y))
-            y -= text_height / 2
+            y += text_height
 
     def background(self, r, g=-1, b=-1, surface=None):
         if surface == None: surface = self.get_screen()

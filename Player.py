@@ -23,7 +23,6 @@ class Player:
         self.field_size = field_size
 
         self.x, self.y = None, None  # pos on the world map
-        # self.xPos, self.yPos = 0, 0  # pos on the field array
         self.current_tile: Tile = None
         self.radius = self.field.hex_size / 2.3  # base this on hex_size of Tiles
         # assign starting position to a viable tile
@@ -54,8 +53,6 @@ class Player:
         width, height = self.screen.get_size()
         self.screen.text_array(width - 110, 20, menu_txt, 255, background_color=0)
 
-    # def update(self):
-    #     self.player_input(self.screen.get_mouse_pos(), self.screen.get_mouse_pressed(), self.screen.get_pressed_keys())
     def update(self):
         if self.is_walking:  # walking
             factor = 1 - self.walk_timer / Settings.PLAYER_WALKING_TIME
@@ -84,14 +81,12 @@ class Player:
                         self.inventory[resource] = 1
 
     def move_player(self, targetTileX, targetTileY):
-        neighbours = self.current_tile.get_neighbours()  # self.field.get_tile(self.xPos, self.yPos).bordering_tiles
+        neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
             if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).walkable:
                 # TODO: implement tick rate with something like nextTile = this.tile
-                # self.align_player(neighbour)
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME
-                # self.from_tile = self.current_tile
                 self.target_tile = neighbour
 
     # employ walking algorithm to find suitable starting tile
@@ -103,15 +98,8 @@ class Player:
         else:
             # assign player position to the found grass tile
             print(f"Starting tile found: ({tileX},{tileY})")
-            # hex_size = self.field.get_hex_size()
             self.align_player(tile)
 
     def align_player(self, tile: Tile):
-        # self.xPos, self.yPos = tile.x, tile.y
         self.current_tile = tile
         self.x, self.y = tile.get_center()
-
-    # def align_player(self, x, y):
-    #     self.xPos = x
-    #     self.yPos = y
-    #     self.x, self.y = self.field.get_tile(x, y).get_center()

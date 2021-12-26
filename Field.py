@@ -59,6 +59,10 @@ class Field:
             "selected_forest_hills": [pygame.image.load("./Sprites/Selected_tilles/foresthills.png").convert_alpha(),
                                      pygame.image.load("./Sprites/Selected_tilles/foresthills2.png").convert_alpha()],
 
+            # new highlights
+            "is_highlight": pygame.image.load("./Sprites/Selected_tilles/highlight-white.png").convert_alpha(),
+
+            # structures
             "wall_grass": pygame.image.load("./Sprites/Tiles/wall_grass.png").convert_alpha(),
             "wall_hills": pygame.image.load("./Sprites/Tiles/wall_hills2.png").convert_alpha()
         }
@@ -94,10 +98,9 @@ class Field:
 
         self.tiles_list = []
         self.water_tiles = []
-        self.coastal_tiles = []
         for tiles in self.tiles:
             for tile in tiles:
-                if not tile.isWater:
+                if not tile.is_water:
                     self.tiles_list.append(tile)
                 else:
                     self.water_tiles.append(tile)

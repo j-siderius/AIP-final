@@ -8,7 +8,7 @@ from Screen import *
 import helper
 
 # TODO
-#   - add break timer, so like it cost time to break something (prob do it with the cursor highlight thingy)
+#   - add break timer, so like it cost time to break something (prob do it with the cursor is_highlight thingy)
 
 
 class Player:
@@ -25,6 +25,8 @@ class Player:
         self.radius = self.field.hex_size / 2.3  # base this on hex_size of Tiles
         # assign starting position to a viable tile
         self.find_starting_tile(int(hex_amount[0] / 2), int(hex_amount[1] / 2))
+        # is_highlight the next moves
+        self.current_tile.highlight_neighbours()
 
         # walking
         self.is_walking = False
@@ -45,8 +47,7 @@ class Player:
         menu_txt = ["Inventory: "]
         for key, value in self.inventory.items():
             menu_txt.append(f"{key}: {value}")
-        # if len(menu_txt) == 1:
-        #     menu_txt.append("Empty")
+
         self.screen.text_font(25)
         width, height = self.screen.get_size()
         self.screen.text_array(width - 110, 20, menu_txt, 255, background_color=0)
@@ -60,8 +61,13 @@ class Player:
                 self.is_walking = False
                 self.align_player(self.target_tile)
                 self.from_tile = self.current_tile
+
+                # is_highlight the next moves
+                self.current_tile.highlight_neighbours()
             else:
                 self.x, self.y = lerp_2D(self.from_tile.get_center(), self.target_tile.get_center(), factor)
+        # else:
+        #     self.current_tile.highlight_neighbours()
 
     def mouse_pressed(self, mousePos, button):
         if button == MouseButton.left and not self.is_walking:
@@ -94,6 +100,7 @@ class Player:
         for neighbour in neighbours:
             if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
+                self.current_tile.unhighlight_neighbours()
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME
                 self.target_tile = neighbour

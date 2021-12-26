@@ -2,6 +2,8 @@ import copy
 import random
 
 import numpy as np
+
+import Screen
 from Screen import *
 from perlin_noise import PerlinNoise
 import math
@@ -28,7 +30,8 @@ class Tile(pygame.sprite.Sprite):
         self.sprite_dict = sprite_dict
         self.index_of_sprite = None
         self.image_name = ""
-        self.highlight = False
+        self.is_highlight = False
+        self.is_selected = False
 
         self.color = (0, 100, 0)
         self.stroke_color = (110, 110, 110)
@@ -61,21 +64,13 @@ class Tile(pygame.sprite.Sprite):
         else:  # snow
             self.image_name = "mountain"
 
-        self.isWater = self.height < 0
+        self.is_water = self.height < 0
 
         self.resource: ResourceTiles = ResourceTiles.none
-        if self.isWater:
+        if self.is_water:
             self.pos = self.pos + 1
         elif self.is_walkable():
             # resources:
-            # if self.resource_value > 0.2:  # large forest
-            #     if self.image_name == "hills":
-            #         self.image_name = "foresthills"
-            #         self.resource = ResourceTiles.forest
-            #     else:
-            #         self.image_name = "large_forest"
-            #         self.resource = ResourceTiles.large_forest
-            #         self.walkspeed = 0.5
             if self.resource_value > 0.05:
                 if "hills" in self.image_name or self.resource_value < 0.2:
                     self.image_name = f"forest_{self.image_name}"
@@ -115,22 +110,44 @@ class Tile(pygame.sprite.Sprite):
             if self.x < fieldSize[0] - 1 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y + 1)])
 
         for tile in self.bordering_tiles:
-            if self.pos[1] > tile.pos[1] and tile.isWater:
+            if self.pos[1] > tile.pos[1] and tile.is_water:
                 self.coastal_tile = True
 
-    def higlight(self, color=(255,100)): # still w.i.p. waiting for the new cursor
-        # self.screen.aapolygon(self.points, color, stroke_color=self.stroke_color)
-        if f"selected_{self.image_name}" in self.sprite_dict.keys():
-            self.highlight = True
-            self.change_image(f"selected_{self.image_name}")
-
     def update(self, mouse):
-        if self.isOver(mouse) and self.is_walkable() and not self.highlight:
-            self.highlight = True
-            self.change_image(f"selected_{self.image_name}")
-        elif not self.isOver(mouse) and self.highlight:
-            self.highlight = False
+        if self.isOver(mouse) and self.is_highlight and not self.is_selected:
+            self.is_selected = True
+            self.highlight()
+            # self.image = self.image.copy()
+            # # self.image.blit(self.sprite_dict["is_highlight"], (0, 0))
+            # draw.filled_circle(self.image, round(self.size[0]/2), round(self.image.get_height() - self.size[1]/2 - 3), int(self.radius*0.5), (255, 0, 0, 100))
+            # draw.aacircle(self.image, round(self.size[0]/2), round(self.image.get_height() - self.size[1]/2 - 3), int(self.radius*0.5), (255, 0, 0, 100))
+        elif not self.isOver(mouse) and self.is_highlight and self.is_selected:
+            self.is_selected = False
+            # self.is_highlight = False
             self.change_image(self.image_name)
+
+    def update_Tile(self):
+        if self.is_highlight:
+            self.highlight()
+
+    def highlight(self, color=Settings.HIGHLIGHT_COLOR): # still w.i.p. waiting for the new cursor
+        if self.is_water: return
+        if self.is_selected and color == Settings.HIGHLIGHT_COLOR:
+            color = Settings.HIGHLIGHT_COLOR_SELECTED
+        if self.is_wall and color == Settings.HIGHLIGHT_COLOR:
+            color = Settings.HIGHLIGHT_COLOR_ACTION
+
+        color = format_color(color)
+        self.is_highlight = True
+        # self.change_image(self.image_name, False)
+        self.image = self.image.copy()
+        # self.image.blit(self.sprite_dict["is_highlight"], (0, 0))
+        draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
+        # draw.aacircle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
+
+    def unhighlight(self):
+        self.is_highlight = False
+        self.change_image(self.image_name)
 
     def has_resources(self):
         return self.resource != ResourceTiles.none
@@ -152,11 +169,10 @@ class Tile(pygame.sprite.Sprite):
             self.hitpoints = 0
             self.is_wall = False
             self.image_name = self.image_name.replace("wall_", "")
-            self.change_image(f"selected_{self.image_name}")
+            self.change_image(f"{self.image_name}")
 
             if self.coastal_tile:
                 self.field.update_coastal_waters()
-
 
     def mine_resource(self):
         resource = None
@@ -173,18 +189,21 @@ class Tile(pygame.sprite.Sprite):
 
             if "hills" not in self.image_name:
                 self.walkspeed = 1
-            self.change_image(f"selected_{self.image_name}")
+            self.change_image(f"{self.image_name}")
 
         if resource and self.coastal_tile:
             self.field.update_coastal_waters()
 
         return resource
 
-    def change_image(self, image_name):
+    def change_image(self, image_name, update_tile=True):
         if isinstance(self.sprite_dict[image_name], list):
-            self.image = self.sprite_dict[image_name][self.index_of_sprite]
+            self.image = self.sprite_dict[image_name][self.index_of_sprite]#.copy()
         else:
-            self.image = self.sprite_dict[image_name]
+            self.image = self.sprite_dict[image_name]#.copy()
+
+        if update_tile:
+            self.update_Tile()
 
     def isOver(self, point):
         return math.dist(point, self.hex_rect.center) <= self.radius
@@ -194,6 +213,14 @@ class Tile(pygame.sprite.Sprite):
         if self.walkable and not self.is_wall:
             return self.walkspeed
         else: return False
+
+    def highlight_neighbours(self):
+        for tile in self.bordering_tiles:
+            tile.highlight()
+
+    def unhighlight_neighbours(self):
+        for tile in self.bordering_tiles:
+            tile.unhighlight()
 
     def get_neighbours(self):
         return self.bordering_tiles

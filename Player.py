@@ -1,21 +1,38 @@
 import random
+import pygame
 
+import Tile
+from Field import Field
+from settings import *
+from Screen import *
 import helper
+
+# TODO
+#   - add break timer, so like it cost time to break something (prob do it with the cursor highlight thingy)
 
 
 class Player:
 
-    def __init__(self, screen, field_size, field, hex_amount):
+    def __init__(self, screen, field_size, field: Field):
         self.screen = screen
         self.field = field
+        hex_amount = field.field_size
 
         self.field_size = field_size
 
-        self.x, self.y = None, None
-        self.xPos, self.yPos = 0, 0
-        self.radius = (field_size[0] / hex_amount[0]) / 2.3  # base this on hex_size of Tiles
+        self.x, self.y = None, None  # pos on the world map
+        self.current_tile: Tile = None
+        self.radius = self.field.hex_size / 2.3  # base this on hex_size of Tiles
         # assign starting position to a viable tile
         self.find_starting_tile(int(hex_amount[0] / 2), int(hex_amount[1] / 2))
+
+        # walking
+        self.is_walking = False
+        self.walk_timer = 0
+        self.from_tile = self.current_tile
+        self.target_tile = None
+
+        self.inventory = dict()
 
         self.color = (255, 0, 0)
 
@@ -24,38 +41,63 @@ class Player:
         self.screen.stroke(self.color)
         self.screen.circle(self.x, self.y, self.radius, self.color)
 
-    def update(self):
-        self.player_input(self.screen.get_mouse_pos(), self.screen.get_mouse_pressed(), self.screen.get_pressed_keys())
-        pass
+        # inventory menu
+        menu_txt = ["Inventory: "]
+        for key, value in self.inventory.items():
+            menu_txt.append(f"{key}: {value}")
+        # if len(menu_txt) == 1:
+        #     menu_txt.append("Empty")
+        self.screen.text_font(25)
+        width, height = self.screen.get_size()
+        self.screen.text_array(width - 110, 20, menu_txt, 255, background_color=0)
 
-    def player_input(self, mousePos, mousePressed, keyPresses):
-        if mousePressed[0]:
-            pressedTile = self.field.get_current_mouse_tile()
-            self.move_player(pressedTile.x, pressedTile.y)
+    def update(self):
+        if self.is_walking:  # walking
+            factor = 1 - self.walk_timer / Settings.PLAYER_WALKING_TIME
+            walkspeed = lerp(self.current_tile.is_walkable(), self.target_tile.is_walkable(), factor)
+            self.walk_timer -= self.screen.get_elapsed_time() * walkspeed
+            if self.walk_timer <= 0:
+                self.is_walking = False
+                self.align_player(self.target_tile)
+                self.from_tile = self.current_tile
+            else:
+                self.x, self.y = lerp_2D(self.from_tile.get_center(), self.target_tile.get_center(), factor)
+
+    def mouse_pressed(self, mousePos, button):
+        if button == MouseButton.left and not self.is_walking:
+            pressed_tile = self.field.get_tile_from_point(mousePos)
+            self.move_player(pressed_tile.x, pressed_tile.y)
+        elif button == MouseButton.right and not self.is_walking:
+            pressed_tile = self.field.get_tile_from_point(mousePos)
+
+            if pressed_tile in self.current_tile.get_neighbours():
+                resource = pressed_tile.mine_resource()
+                if resource is not None:
+                    if resource in self.inventory:
+                        self.inventory[resource] += 1
+                    else:
+                        self.inventory[resource] = 1
 
     def move_player(self, targetTileX, targetTileY):
-        neighbours = self.field.get_tile(self.xPos, self.yPos).bordering_tiles
+        neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
             if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).walkable:
                 # TODO: implement tick rate with something like nextTile = this.tile
-                self.align_player(targetTileX, targetTileY)
+                self.is_walking = True
+                self.walk_timer = Settings.PLAYER_WALKING_TIME
+                self.target_tile = neighbour
 
     # employ walking algorithm to find suitable starting tile
     def find_starting_tile(self, tileX, tileY):
         tile = self.field.get_tile(tileX, tileY)
         if tile.is_walkable() != 1:
-            try_tile = tile.bordering_tiles[random.randint(0, len(tile.bordering_tiles) - 1)]
+            try_tile = tile.get_neighbours()[random.randint(0, len(tile.get_neighbours()) - 1)]
             self.find_starting_tile(try_tile.x, try_tile.y)
         else:
             # assign player position to the found grass tile
             print(f"Starting tile found: ({tileX},{tileY})")
-            hex_size = self.field.get_hex_size()
-            self.align_player(tileX, tileY)
+            self.align_player(tile)
 
-    def align_player(self, x, y):
-        # points are arranged in the following manner: [0]=bottom-right, [1]=bottom-left, [2]=middle-left,
-        # [3]=top-left, [4]=top-right, [5]=middle-right
-        self.xPos = x
-        self.yPos = y
-        self.x = self.field.get_tile(x, y).get_points()[4][0] - (self.field.get_hex_width() / 3)
-        self.y = self.field.get_tile(x, y).get_points()[2][1]
+    def align_player(self, tile: Tile):
+        self.current_tile = tile
+        self.x, self.y = tile.get_center()

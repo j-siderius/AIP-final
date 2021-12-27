@@ -17,6 +17,7 @@ from pygame import gfxdraw as draw
 from enum import Enum
 import time
 import numpy as np
+from pygame.locals import *
 
 
 class Screen:
@@ -25,10 +26,12 @@ class Screen:
         # setup screen
         pygame.init()
         if width == height == 0:
-            self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+            # self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
+            flags = FULLSCREEN | DOUBLEBUF
+            self.screen = pygame.display.set_mode((width, height), flags, 8)
         else:
             self.screen = pygame.display.set_mode((width, height))
-        if title: Screen.set_title(title)
+        if title: self.set_title(title)
 
         # input variables 
         self.window_width = width
@@ -67,19 +70,19 @@ class Screen:
                 if event.type == pygame.QUIT or pygame.K_ESCAPE in self.get_pressed_keys() or pygame.KSCAN_ESCAPE in self.get_pressed_keys():
                     self.run = False
                 if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
-                    self.key_pressed()
+                    self.key_pressed_event()
                 if event.type == pygame.MOUSEBUTTONDOWN:
-                    self.mouse_pressed(event.button)
+                    self.mouse_pressed_event(event.button)
                 if event.type == pygame.MOUSEBUTTONUP:
-                    self.mouse_released(event.button)
+                    self.mouse_released_event(event.button)
 
             self.elapsed_time = time.perf_counter() - self.old_time
 
             # main loop
             if self.elapsed_time > 1 / self.frameRate:
                 self.old_time = time.perf_counter()
-                if self.mouse_dragged_func: self.key_hold()
-                if self.mouse_dragged_func: self.mouse_dragged()
+                if self.mouse_dragged_func: self.key_hold_event()
+                if self.mouse_dragged_func: self.mouse_dragged_event()
 
                 # call the loop function
                 self.loopFunction()
@@ -95,29 +98,28 @@ class Screen:
         self.run = False
 
     # events
-    def key_pressed(self):
+    def key_pressed_event(self):
         # keypressed, the function is called and the active keys are given. the key can be found using pygame.KSCAN_W
         if self.key_pressed_func is not None:
             active_keys = self.get_pressed_keys()
 
             self.key_pressed_func(active_keys)
 
-    def key_hold(self):
+    def key_hold_event(self):
         if self.key_hold_func is not None:
             active_keys = self.get_pressed_keys()
             if len(active_keys) > 0:
                 self.key_hold_func(active_keys)
 
-    def mouse_pressed(self, button):  # 3 == right button, 1 == left button, 2 scroll button
+    def mouse_pressed_event(self, button):  # 3 == right button, 1 == left button, 2 scroll button
         if self.mouse_pressed_func is not None: self.mouse_pressed_func(button)
 
-    def mouse_released(self, button):
+    def mouse_released_event(self, button):
         if self.mouse_released_func is not None: self.mouse_released_func(button)
 
-    def mouse_dragged(self):
+    def mouse_dragged_event(self):
         if self.get_mouse_pressed()[0]:
             self.mouse_dragged_func(self.get_mouse_pos())
-
 
     # settings
     def setframeRate(self, frameRate):
@@ -135,6 +137,9 @@ class Screen:
 
     def get_delta_time(self):
         return self.get_wanted_frameRate() / self.get_frameRate()
+
+    def get_elapsed_time(self):
+        return self.elapsed_time
 
     def get_width(self):
         w, h = self.get_size()
@@ -246,7 +251,7 @@ class Screen:
     def toggle_text_stroke(self, active):
         self.text_stroke_active = active
 
-    def set_title(title):
+    def set_title(self, title):
         pygame.display.set_caption(title)
 
     # drawing
@@ -287,11 +292,11 @@ class Screen:
         # it's done this way, because alpha's are in this case on just one color and this is a lot faster
         draw_surface = pygame.Surface((w, h))
         alpha = color[3]
-        draw_color = Screen.format_color_3(color)
+        draw_color = format_color_3(color)
 
         # if self.filled or color[0] == -1: pygame.draw.rect(surface, color, pygame.Rect(x,y, w, h))
         if self.filled or filled:
-            if border_radius > 0:
+            if border_radius > 1:
                 pygame.draw.rect(surface, color, pygame.Rect(x, y, w, h), border_radius=border_radius, border_top_right_radius=border_top_right_radius
                                  , border_bottom_left_radius=border_bottom_left_radius, border_top_left_radius=border_top_left_radius,
                                  border_bottom_right_radius=border_bottom_right_radius)
@@ -344,25 +349,38 @@ class Screen:
                 center = [0, 0]
             surface.blit(textSurf, (x - center[0], y - center[1]))
 
-    def text_array(self, x, y, txt_array, color=None, font=None, surface=None,
-                   antialias=True):  # not updated anymore!!!!
-        if font == None: font = self.txt_font
-        if surface == None: surface = self.get_screen()
+    def text_array(self, x, y, txt_array, color=None, font=None, background_color=None, surface=None, antialias=True, centeredX=True):
+        if font is None: font = self.txt_font
+        if surface is None: surface = self.get_screen()
         color = self.drawColor(color)
+        background_color = format_color(background_color)
 
+        max_width = 0
+        height = 0
         try:
             for txt in txt_array:
                 txt = str(txt)
+                text_width, text_height = font.size(txt)
+                max_width = max(max_width, text_width)
+                height += text_height
         except:
             print("!!!!!  ----- the text in text() can't be converted to string -----  !!!!!")
+            return False
 
-        for txt in txt_array[::-1]:
+        if not centeredX:
+            x += max_width/2
+
+        if background_color:
+            background_surface = pygame.Surface((max_width + 10, height))
+            background_surface.fill(background_color)
+            surface.blit(background_surface, (x - 5 - max_width/2, y))
+
+        for txt in txt_array[::]:
             text_width, text_height = font.size(txt)
             x_ = x - text_width / 2
-            y -= text_height / 2
             textsurface = font.render(txt, antialias, color)
             surface.blit(textsurface, (x_, y))
-            y -= text_height / 2
+            y += text_height
 
     def background(self, r, g=-1, b=-1, surface=None):
         if surface == None: surface = self.get_screen()
@@ -392,7 +410,7 @@ class Screen:
         for i in range(0, height, step):
             if float(i) % float(step * 2) == 0:
                 if self.filled or filled:
-                    pygame.Surface.fill(line_surface, Screen.format_color_3(color), pygame.Rect(0, i, width, step))
+                    pygame.Surface.fill(line_surface, format_color_3(color), pygame.Rect(0, i, width, step))
 
                 if self.stroke_active: pygame.draw.rect(line_surface, self.current_stroke_color,
                                                         pygame.Rect(0, i, width, step), self.current_stroke_thickness,
@@ -425,8 +443,8 @@ class Screen:
 
         draw_surface = pygame.Surface((radius * 2, radius * 2))
         alpha = color[3]
-        draw_color = Screen.format_color_3(color)
-        color_key = Screen.opposite_color(draw_color)
+        draw_color = format_color_3(color)
+        color_key = opposite_color(draw_color)
         draw_surface.fill(color_key)
         draw_surface.set_colorkey(color_key)
 
@@ -474,8 +492,8 @@ class Screen:
         # alpha
         draw_surface = pygame.Surface((width, height))
         alpha = color[3]
-        draw_color = Screen.format_color_3(color)
-        color_key = Screen.opposite_color(draw_color)
+        draw_color = format_color_3(color)
+        color_key = opposite_color(draw_color)
         draw_surface.fill(color_key)
         draw_surface.set_colorkey(color_key)
 
@@ -484,8 +502,8 @@ class Screen:
         stroke_cutout = pygame.Surface((width, height))
 
         stroke_alpha = stroke_color[3]
-        draw_stroke_color = Screen.format_color_3(self.current_stroke_color)
-        stroke_color_key = Screen.opposite_color(draw_stroke_color)
+        draw_stroke_color = format_color_3(self.current_stroke_color)
+        stroke_color_key = opposite_color(draw_stroke_color)
 
         stroke_surface.fill(stroke_color_key)
         stroke_surface.set_colorkey(stroke_color_key)
@@ -562,8 +580,7 @@ class Screen:
         except:  # if it isn't a tuple
             color = (color, color, color)
 
-        if color[
-            0] == -1: self.filled = False  # old, still posible, but just old, tho it is faster. so you dcan use it ;)
+        if color[0] == -1: self.filled = False  # old, still possible, but just old, tho it is faster. so you dcan use it ;)
 
         if len(color) < 4:
             color = (color[0], color[1], color[2], 255)
@@ -571,13 +588,13 @@ class Screen:
         return color
 
 
-# enums
-class MouseButton(Enum):
-    left = 1
-    scroll = 2
-    right = 3
-    scroll_up = 4
-    scroll_down = 5
+# # enums
+# class MouseButton(Enum):
+#     left = 1
+#     scroll = 2
+#     right = 3
+#     scroll_up = 4
+#     scroll_down = 5
 
 
 def format_color(color):
@@ -632,6 +649,15 @@ def opposite_color(color):
         return (255 - color[0], 255 - color[1], 255 - color[2])
     elif len(color) == 4:
         return (255 - color[0], 255 - color[1], 255 - color[2], color[3])
+
+
+def lerp(value1, value2, factor):
+    if factor > 1:
+        factor = 1
+    elif factor < 0:
+        factor = 0
+
+    return value2 - value1 * factor + value1
 
 
 def lerp_2D(vector1, vector2, factor):

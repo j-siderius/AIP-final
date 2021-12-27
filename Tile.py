@@ -117,25 +117,21 @@ class Tile(pygame.sprite.Sprite):
         if self.isOver(mouse) and self.is_highlight and not self.is_selected:
             self.is_selected = True
             self.highlight()
-            # self.image = self.image.copy()
-            # # self.image.blit(self.sprite_dict["is_highlight"], (0, 0))
-            # draw.filled_circle(self.image, round(self.size[0]/2), round(self.image.get_height() - self.size[1]/2 - 3), int(self.radius*0.5), (255, 0, 0, 100))
-            # draw.aacircle(self.image, round(self.size[0]/2), round(self.image.get_height() - self.size[1]/2 - 3), int(self.radius*0.5), (255, 0, 0, 100))
         elif not self.isOver(mouse) and self.is_highlight and self.is_selected:
             self.is_selected = False
-            # self.is_highlight = False
             self.change_image(self.image_name)
 
     def update_Tile(self):
         if self.is_highlight:
             self.highlight()
 
-    def highlight(self, color=Settings.HIGHLIGHT_COLOR): # still w.i.p. waiting for the new cursor
-        if self.is_water: return
-        if self.is_selected and color == Settings.HIGHLIGHT_COLOR:
+    def highlight(self, color=Settings.HIGHLIGHT_COLOR):
+        if self.is_selected and color == Settings.HIGHLIGHT_COLOR:  # when the mouse is over it, make it a different color
             color = Settings.HIGHLIGHT_COLOR_SELECTED
-        if self.is_wall and color == Settings.HIGHLIGHT_COLOR:
+        if self.is_wall and color == Settings.HIGHLIGHT_COLOR:  # show the action icon when the user can only do an action
             color = Settings.HIGHLIGHT_COLOR_ACTION
+        elif (not self.is_wall and not self.walkable) or self.is_water:  # don't show an action when the user can't do an action
+            return
 
         color = format_color(color)
         self.is_highlight = True
@@ -143,7 +139,6 @@ class Tile(pygame.sprite.Sprite):
         self.image = self.image.copy()
         # self.image.blit(self.sprite_dict["is_highlight"], (0, 0))
         draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
-        # draw.aacircle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
 
     def unhighlight(self):
         self.is_highlight = False

@@ -42,12 +42,12 @@ class Serial:
                     if 'NUNCHUCK' in msg:
                         print(msg)
                         # print(msg[msg.index('JoyX:'): msg.index('\r\n')])
-                        self.joyX = msg[msg.index('JoyX:  ')+7: msg.index('  | JoyY:')]
-                        self.joyY = msg[msg.index('JoyY:  ')+7: msg.index('  | Ax:')]
-                        self.joyAccX = msg[msg.index('Ax:  ')+7: msg.index('  | Ay:')]
-                        self.joyAccY = msg[msg.index('Ay:  ')+7: msg.index('  | Az:')]
-                        self.joyAccZ = msg[msg.index('Az:  ')+7: msg.index('  | Buttons:')]
-                        print(f"{self.joyX = }, {self.joyY = }, {self.joyAccX = }, {self.joyAccY = }, {self.joyAccZ = }")
+                        # self.joyX = msg[msg.index('JoyX:  ')+7: msg.index('  | JoyY:')]
+                        # self.joyY = msg[msg.index('JoyY:  ')+7: msg.index('  | Ax:')]
+                        # self.joyAccX = msg[msg.index('Ax:  ')+7: msg.index('  | Ay:')]
+                        # self.joyAccY = msg[msg.index('Ay:  ')+7: msg.index('  | Az:')]
+                        # self.joyAccZ = msg[msg.index('Az:  ')+7: msg.index('  | Buttons:')]
+                        # print(f"{self.joyX = }, {self.joyY = }, {self.joyAccX = }, {self.joyAccY = }, {self.joyAccZ = }")
                         # # calculating angle values for selection:
                         # angle = math.degrees(math.atan2((self.JoyY-128), (self.JoyX-128))) + 180.0
                     else:

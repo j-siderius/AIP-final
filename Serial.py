@@ -1,13 +1,16 @@
 import time
 
 import serial
-import Screen
+from Screen import *
 import math
 
 
 class Serial:
     def __init__(self, port, baud_rate):
-        self.port = serial.Serial(port, baud_rate, timeout=0)
+        try:
+            self.port = serial.Serial(port, baud_rate, timeout=0)
+        except serial.serialutil.SerialException:
+            print("No Serial device connected!")
         self.dayNightCycle = 0
         self.health = 0
         self.joyX, self.joyY, self.joyC, self.joyZ, self.joyAccX, self.joyAccY, self.joyAccZ = \
@@ -50,7 +53,7 @@ class Serial:
 
             self.send('HEALTH' + str(self.health) + "\n")
 
-        if 11 in Screen.Screen.get_pressed_keys(self):  # press H
+        if 11 in Screen.get_pressed_keys():  # press H
             print("H pressed")
             self.health += 1
             self.send('HEALTH' + str(self.health) + "\n")
@@ -66,7 +69,7 @@ class Serial:
     def updateHealth(self, health):
         """
         Updates the health of the LED clock
-        full health=4, half health=2, dead
+        full health=4, half health=2, dead=0
         """
         self.send('HEALTH' + str(health) + "\n")
 
@@ -187,8 +190,6 @@ void ledLoop() {
   }
 
   FastLED.show();
-
-  Serial.println("TESTING");
 }
 
 void controllerLoop() {

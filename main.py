@@ -14,7 +14,7 @@ class program:
 
         self.field = Field(self.screen, field_pos=(0, 0), hex_width='auto', field_size=(self.screen.get_size()), hex_amount=(75, 0))
         self.player = Player(self.screen, field_size=(self.screen.get_size()), field=self.field, hex_amount=(75, 39))  # need to implement hex calculation in class
-        self.serial = Serial('COM14', 115200)
+        self.serial = Serial('/dev/cu.wchusbserial1410')
 
         self.screen.start()
 

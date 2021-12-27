@@ -1,62 +1,72 @@
 import time
-
 import serial
+import serial.tools.list_ports
 from Screen import *
 import math
 
 
 class Serial:
-    def __init__(self, port, baud_rate):
-        try:
-            self.port = serial.Serial(port, baud_rate, timeout=0)
-        except serial.serialutil.SerialException:
-            print("No Serial device connected!")
-        self.dayNightCycle = 0
-        self.health = 0
-        self.joyX, self.joyY, self.joyC, self.joyZ, self.joyAccX, self.joyAccY, self.joyAccZ = \
-            None, None, False, False, None, None, None
-        self.send('DAYNIGHT' + str(self.dayNightCycle) + "\n")
-        self.send('HEALTH' + str(self.health) + "\n")
-        self.waitTime = 0
+    def __init__(self, port=None, baud_rate=115200):
+        """
+        Initialize the serial object, specify the communication
+        baud-rate and connection port. Leave port empty if you want a
+        list of all available serial devices.
+        """
+        if port is None:
+            self.port = None
+            print("No serial device specified, available serial devices:")
+            serial_list = serial.tools.list_ports.comports(include_links=True)
+            for element in serial_list:
+                print(element.device)
+        else:
+            try:
+                self.port = serial.Serial(port, baud_rate, timeout=0)
+            except serial.serialutil.SerialException:
+                self.port = None
+                print("No Serial device connected on this address")
+            self.dayNightCycle = 0
+            self.health = 0
+            self.joyX, self.joyY, self.joyC, self.joyZ, self.joyAccX, self.joyAccY, self.joyAccZ = \
+                None, None, False, False, None, None, None
+            self.send('DAYNIGHT' + str(self.dayNightCycle) + "\n")
+            self.send('HEALTH' + str(self.health) + "\n")
+            self.waitTime = 0
 
     def update(self):
-        waiting = self.port.in_waiting
-        if waiting > 0:
-            try:
-                msg = self.port.read(waiting).decode('ascii')
+        if self.port is not None:
+            waiting = self.port.in_waiting
+            if waiting > 0:  # TODO: add check if message is complete (checksum or line-end)
+                try:
+                    msg = self.port.read(waiting).decode('ascii')
 
-                if 'NUNCHUCK' in msg:
-                    print(msg)
-                    # print(msg[msg.index('JoyX:'): msg.index('\r\n')])
-                    # self.joyX = msg[msg.index('JoyX:  ')+7: msg.index('  | JoyY:')]
-                    # self.joyY = msg[msg.index('JoyY:  ')+7: msg.index('  | Ax:')]
-                    # self.joyAccX = msg[msg.index('Ax:  ')+7: msg.index('  | Ay:')]
-                    # self.joyAccY = msg[msg.index('Ay:  ')+7: msg.index('  | Az:')]
-                    # self.joyAccZ = msg[msg.index('Az:  ')+7: msg.index('  | Buttons:')]
-                    # # calculating angle values for selection:
-                    # angle = math.degrees(math.atan2((self.JoyY-128), (self.JoyX-128))) + 180.0
+                    if 'NUNCHUCK' in msg:
+                        print(msg)
+                        # print(msg[msg.index('JoyX:'): msg.index('\r\n')])
+                        self.joyX = msg[msg.index('JoyX:  ')+7: msg.index('  | JoyY:')]
+                        self.joyY = msg[msg.index('JoyY:  ')+7: msg.index('  | Ax:')]
+                        self.joyAccX = msg[msg.index('Ax:  ')+7: msg.index('  | Ay:')]
+                        self.joyAccY = msg[msg.index('Ay:  ')+7: msg.index('  | Az:')]
+                        self.joyAccZ = msg[msg.index('Az:  ')+7: msg.index('  | Buttons:')]
+                        print(f"{self.joyX = }, {self.joyY = }, {self.joyAccX = }, {self.joyAccY = }, {self.joyAccZ = }")
+                        # # calculating angle values for selection:
+                        # angle = math.degrees(math.atan2((self.JoyY-128), (self.JoyX-128))) + 180.0
+                    else:
+                        print(f"Serial error: {msg}")
+
+                except UnicodeDecodeError:
+                    print("Serial decoding error")
+
+            # test code
+            if time.perf_counter() > self.waitTime + 2.000:
+                self.waitTime = time.perf_counter()
+
+                self.updateDayNight(self.dayNightCycle)  # send daynight update
+                if self.dayNightCycle < 11:
+                    self.dayNightCycle += 1
                 else:
-                    print(msg)
+                    self.dayNightCycle = 0
 
-            except UnicodeDecodeError:
-                print("Serial error")
-
-        # test code
-        if time.perf_counter() > self.waitTime + 2.000:
-            self.waitTime = time.perf_counter()
-
-            self.updateDayNight(self.dayNightCycle)
-            if self.dayNightCycle < 11:
-                self.dayNightCycle += 1
-            else:
-                self.dayNightCycle = 0
-
-            self.send('HEALTH' + str(self.health) + "\n")
-
-        if 11 in Screen.get_pressed_keys():  # press H
-            print("H pressed")
-            self.health += 1
-            self.send('HEALTH' + str(self.health) + "\n")
+                self.send('HEALTH' + str(self.health) + "\n")  # send health update
 
     def updateDayNight(self, time):
         """
@@ -74,8 +84,9 @@ class Serial:
         self.send('HEALTH' + str(health) + "\n")
 
     def send(self, argument):
-        arg = bytes(argument.encode())
-        self.port.write(arg)
+        if self.port is not None:
+            arg = bytes(argument.encode())
+            self.port.write(arg)
 
 
 '''

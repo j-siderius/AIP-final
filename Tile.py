@@ -231,7 +231,6 @@ class Tile(pygame.sprite.Sprite):
 
     def __lt__(self, other):
         return self.pos[1] < other.pos[1]
-        # return math.dist(self.pos, (0, 0)) < math.dist(other.pos, (0, 0))
 
 
 def limit(value, min, max):

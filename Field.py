@@ -118,7 +118,7 @@ class Field:
         print(f"{self.hex_size = }, {len(self.tiles) = }, {self.field_size = }")
 
     def display(self, screen):
-        self.tiles_group.update(screen.get_mouse_pos())
+        # self.tiles_group.update(screen.get_mouse_pos())
         self.tiles_group.draw(screen.get_screen())
 
         # for tile_row in self.tiles:
@@ -132,6 +132,12 @@ class Field:
     def get_tile(self, tileX, tileY):
         return self.tiles[int(tileX)][int(tileY)]
 
+    def get_tile_from_point(self, point):
+        for tiles in self.tiles:
+            for tile in tiles:
+                if tile.isOver(point):
+                    return tile
+
     # returns the size of a hex (to base other objects off of)
     def get_hex_size(self):
         return self.hex_size
@@ -141,9 +147,3 @@ class Field:
 
     def highlight_tile(self, tileX, tileY):
         self.tiles[tileX][tileY].highlight()
-
-    def get_tile_from_point(self, point):
-        for tile_row in self.tiles:
-            for tile in tile_row:
-                if tile.isOver(point):
-                    return tile

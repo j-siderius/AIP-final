@@ -2,7 +2,6 @@ import time
 import serial
 import serial.tools.list_ports
 from Screen import *
-import math
 
 
 class Serial:
@@ -24,37 +23,35 @@ class Serial:
             except serial.serialutil.SerialException:
                 self.port = None
                 print("No Serial device connected on this address")
+
             self.dayNightCycle = 0
             self.health = 0
-            self.joyX, self.joyY, self.joyC, self.joyZ, self.joyAccX, self.joyAccY, self.joyAccZ = \
-                None, None, False, False, None, None, None
-            self.send('DAYNIGHT' + str(self.dayNightCycle) + "\n")
-            self.send('HEALTH' + str(self.health) + "\n")
+            self.joyX, self.joyY, self.joyC, self.joyZ = None, None, False, False
+            self.updateDayNight(self.dayNightCycle)
+            self.updateHealth(self.health)
             self.waitTime = 0
 
     def update(self):
+        """
+        Serial protocol:
+        send DN+00 to change day-night display
+        send HLT+0 to change health display
+        receive JOY:X000Y000BTZ0BTC0\r\n
+        """
         if self.port is not None:
-            waiting = self.port.in_waiting
-            if waiting > 0:  # TODO: add check if message is complete (checksum or line-end)
-                try:
-                    msg = self.port.read(waiting).decode('ascii')
-
-                    if 'NUNCHUCK' in msg:
-                        print(msg)
-                        # print(msg[msg.index('JoyX:'): msg.index('\r\n')])
-                        # self.joyX = msg[msg.index('JoyX:  ')+7: msg.index('  | JoyY:')]
-                        # self.joyY = msg[msg.index('JoyY:  ')+7: msg.index('  | Ax:')]
-                        # self.joyAccX = msg[msg.index('Ax:  ')+7: msg.index('  | Ay:')]
-                        # self.joyAccY = msg[msg.index('Ay:  ')+7: msg.index('  | Az:')]
-                        # self.joyAccZ = msg[msg.index('Az:  ')+7: msg.index('  | Buttons:')]
-                        # print(f"{self.joyX = }, {self.joyY = }, {self.joyAccX = }, {self.joyAccY = }, {self.joyAccZ = }")
-                        # # calculating angle values for selection:
-                        # angle = math.degrees(math.atan2((self.JoyY-128), (self.JoyX-128))) + 180.0
-                    else:
-                        print(f"Serial error: {msg}")
-
-                except UnicodeDecodeError:
-                    print("Serial decoding error")
+            try:
+                msg = self.port.readline().decode('ascii')
+                if 'JOY:' in msg:
+                    self.joyX = int(msg[5:8])
+                    self.joyY = int(msg[9:12])
+                    self.joyZ = False if int(msg[15:16]) == 0 else True
+                    self.joyC = False if int(msg[19:20]) == 0 else True
+                    print(f"{self.joyX=}, {self.joyY=}, {self.joyZ=}, {self.joyC=}")
+                    angle = int(math.degrees(math.atan2((self.joyY-128), (self.joyX-128))) + 180.0)
+                    print(angle)
+                self.port.reset_input_buffer()
+            except UnicodeDecodeError:
+                print("decoding error")
 
             # test code
             if time.perf_counter() > self.waitTime + 2.000:
@@ -66,22 +63,20 @@ class Serial:
                 else:
                     self.dayNightCycle = 0
 
-                self.send('HEALTH' + str(self.health) + "\n")  # send health update
-
     def updateDayNight(self, time):
         """
         Updates the time of the LED clock
         time value from 0 to 11, describes the sun and moon phase >> 0=beginning of day,
         5=end of daytime, 6=beginning of night, 11=end of nighttime
         """
-        self.send('DAYNIGHT' + str(time) + "\n")
+        self.send('DN' + str(time).zfill(2) + "\n")
 
     def updateHealth(self, health):
         """
         Updates the health of the LED clock
         full health=4, half health=2, dead=0
         """
-        self.send('HEALTH' + str(health) + "\n")
+        self.send('HLT' + str(health) + "\n")
 
     def send(self, argument):
         if self.port is not None:
@@ -89,7 +84,7 @@ class Serial:
             self.port.write(arg)
 
 
-'''
+"""
 ## Arduino code: ##
 
 #include <WiiChuck.h>
@@ -115,8 +110,9 @@ Accessory nunchuck1;
 unsigned long ledMillis, controllerMillis;
 String incomingBytes;
 int sunMoonPhase = 0; //from 0 to 11, describes the sun and moon phase >> 0=beginning of day, 5=end of daytime, 6=beginning of night, 11=end of nighttime
-int healthTracker = 1; //full health=4, half health=2, dead=0
+int healthTracker = 4; //full health=4, half health=2, dead=0
 int _controllerUpdateRate = 10; //Hz=1/(millis*1000) >> 17
+uint8_t joystickX, joystickY, btnC, btnZ;
 
 void setup() {
   Serial.begin(115200);
@@ -153,13 +149,13 @@ void serialLoop() {
   incomingBytes = Serial.readStringUntil('\n');
 
   //decoding
-  if (incomingBytes.indexOf("DAYNIGHT") >= 0) {
+  if (incomingBytes.indexOf("DN") >= 0) {
     //daynight update
-    sunMoonPhase = incomingBytes.substring(8).toInt();
+    sunMoonPhase = incomingBytes.substring(2).toInt();
   }
-  if (incomingBytes.indexOf("HEALTH") >= 0) {
+  if (incomingBytes.indexOf("HLT") >= 0) {
     //health update
-    healthTracker = incomingBytes.substring(6).toInt();
+    healthTracker = incomingBytes.substring(3).toInt();
   }
 }
 
@@ -205,7 +201,12 @@ void ledLoop() {
 
 void controllerLoop() {
   nunchuck1.readData();    // Read inputs and update maps
-  nunchuck1.printInputs(); // Print all inputs
+  joystickX = nunchuck1.values[0];  // fetch all controller inputs
+  joystickY = nunchuck1.values[1];
+  if (nunchuck1.values[10] > 0) btnZ = 1;
+  else btnZ = 0;
+  if (nunchuck1.values[11] > 0) btnC = 1;
+  else btnC = 0;
+  printf("JOY:X%03dY%03dBTZ%dBTC%d\r\n", joystickX, joystickY, btnZ, btnC);   // print controller inputs to serial
 }
-
-'''
+"""

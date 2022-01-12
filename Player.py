@@ -1,11 +1,10 @@
 import random
-import pygame
 
 import Tile
 from Field import Field
-from settings import *
+from Data.settings import *
 from Screen import *
-import helper
+
 
 # TODO
 #   - add break timer, so like it cost time to break something (prob do it with the cursor is_highlight thingy)

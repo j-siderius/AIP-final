@@ -1,13 +1,9 @@
-import copy
 import random
 
-import numpy as np
-
-import Screen
 from Screen import *
 from perlin_noise import PerlinNoise
 import math
-from settings import *
+from Data.settings import *
 
 
 class Tile(pygame.sprite.Sprite):

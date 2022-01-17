@@ -5,7 +5,6 @@ import Tile
 from Field import Field
 from settings import *
 from Screen import *
-import helper
 
 # TODO
 #   - add break timer, so like it cost time to break something (prob do it with the cursor highlight thingy)
@@ -77,6 +76,16 @@ class Player:
                         self.inventory[resource] += 1
                     else:
                         self.inventory[resource] = 1
+
+        # detect where mouse is in relation to player
+        # TODO: fix uniform circle angles!
+        # degrees on the circle:
+        #       90
+        # 0/360     180
+        #       270
+        # TODO: make mouse position checking continuous
+        angle = int(math.degrees(math.atan2((mousePos[1] - self.y), (mousePos[0] - self.x))) + 180.0)
+        print(f"mouse{angle=}")
 
     def move_player(self, targetTileX, targetTileY):
         neighbours = self.current_tile.get_neighbours()

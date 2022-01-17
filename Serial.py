@@ -46,9 +46,14 @@ class Serial:
                     self.joyY = int(msg[9:12])
                     self.joyZ = False if int(msg[15:16]) == 0 else True
                     self.joyC = False if int(msg[19:20]) == 0 else True
-                    print(f"{self.joyX=}, {self.joyY=}, {self.joyZ=}, {self.joyC=}")
+                    # TODO: fix uniform circle angles!
+                    # degrees on the circle:
+                    #       270
+                    # 0/360     180
+                    #       90
+                    # TODO: add check if joystick is not in the middle (then no direction should be chosen)
                     angle = int(math.degrees(math.atan2((self.joyY-128), (self.joyX-128))) + 180.0)
-                    print(angle)
+                    print(f"joystick{angle=}")
                 self.port.reset_input_buffer()
             except UnicodeDecodeError:
                 print("decoding error")

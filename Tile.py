@@ -1,5 +1,6 @@
 import random
 
+import Screen
 from Screen import *
 from perlin_noise import PerlinNoise
 import math
@@ -19,8 +20,6 @@ class Tile(pygame.sprite.Sprite):
         self.y = place[1]
         self.bordering_tiles = []
 
-        self.walkable = False
-        self.walkspeed = 0
         self.is_wall = False
         self.hitpoints = 0
 
@@ -29,9 +28,6 @@ class Tile(pygame.sprite.Sprite):
         self.image_name = ""
         self.is_highlight = False
         self.is_selected = False
-
-        self.color = (0, 100, 0)
-        self.stroke_color = (110, 110, 110)
 
         # noise for the terrain and resource generation
         self.height = noise([self.pos[0] / 300, self.pos[1] / 300]) * 1.5
@@ -85,6 +81,7 @@ class Tile(pygame.sprite.Sprite):
             # setup the tile properties
             self.tile_property: TileProperty = tiles_dict[self.image_name]
 
+        self.current_break_time = self.tile_property.break_time
         self.coastal_tile = False
 
         # if there are multiple sprites for the given tile and the index of the sprite hasn't been determined yet, choose a random index
@@ -131,6 +128,12 @@ class Tile(pygame.sprite.Sprite):
             self.is_selected = False
             self.change_image(self.image_name)
 
+        # if the user is breaking the tile show it
+        if self.is_selected and self.current_break_time != self.tile_property.break_time and self.is_highlight:
+            self.highlight()
+            if self.tile_property.break_time == 0:
+                self.reset_break_time()
+
     def update_Tile(self):
         # highlight the tiles around the player to show the options
         if self.is_highlight:
@@ -148,7 +151,12 @@ class Tile(pygame.sprite.Sprite):
         color = format_color(color)
         self.is_highlight = True
         self.image = self.image.copy()
-        draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
+
+        if self.current_break_time != self.tile_property.break_time and self.tile_property.break_time != 0:
+            draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3),
+                               int(self.radius * 0.5), lerp_color(color, (255, 0, 0), 1 - self.current_break_time / self.tile_property.break_time))
+        else:
+            draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
 
     def unhighlight(self):  # remove the highlight from the tile
         self.is_highlight = False
@@ -182,24 +190,21 @@ class Tile(pygame.sprite.Sprite):
 
     def mine_resource(self):
         resource = None
+        if self.current_break_time <= 0:
+            if self.tile_property.resource == ResourceTiles.forest:
+                resource = Resources.wood
+                self.image_name = self.image_name.replace("forest_", "")
+                self.change_image(self.image_name)
 
-        if self.tile_property.resource == ResourceTiles.forest:
-            # self.tile_property.resource = ResourceTiles.none
-            resource = Resources.wood
-            self.image_name = self.image_name.replace("forest_", "")
-            self.change_image(self.image_name)
+            elif self.tile_property.resource == ResourceTiles.large_forest:
+                resource = Resources.wood
+                self.image_name = self.image_name.replace("large_", "")
+                self.change_image(f"{self.image_name}")
 
-        elif self.tile_property.resource == ResourceTiles.large_forest:
-            # self.tile_property.resource = ResourceTiles.forest
-            resource = Resources.wood
-            self.image_name = self.image_name.replace("large_", "")
+            if resource and self.coastal_tile:
+                self.field.update_water()
 
-            # if "hills" not in self.image_name:
-            #     self.walkspeed = 1
-            self.change_image(f"{self.image_name}")
-
-        if resource and self.coastal_tile:
-            self.field.update_water()
+            self.reset_break_time()
 
         return resource
 
@@ -245,6 +250,12 @@ class Tile(pygame.sprite.Sprite):
 
     def get_bottomleft(self):
         return self.hex_rect.bottomleft
+
+    def reset_break_time(self):
+        self.current_break_time = self.tile_property.break_time
+
+    def lower_break_time(self, delta_time):
+        self.current_break_time -= delta_time
 
     def __lt__(self, other):
         return self.pos[1] < other.pos[1]

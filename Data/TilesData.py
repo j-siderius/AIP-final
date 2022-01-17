@@ -27,14 +27,13 @@ class TilesData:
 
 
 class TileProperty:
-    def __init__(self, walkspeed=0, walkable=True, hitpoints=0, resource=ResourceTiles.none):
+    def __init__(self, walkspeed=0, walkable=True, hitpoints=0, resource=ResourceTiles.none, break_time: float = 0):
         self.walkspeed = walkspeed
         self.walkable = walkable
         self.hitpoints = hitpoints
         self.resource = resource
+        self.break_time = break_time
 
-    def copy(self):
-        return TileProperty(self.walkspeed, self.walkable, self.hitpoints, self.resource)
 
 # dictionary that houses all the information about the tiles
 tiles_dict = {
@@ -47,67 +46,11 @@ tiles_dict = {
     "water": TileProperty(walkable=False),
 
     # resources:
-    "forest_grass": TileProperty(walkspeed=1, resource=ResourceTiles.forest),
-    "forest_hills": TileProperty(walkspeed=1, resource=ResourceTiles.forest),
-    "large_forest_grass": TileProperty(walkspeed=1, resource=ResourceTiles.large_forest),
+    "forest_grass": TileProperty(walkspeed=1, resource=ResourceTiles.forest, break_time=0.5),
+    "forest_hills": TileProperty(walkspeed=1, resource=ResourceTiles.forest, break_time=0.5),
+    "large_forest_grass": TileProperty(walkspeed=1, resource=ResourceTiles.large_forest, break_time=0.5),
 
     # structures
-    "wall_grass": TileProperty(walkable=False, hitpoints=100),
-    "wall_hills": TileProperty(walkable=False, hitpoints=100),
+    "wall_grass": TileProperty(walkable=False, hitpoints=100, break_time=1),
+    "wall_hills": TileProperty(walkable=False, hitpoints=100, break_time=1),
 }
-
-# tiles_dict = {
-#     # ground tiles:
-#     "grass": {
-#         "walkspeed": 1,
-#         "walkable": True,
-#         "resource": ResourceTiles.none,
-#     },
-#     "hills": {
-#         "walkspeed": 1,
-#         "walkable": True,
-#         "resource": ResourceTiles.none,
-#     },
-#     "mountain": {
-#         "walkspeed": 1,
-#         "walkable": True,
-#         "resource": ResourceTiles.none,
-#     },
-#
-#     # water tiles:
-#     "water": {
-#         "walkspeed": 0,
-#         "walkable": False,
-#         "resource": ResourceTiles.none,
-#     },
-#
-#     # resources:
-#     "forest_grass": {
-#         "walkspeed": 1,
-#         "walkable": True,
-#         "resource": ResourceTiles.forest,
-#     },
-#     "forest_hills": {
-#         "walkspeed": 1,
-#         "walkable": True,
-#         "resource": ResourceTiles.forest,
-#     },
-#     "large_forest_grass": {
-#         "walkspeed": 1,
-#         "walkable": True,
-#         "resource": ResourceTiles.large_forest,
-#     },
-#
-#     # structures
-#     "wall_grass": {
-#         "walkspeed": 0,
-#         "walkable": False,
-#         "hitpoints": 100,
-#     },
-#     "wall_hills": {
-#         "walkspeed": 0,
-#         "walkable": False,
-#         "hitpoints": 100,
-#     },
-# }
-

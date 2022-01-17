@@ -82,6 +82,7 @@ class Tile(pygame.sprite.Sprite):
             self.tile_property: TileProperty = tiles_dict[self.image_name]
 
         self.current_break_time = self.tile_property.break_time
+        self.break_time_not_updated = False
         self.coastal_tile = False
 
         # if there are multiple sprites for the given tile and the index of the sprite hasn't been determined yet, choose a random index
@@ -134,6 +135,11 @@ class Tile(pygame.sprite.Sprite):
             if self.tile_property.break_time == 0:
                 self.reset_break_time()
 
+        if not self.break_time_not_updated:
+            self.reset_break_time()
+        elif self.break_time_not_updated:
+            self.break_time_not_updated = False
+
     def update_Tile(self):
         # highlight the tiles around the player to show the options
         if self.is_highlight:
@@ -172,13 +178,17 @@ class Tile(pygame.sprite.Sprite):
         return self.is_wall
 
     def build_wall(self):
-        self.is_wall = True
-        self.image_name = f"wall_{self.image_name}"
-        self.change_image(self.image_name)
-        self.hitpoints = self.tile_property.hitpoints
+        if self.current_break_time <= 0:
+            self.is_wall = True
+            self.image_name = f"wall_{self.image_name}"
+            self.change_image(self.image_name)
+            self.hitpoints = self.tile_property.hitpoints
+            self.reset_break_time()
+            return True
+        return False
 
     def destroy_structure(self):
-        if self.is_wall:
+        if self.is_wall and self.current_break_time <= 0:
             # self.hitpoints = 0
             self.is_wall = False
             self.image_name = self.image_name.replace("wall_", "")
@@ -187,6 +197,7 @@ class Tile(pygame.sprite.Sprite):
             # if the tile is next to the water redraw/update the water tiles
             if self.coastal_tile:
                 self.field.update_water()
+            self.reset_break_time()
 
     def mine_resource(self):
         resource = None
@@ -256,6 +267,7 @@ class Tile(pygame.sprite.Sprite):
 
     def lower_break_time(self, delta_time):
         self.current_break_time -= delta_time
+        self.break_time_not_updated = True
 
     def __lt__(self, other):
         return self.pos[1] < other.pos[1]

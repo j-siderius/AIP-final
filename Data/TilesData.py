@@ -27,7 +27,7 @@ class TilesData:
 
 
 class TileProperty:
-    def __init__(self, walkspeed=0, walkable=True, hitpoints=0, resource=ResourceTiles.none, break_time: float = 0):
+    def __init__(self, walkspeed=0, walkable=True, hitpoints=0, resource=ResourceTiles.none, break_time: float = 1):
         self.walkspeed = walkspeed
         self.walkable = walkable
         self.hitpoints = hitpoints

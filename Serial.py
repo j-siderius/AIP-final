@@ -13,16 +13,14 @@ class Serial:
         """
         if port is None:
             self.port = None
-            print("No serial device specified, available serial devices:")
-            serial_list = serial.tools.list_ports.comports(include_links=True)
-            for element in serial_list:
-                print(element.device)
+            self.list_serial_devices()
         else:
             try:
                 self.port = serial.Serial(port, baud_rate, timeout=0)
             except serial.serialutil.SerialException:
                 self.port = None
                 print("No Serial device connected on this address")
+                self.list_serial_devices()
 
             self.dayNightCycle = 0
             self.health = 0
@@ -30,6 +28,15 @@ class Serial:
             self.updateDayNight(self.dayNightCycle)
             self.updateHealth(self.health)
             self.waitTime = 0
+
+    def list_serial_devices(self):
+        """
+        Lists all available serial devices and their ports
+        """
+        print("Available serial devices:")
+        serial_list = serial.tools.list_ports.comports(include_links=True)
+        for element in serial_list:
+            print(element.device)
 
     def update(self):
         """

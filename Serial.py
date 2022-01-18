@@ -66,7 +66,7 @@ class Serial:
                             angle -= 180.0
                     else:
                         angle = 0
-                    print(f"joystick{angle=}")
+                    # print(f"joystick{angle=}")
                 self.port.reset_input_buffer()
             except UnicodeDecodeError:
                 print("decoding error")

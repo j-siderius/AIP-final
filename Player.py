@@ -1,5 +1,6 @@
 import random
 import pygame
+import math
 
 import Tile
 from Field import Field
@@ -78,13 +79,19 @@ class Player:
                         self.inventory[resource] = 1
 
         # detect where mouse is in relation to player
-        # TODO: fix uniform circle angles!
         # degrees on the circle:
-        #       90
-        # 0/360     180
-        #       270
+        #     90
+        # 180     0/360
+        #     270
         # TODO: make mouse position checking continuous
-        angle = int(math.degrees(math.atan2((mousePos[1] - self.y), (mousePos[0] - self.x))) + 180.0)
+        if math.sqrt(pow((self.x - mousePos[0]), 2) + pow((self.y - mousePos[1]), 2)) > 20:  # correct for no real input
+            angle = int(math.degrees(math.atan2((mousePos[1] - self.y), (mousePos[0] - self.x))) - 180.0) * -1
+            if angle < 180:
+                angle += 180.0  # fix orientation of degree circle
+            else:
+                angle -= 180.0
+        else:
+            angle = 0
         print(f"mouse{angle=}")
 
     def move_player(self, targetTileX, targetTileY):

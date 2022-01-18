@@ -106,6 +106,7 @@ class Field:
 
         print(f"Field has been generated, {self.hex_size = }, {len(self.tiles) = }, {self.field_size = }")
 
+    # TODO fix deze naam
     def display(self, screen):  # render and update the land tiles
         self.tiles_group.update(screen.get_mouse_pos())
         self.tiles_group.draw(screen.get_screen())

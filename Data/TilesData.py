@@ -27,12 +27,14 @@ class TilesData:
 
 
 class TileProperty:
-    def __init__(self, walkspeed=0, walkable=True, hitpoints=0, resource=ResourceTiles.none, break_time: float = 1):
+    def __init__(self, walkspeed=0, walkable=True, hitpoints=0, resource_tile=ResourceTiles.none, resource=None, resource_amount=1, action_time: float = 0.25):
         self.walkspeed = walkspeed
         self.walkable = walkable
         self.hitpoints = hitpoints
+        self.resource_tile = resource_tile
         self.resource = resource
-        self.break_time = break_time
+        self.resource_amount = resource_amount
+        self.action_time = action_time
 
 
 # dictionary that houses all the information about the tiles
@@ -46,11 +48,11 @@ tiles_dict = {
     "water": TileProperty(walkable=False),
 
     # resources:
-    "forest_grass": TileProperty(walkspeed=1, resource=ResourceTiles.forest, break_time=0.5),
-    "forest_hills": TileProperty(walkspeed=1, resource=ResourceTiles.forest, break_time=0.5),
-    "large_forest_grass": TileProperty(walkspeed=1, resource=ResourceTiles.large_forest, break_time=0.5),
+    "forest_grass": TileProperty(walkspeed=1, resource=Resources.wood, resource_tile=ResourceTiles.forest),
+    "forest_hills": TileProperty(walkspeed=1, resource=Resources.wood, resource_tile=ResourceTiles.forest),
+    "large_forest_grass": TileProperty(walkspeed=1, resource=Resources.wood, resource_tile=ResourceTiles.large_forest),
 
     # structures
-    "wall_grass": TileProperty(walkable=False, hitpoints=100, break_time=1),
-    "wall_hills": TileProperty(walkable=False, hitpoints=100, break_time=1),
+    "wall_grass": TileProperty(walkable=False, hitpoints=100, resource=Resources.wood),
+    "wall_hills": TileProperty(walkable=False, hitpoints=100, resource=Resources.wood),
 }

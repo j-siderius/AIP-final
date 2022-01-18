@@ -50,13 +50,9 @@ class Tile(pygame.sprite.Sprite):
             self.index_of_sprite = limit(round(-self.height * (7 + Settings.WATER_DROP_OFF_SCALING * 4)), 0, 7)
             self.image_name = "water"
         elif self.height < 0.45:  # land
-            # self.walkable = True
             self.image_name = "grass"
-            # self.walkspeed = 1
         elif self.height < 0.7:  # grey mountain
-            # self.walkable = True
             self.image_name = "hills"
-            # self.walkspeed = 0.5
         else:  # snow
             self.image_name = "mountain"
 
@@ -73,16 +69,16 @@ class Tile(pygame.sprite.Sprite):
             if self.resource_value > 0.05:
                 if "hills" in self.image_name or self.resource_value < 0.2:
                     self.image_name = f"forest_{self.image_name}"
-                    # self.tile_property.resource = ResourceTiles.forest
                 else:
                     self.image_name = f"large_forest_{self.image_name}"
-                    # self.tile_property.resource = ResourceTiles.large_forest
-                    # self.walkspeed = 0.5
+
             # setup the tile properties
             self.tile_property: TileProperty = tiles_dict[self.image_name]
 
-        self.current_break_time = self.tile_property.break_time
-        self.break_time_not_updated = False
+        # setup the action variables
+        self.current_action_time = self.tile_property.action_time
+        self.current_action = ActionType.none
+        self.end_action_func = None
         self.coastal_tile = False
 
         # if there are multiple sprites for the given tile and the index of the sprite hasn't been determined yet, choose a random index
@@ -105,12 +101,12 @@ class Tile(pygame.sprite.Sprite):
 
     def init(self, tiles, fieldSize):
         # find the bordering tiles:
-        if self.y > 0: self.bordering_tiles.append(tiles[int(self.x)][int(self.y - 1)])
-        if self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x)][int(self.y + 1)])
-        if self.x > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y)])
-        if self.x < fieldSize[0] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y)])
+        if self.y > 0: self.bordering_tiles.append(tiles[int(self.x)][int(self.y - 1)])  # Top
+        if self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x)][int(self.y + 1)])  # bottom
+        if self.x > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y)])  # left
+        if self.x < fieldSize[0] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y)])  # right
         if self.x % 2 == 0:
-            if self.x > 0 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y - 1)])
+            if self.x > 0 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y - 1)])  # left top
             if self.x < fieldSize[0] - 1 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y - 1)])
         else:
             if self.x > 0 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y + 1)])
@@ -120,7 +116,7 @@ class Tile(pygame.sprite.Sprite):
             if self.pos[1] > tile.pos[1] and tile.is_water:
                 self.coastal_tile = True
 
-    def update(self, mouse):
+    def update(self, mouse):  # update called in field
         # highlight the tiles when the mouse is over them
         if self.isOver(mouse) and self.is_highlight and not self.is_selected:
             self.is_selected = True
@@ -130,25 +126,26 @@ class Tile(pygame.sprite.Sprite):
             self.change_image(self.image_name)
 
         # if the user is breaking the tile show it
-        if self.is_selected and self.current_break_time != self.tile_property.break_time and self.is_highlight:
+        if self.is_selected and self.current_action_time != self.tile_property.action_time and self.is_highlight:
             self.highlight()
-            if self.tile_property.break_time == 0:
+            if self.tile_property.action_time == 0:
                 self.reset_break_time()
 
-        if not self.break_time_not_updated:
-            self.reset_break_time()
-        elif self.break_time_not_updated:
-            self.break_time_not_updated = False
+        if self.current_action != ActionType.none:
+            self.current_action_time -= self.screen.get_elapsed_time()
 
-    def update_Tile(self):
+            if self.current_action_time <= 0:
+                self.end_action()
+
+    def update_Tile(self):  # internal update of the tile
         # highlight the tiles around the player to show the options
         if self.is_highlight:
             self.highlight()
 
-    def highlight(self, color=Settings.HIGHLIGHT_COLOR):                 # highlight the tiles around the player to show the options
-        if self.is_selected and color == Settings.HIGHLIGHT_COLOR:       # when the mouse is over it, make it a different color
+    def highlight(self, color=Settings.HIGHLIGHT_COLOR):  # highlight the tiles around the player to show the options
+        if self.is_selected and color == Settings.HIGHLIGHT_COLOR:  # when the mouse is over it, make it a different color
             color = Settings.HIGHLIGHT_COLOR_SELECTED
-        if self.is_wall and color == Settings.HIGHLIGHT_COLOR:           # show the action icon when the user can only do an action
+        if self.is_wall and color == Settings.HIGHLIGHT_COLOR:  # show the action icon when the user can only do an action
             color = Settings.HIGHLIGHT_COLOR_ACTION
         elif (not self.is_wall and not self.tile_property.walkable) or self.is_water:  # don't show an action when the user can't do an action
             return
@@ -158,9 +155,9 @@ class Tile(pygame.sprite.Sprite):
         self.is_highlight = True
         self.image = self.image.copy()
 
-        if self.current_break_time != self.tile_property.break_time and self.tile_property.break_time != 0:
+        if self.current_action_time != self.tile_property.action_time and self.tile_property.action_time != 0:
             draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3),
-                               int(self.radius * 0.5), lerp_color(color, (255, 0, 0), 1 - self.current_break_time / self.tile_property.break_time))
+                               int(self.radius * 0.5), lerp_color(color, (255, 0, 0), 1 - self.current_action_time / self.tile_property.action_time))
         else:
             draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
 
@@ -169,7 +166,7 @@ class Tile(pygame.sprite.Sprite):
         self.change_image(self.image_name)
 
     def has_resources(self):
-        return self.tile_property.resource != ResourceTiles.none
+        return self.tile_property.resource_tile != ResourceTiles.none
 
     def can_build(self):
         return self.is_walkable()
@@ -177,57 +174,86 @@ class Tile(pygame.sprite.Sprite):
     def has_structure(self):
         return self.is_wall
 
+    def action_build_wall(self, end_action_func):
+        self.end_action_func = end_action_func
+        self.current_action = ActionType.building
+        self.current_action_time = self.tile_property.action_time
+
     def build_wall(self):
-        if self.current_break_time <= 0:
-            self.is_wall = True
-            self.image_name = f"wall_{self.image_name}"
-            self.change_image(self.image_name)
-            self.hitpoints = self.tile_property.hitpoints
-            self.reset_break_time()
-            return True
-        return False
+        self.is_wall = True
+        self.image_name = f"wall_{self.image_name}"
+        self.change_image(self.image_name)
+        self.hitpoints = self.tile_property.hitpoints
+
+    def action_destroy_structure(self, end_action_func):
+        self.end_action_func = end_action_func
+        self.current_action = ActionType.destroying
+        self.current_action_time = self.tile_property.action_time
 
     def destroy_structure(self):
-        if self.is_wall and self.current_break_time <= 0:
-            # self.hitpoints = 0
-            self.is_wall = False
-            self.image_name = self.image_name.replace("wall_", "")
-            self.change_image(f"{self.image_name}")
+        resource, amount = self.tile_property.resource, self.tile_property.resource_amount
 
-            # if the tile is next to the water redraw/update the water tiles
-            if self.coastal_tile:
-                self.field.update_water()
-            self.reset_break_time()
+        self.is_wall = False
+        self.image_name = self.image_name.replace("wall_", "")
+        self.change_image(f"{self.image_name}")
+
+        # if the tile is next to the water redraw/update the water tiles
+        if self.coastal_tile:
+            self.field.update_water()
+
+        return resource, amount
+
+    def action_mine_resource(self, end_action_func):
+        self.end_action_func = end_action_func
+        self.current_action = ActionType.mining
+        self.current_action_time = self.tile_property.action_time
 
     def mine_resource(self):
         resource = None
-        if self.current_break_time <= 0:
-            if self.tile_property.resource == ResourceTiles.forest:
-                resource = Resources.wood
-                self.image_name = self.image_name.replace("forest_", "")
-                self.change_image(self.image_name)
+        amount = 0
+        if self.tile_property.resource_tile == ResourceTiles.forest:
+            resource = self.tile_property.resource
+            self.image_name = self.image_name.replace("forest_", "")
+            self.change_image(self.image_name)
 
-            elif self.tile_property.resource == ResourceTiles.large_forest:
-                resource = Resources.wood
-                self.image_name = self.image_name.replace("large_", "")
-                self.change_image(f"{self.image_name}")
+        elif self.tile_property.resource_tile == ResourceTiles.large_forest:
+            resource = self.tile_property.resource
+            self.image_name = self.image_name.replace("large_", "")
+            self.change_image(f"{self.image_name}")
 
-            if resource and self.coastal_tile:
-                self.field.update_water()
+        if resource and self.coastal_tile:
+            self.field.update_water()
 
-            self.reset_break_time()
+        if resource:
+            amount = self.tile_property.resource_amount
 
-        return resource
+        return resource, amount
+
+    def end_action(self):
+        if self.current_action == ActionType.mining:
+            resource, amount = self.mine_resource()
+            self.end_action_func(resource, amount)
+        if self.current_action == ActionType.building:
+            self.build_wall()
+            self.end_action_func(None, 0)
+        if self.current_action == ActionType.destroying:
+            resource, amount = self.destroy_structure()
+            print(resource, amount)
+            self.end_action_func(resource, amount)
+
+        self.current_action_time = self.tile_property.action_time
+        self.current_action = ActionType.none
+        self.highlight()  # reset the highlight
 
     def change_image(self, image_name, update_tile=True):
-        # set the new sprite properties
-        self.tile_property: TileProperty = tiles_dict[self.image_name]
-
         # find the new sprite in the sprite dict
         if isinstance(self.sprite_dict[image_name], list):
             self.image = self.sprite_dict[image_name][self.index_of_sprite]
         else:
             self.image = self.sprite_dict[image_name]
+
+        # set the new sprite properties
+        self.tile_property: TileProperty = tiles_dict[self.image_name]
 
         if update_tile:
             self.update_Tile()
@@ -262,15 +288,15 @@ class Tile(pygame.sprite.Sprite):
     def get_bottomleft(self):
         return self.hex_rect.bottomleft
 
-    def reset_break_time(self):
-        self.current_break_time = self.tile_property.break_time
-
-    def lower_break_time(self, delta_time):
-        self.current_break_time -= delta_time
-        self.break_time_not_updated = True
-
     def __lt__(self, other):
         return self.pos[1] < other.pos[1]
+
+
+class ActionType(Enum):
+    none = 0
+    mining = 1
+    building = 2
+    destroying = 3
 
 
 def limit(value, min, max):

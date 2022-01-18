@@ -32,10 +32,12 @@ class program:
         self.player.mouse_pressed(self.screen.get_mouse_pos(), button)
 
     def mouse_down(self, mouse_pos, button):
-        self.player.mouse_down(mouse_pos, button)
+        pass
+        # self.player.mouse_down(mouse_pos, button)
 
     def mouse_released(self, button):
-        self.player.mouse_released(button)
+        pass
+        # self.player.mouse_released(button)
 
 
 if __name__ == '__main__':

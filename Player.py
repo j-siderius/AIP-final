@@ -34,7 +34,8 @@ class Player:
         self.target_tile = None
 
         # mining and building
-        self.last_mouse_down_time = 0
+        # self.last_mouse_down_time = 0
+        self.doing_an_action = False
         self.inventory = {Resources.wood: 100}  # dict()
 
         self.color = (255, 0, 0)
@@ -67,57 +68,79 @@ class Player:
                 self.current_tile.highlight_neighbours()
             else:
                 self.x, self.y = lerp_2D(self.from_tile.get_center(), self.target_tile.get_center(), factor)
-        # else:
-        #     self.current_tile.highlight_neighbours()
 
     def mouse_pressed(self, mousePos, button):
+        if self.is_walking or self.doing_an_action:
+            return
+
         # movement
-        if button == MouseButton.left and not self.is_walking:
+        if button == MouseButton.left:
             pressed_tile = self.field.get_tile_from_point(mousePos)
             self.move_player(pressed_tile.x, pressed_tile.y)
 
-    def mouse_down(self, mousePos, button):
-        # mining and building
-        if button == MouseButton.right and not self.is_walking:
+        # mining, building and destroying
+        elif button == MouseButton.right:
             pressed_tile = self.field.get_tile_from_point(mousePos)  # get the pressed tile
 
             # if the pressed tile is next to the user
             if pressed_tile in self.current_tile.get_neighbours():
-                # lower the break time by the time that has passed if the user can do an action
-                if pressed_tile.has_resources() or (pressed_tile.can_build() and self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST) or pressed_tile.has_structure():
-                    if self.last_mouse_down_time > 0:
-                        pressed_tile.lower_break_time(time.perf_counter() - self.last_mouse_down_time)
-                    self.last_mouse_down_time = time.perf_counter()
-                else:
-                    return
 
                 # resource mining
                 if pressed_tile.has_resources():  # if the tile has resources
-                    resource = pressed_tile.mine_resource()
-
-                    if resource is not None:  # if the resource was successfully mined
-                        if resource in self.inventory:
-                            self.inventory[resource] += 1
-                        else:
-                            self.inventory[resource] = 1
+                    pressed_tile.action_mine_resource(self.end_action)
 
                 # building
                 elif pressed_tile.can_build():
                     # wooden wall
                     if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
-                        if pressed_tile.build_wall():
-                            self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
+                        pressed_tile.action_build_wall(self.end_action)
+                        self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
 
                 # destroying buildings
                 elif pressed_tile.has_structure():
-                    pressed_tile.destroy_structure()
+                    pressed_tile.action_destroy_structure(self.end_action)
 
-                self.last_mouse_down_time = time.perf_counter()
+    # def mouse_down(self, mousePos, button):
+    # # mining, building and destroying
+    # if button == MouseButton.right and not self.is_walking:
+    #     pressed_tile = self.field.get_tile_from_point(mousePos)  # get the pressed tile
+    #
+    #     # if the pressed tile is next to the user
+    #     if pressed_tile in self.current_tile.get_neighbours():
+    #         # lower the break time by the time that has passed if the user can do an action
+    #         if pressed_tile.has_resources() or (pressed_tile.can_build() and self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST) or pressed_tile.has_structure():
+    #             if self.last_mouse_down_time > 0:
+    #                 pressed_tile.lower_break_time(time.perf_counter() - self.last_mouse_down_time)
+    #             self.last_mouse_down_time = time.perf_counter()
+    #         else:
+    #             return
+    #
+    #         # resource mining
+    #         if pressed_tile.has_resources():  # if the tile has resources
+    #             resource = pressed_tile.mine_resource()
+    #
+    #             if resource is not None:  # if the resource was successfully mined
+    #                 if resource in self.inventory:
+    #                     self.inventory[resource] += 1
+    #                 else:
+    #                     self.inventory[resource] = 1
+    #
+    #         # building
+    #         elif pressed_tile.can_build():
+    #             # wooden wall
+    #             if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
+    #                 if pressed_tile.build_wall():
+    #                     self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
+    #
+    #         # destroying buildings
+    #         elif pressed_tile.has_structure():
+    #             pressed_tile.destroy_structure()
 
+    # self.last_mouse_down_time = time.perf_counter()
 
-    def mouse_released(self, button):
-        if button == MouseButton.right:
-            self.last_mouse_down_time = 0
+    # def mouse_released(self, button):
+    #     if button == MouseButton.right:
+    #         self.last_mouse_down_time = 0
 
     def move_player(self, targetTileX, targetTileY):
         neighbours = self.current_tile.get_neighbours()
@@ -143,3 +166,17 @@ class Player:
     def align_player(self, tile: Tile):
         self.current_tile = tile
         self.x, self.y = tile.get_center()
+
+    def start_action(self):
+        # TODO !!!! @JANNICK set here your time tick thingy, deze is called when an action is started !!!!!!!
+        self.doing_an_action = True
+
+    def end_action(self, gained_resource, amount):
+        if gained_resource is not None:  # if a resource was gained in the action
+            if gained_resource in self.inventory:  # if the user already has a resource then just add it.
+                self.inventory[gained_resource] += amount
+            else:  # if the user doesn't than add the resource to the inventory
+                self.inventory[gained_resource] = amount
+
+        # set doing an action to false so the user can start another action
+        self.doing_an_action = False

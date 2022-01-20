@@ -1,6 +1,8 @@
 import time
 import serial
 import serial.tools.list_ports
+
+from Input import *
 from Screen import *
 
 
@@ -54,19 +56,8 @@ class Serial:
                     self.joyZ = False if int(msg[15:16]) == 0 else True
                     self.joyC = False if int(msg[19:20]) == 0 else True
 
-                    # degrees on the circle:
-                    #     90
-                    # 180     0/360
-                    #     270
-                    if (self.joyY < 108 or self.joyY > 148) or (self.joyX < 108 or self.joyX > 148):  # correct for no input
-                        angle = int(math.degrees(math.atan2((self.joyY - 128), (self.joyX - 128))) + 180.0)
-                        if angle <= 180:
-                            angle += 180.0  # fix orientation of degree circle
-                        else:
-                            angle -= 180.0
-                    else:
-                        angle = 0
-                    # print(f"joystick{angle=}")
+                    Input.process_nunchuck([self.joyX, self.joyY], [self.joyZ, self.joyC])
+
                 self.port.reset_input_buffer()
             except UnicodeDecodeError:
                 print("decoding error")

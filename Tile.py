@@ -125,23 +125,26 @@ class Tile(pygame.sprite.Sprite):
             self.is_selected = False
             self.change_image(self.image_name)
 
-        # if the user is breaking the tile show it
-        if self.is_selected and self.current_action_time != self.tile_property.action_time and self.is_highlight:
-            self.highlight()
-            if self.tile_property.action_time == 0:
-                self.reset_break_time()
-
+        # if an action is happening on this tile
         if self.current_action != ActionType.none:
+            if self.is_selected:  # if the user is breaking thing type show a little animation
+                self.highlight()
             self.current_action_time -= self.screen.get_elapsed_time()
 
+            # if the action is finished
             if self.current_action_time <= 0:
                 self.end_action()
+
+        # if the wall is broken by an enemy
+        if self.is_wall and self.hitpoints < 0:
+            self.destroy_structure()
 
     def update_Tile(self):  # internal update of the tile
         # highlight the tiles around the player to show the options
         if self.is_highlight:
             self.highlight()
 
+    # a generic highlight function to highlight the tile by drawing a colored circle in the middle of it
     def highlight(self, color=Settings.HIGHLIGHT_COLOR):  # highlight the tiles around the player to show the options
         if self.is_selected and color == Settings.HIGHLIGHT_COLOR:  # when the mouse is over it, make it a different color
             color = Settings.HIGHLIGHT_COLOR_SELECTED
@@ -150,16 +153,16 @@ class Tile(pygame.sprite.Sprite):
         elif (not self.is_wall and not self.tile_property.walkable) or self.is_water:  # don't show an action when the user can't do an action
             return
 
+        # if an action is happening, change the circle to reflect it
+        if self.current_action_time != self.tile_property.action_time and self.tile_property.action_time != 0:
+            color = lerp_color(color, (255, 0, 0), 1 - self.current_action_time / self.tile_property.action_time)
+
         # draw a colored circle to highlight the tile
         color = format_color(color)
         self.is_highlight = True
         self.image = self.image.copy()
 
-        if self.current_action_time != self.tile_property.action_time and self.tile_property.action_time != 0:
-            draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3),
-                               int(self.radius * 0.5), lerp_color(color, (255, 0, 0), 1 - self.current_action_time / self.tile_property.action_time))
-        else:
-            draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
+        draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
 
     def unhighlight(self):  # remove the highlight from the tile
         self.is_highlight = False
@@ -174,22 +177,26 @@ class Tile(pygame.sprite.Sprite):
     def has_structure(self):
         return self.is_wall
 
+    # the 'public' action that the player calls
     def action_build_wall(self, end_action_func):
         self.end_action_func = end_action_func
         self.current_action = ActionType.building
         self.current_action_time = self.tile_property.action_time
 
+    # the actual building of the wall, called when action is finished
     def build_wall(self):
         self.is_wall = True
         self.image_name = f"wall_{self.image_name}"
         self.change_image(self.image_name)
         self.hitpoints = self.tile_property.hitpoints
 
+    # the 'public' action that the player calls
     def action_destroy_structure(self, end_action_func):
         self.end_action_func = end_action_func
         self.current_action = ActionType.destroying
         self.current_action_time = self.tile_property.action_time
 
+    # the actual destroying of the structure (wall), called when action is finished
     def destroy_structure(self):
         resource, amount = self.tile_property.resource, self.tile_property.resource_amount
 
@@ -203,11 +210,13 @@ class Tile(pygame.sprite.Sprite):
 
         return resource, amount
 
+    # the 'public' action that the player calls
     def action_mine_resource(self, end_action_func):
         self.end_action_func = end_action_func
         self.current_action = ActionType.mining
         self.current_action_time = self.tile_property.action_time
 
+    # the actual mining of the resource (forest), called when action is finished
     def mine_resource(self):
         resource = None
         amount = 0
@@ -229,6 +238,7 @@ class Tile(pygame.sprite.Sprite):
 
         return resource, amount
 
+    # called when the action is finished, calls the separate action functions
     def end_action(self):
         if self.current_action == ActionType.mining:
             resource, amount = self.mine_resource()
@@ -245,6 +255,7 @@ class Tile(pygame.sprite.Sprite):
         self.current_action = ActionType.none
         self.highlight()  # reset the highlight
 
+    # changes the kind of tile it is, aka the sprite/image
     def change_image(self, image_name, update_tile=True):
         # find the new sprite in the sprite dict
         if isinstance(self.sprite_dict[image_name], list):

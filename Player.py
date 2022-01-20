@@ -100,48 +100,6 @@ class Player:
                 elif pressed_tile.has_structure():
                     pressed_tile.action_destroy_structure(self.end_action)
 
-    # def mouse_down(self, mousePos, button):
-    # # mining, building and destroying
-    # if button == MouseButton.right and not self.is_walking:
-    #     pressed_tile = self.field.get_tile_from_point(mousePos)  # get the pressed tile
-    #
-    #     # if the pressed tile is next to the user
-    #     if pressed_tile in self.current_tile.get_neighbours():
-    #         # lower the break time by the time that has passed if the user can do an action
-    #         if pressed_tile.has_resources() or (pressed_tile.can_build() and self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST) or pressed_tile.has_structure():
-    #             if self.last_mouse_down_time > 0:
-    #                 pressed_tile.lower_break_time(time.perf_counter() - self.last_mouse_down_time)
-    #             self.last_mouse_down_time = time.perf_counter()
-    #         else:
-    #             return
-    #
-    #         # resource mining
-    #         if pressed_tile.has_resources():  # if the tile has resources
-    #             resource = pressed_tile.mine_resource()
-    #
-    #             if resource is not None:  # if the resource was successfully mined
-    #                 if resource in self.inventory:
-    #                     self.inventory[resource] += 1
-    #                 else:
-    #                     self.inventory[resource] = 1
-    #
-    #         # building
-    #         elif pressed_tile.can_build():
-    #             # wooden wall
-    #             if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
-    #                 if pressed_tile.build_wall():
-    #                     self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
-    #
-    #         # destroying buildings
-    #         elif pressed_tile.has_structure():
-    #             pressed_tile.destroy_structure()
-
-    # self.last_mouse_down_time = time.perf_counter()
-
-    # def mouse_released(self, button):
-    #     if button == MouseButton.right:
-    #         self.last_mouse_down_time = 0
-
     def move_player(self, targetTileX, targetTileY):
         neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:

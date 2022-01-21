@@ -7,14 +7,13 @@ from Input import Input
 from Gamecontroller import Gamecontroller
 
 
-class program:
+class Program:
 
     def __init__(self):
-        # self.screen = Screen(584, 592, self.loop, title="Test Terrain")
-        self.screen = Screen(0, 0, self.loop, title="Test Terrain", mouse_pressed_func=self.mouse_pressed, mouse_moved_func=self.mouse_moved)
+        self.screen = Screen(0, 0, self.loop, title="HexZomb", mouse_pressed_func=self.mouse_pressed, mouse_moved_func=self.mouse_moved)
 
         self.field = Field(self.screen, hex_width=4 * 11, field_size=(self.screen.get_size()))
-        self.player = Player(self.screen, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=tick_timer)  # need to implement hex calculation in class
+        self.player = Player(self.screen, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer)
         self.serial = Serial('/dev/cu.wchusbserial1410', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC
         self.input = Input(self.player)
         self.controller = Gamecontroller(self.screen)
@@ -52,4 +51,4 @@ class program:
 
 
 if __name__ == '__main__':
-    program()
+    Program()

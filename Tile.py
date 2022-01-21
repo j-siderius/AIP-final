@@ -300,6 +300,7 @@ class Tile(pygame.sprite.Sprite):
 
     def unhighlight_neighbours(self):
         for tile in self.bordering_tiles:
+            tile.unselect_tile()
             tile.unhighlight()
 
     def get_neighbours(self):

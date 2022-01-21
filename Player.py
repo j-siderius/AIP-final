@@ -5,7 +5,7 @@ import math
 import Tile
 from Field import Field
 from Data.settings import *
-from Screen import *
+from Screen import Screen, lerp, lerp_2D
 
 
 class Player:
@@ -76,7 +76,7 @@ class Player:
         targetTileY = targetTile[1]
         neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
-            neighbour.unselect_tile()
+            # neighbour.unselect_tile()
             if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
                 self.current_tile.unhighlight_neighbours()

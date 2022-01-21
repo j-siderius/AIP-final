@@ -2,9 +2,6 @@ import time
 import serial
 import serial.tools.list_ports
 
-from Input import *
-from Screen import *
-
 
 class Serial:
     def __init__(self, port=None, baud_rate=115200, controller_moved_func=None, controller_pressed_func=None):

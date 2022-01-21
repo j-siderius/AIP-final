@@ -93,6 +93,8 @@ class Player:
         if self.is_walking or self.doing_an_action:
             return
 
+        self.start_action()
+
         # resource mining
         if pressed_tile.has_resources():  # if the tile has resources
             pressed_tile.action_mine_resource(self.end_action)

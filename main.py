@@ -32,7 +32,7 @@ class Program:
         self.screen.text_color(0)
         self.screen.text(5, 5, f"{self.screen.get_frameRate():.2f}", False)
 
-        self.controller.daynight()
+        self.controller.update_sky()
 
     def mouse_moved(self):
         self.input.process_mouse_movement(self.screen.get_mouse_pos())

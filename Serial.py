@@ -7,7 +7,7 @@ from Screen import *
 
 
 class Serial:
-    def __init__(self, port=None, baud_rate=115200):
+    def __init__(self, port=None, baud_rate=115200, controller_moved_func=None, controller_pressed_func=None):
         """
         Initialize the serial object, specify the communication
         baud-rate and connection port. Leave port empty if you want a
@@ -26,6 +26,8 @@ class Serial:
                 print("No Serial device connected on this address")
                 self.list_serial_devices()
 
+            self.controller_moved_func = controller_moved_func
+            self.controller_pressed_func = controller_pressed_func
             self.dayNightCycle = 0
             self.health = 0
             self.joyX, self.joyY, self.joyC, self.joyZ = None, None, False, False
@@ -58,8 +60,9 @@ class Serial:
                     self.joyZ = False if int(msg[15:16]) == 0 else True
                     self.joyC = False if int(msg[19:20]) == 0 else True
 
-                    Input.process_nunchuck_movement(Input, [self.joyX, self.joyY])
-                    Input.process_nunchuck_button(Input, [self.joyZ, self.joyC])
+                    if self.controller_moved_func is not None and self.controller_pressed_func is not None:
+                        self.controller_moved_func([self.joyX, self.joyY])
+                        self.controller_pressed_func([self.joyZ, self.joyC])
 
                 self.port.reset_input_buffer()
             except UnicodeDecodeError:

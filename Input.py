@@ -1,18 +1,22 @@
 import math
-from settings import *
+from Data.settings import *
+from Player import *
 
 
 class Input:
-    def __init__(self):
+    def __init__(self, player):
         """
         Processes all the different inputs into usable variables
+        :param player: pass the main player object here:
         """
-        pass
+        self.selected_tile = 5
+        self.prev_selected_tile = 5
+        self.player = player
 
-    def process_nunchuck(self, joystick, buttons):
+    def process_nunchuck_movement(self, joystick):
         """
-        Processes the serial data from the connected controller
-        joystick format: [JoyX, JoyY], [JoyZ, JoyC]
+        Processes the movement data from the connected controller
+        :param joystick: [JoyX, JoyY]
         """
         # degrees on the circle:
         #     90
@@ -27,27 +31,28 @@ class Input:
         else:
             angle = 0
 
-        tile = self.set_tile(self, angle)
+        self.set_tile(self, angle)
 
+    def process_nunchuck_button(self, buttons):
+        """:param buttons: [joyZ, joyC]"""
         if buttons[0]:
             # Z button from joystick (comparable to left-click)
-            self.move_player(self, tile)
+            self.move_player(self.get_selected_tile())
         elif buttons[1]:
             # C button from joystick (comparable to right-click)
-            self.build_mine(self, tile)
+            self.build_mine(self.get_selected_tile())
 
-        # # # process button clicks here ^^
-
-    def process_mouse(self, pos, button, playerPos):
+    def process_mouse_movement(self, pos):
         """
         Processes the input data from the mouse
-        data format: [MouseX, MouseY], button
+        :param pos: [MouseX, MouseY]
         """
         # detect where mouse is in relation to player
         # degrees on the circle:
         #     90
         # 180     0/360
         #     270
+        playerPos = self.player.get_player_position()
         if math.sqrt(pow((playerPos[0] - pos[0]), 2) + pow((playerPos[1] - pos[1]), 2)) > 20:  # correct for no input
             angle = int(math.degrees(math.atan2((pos[1] - playerPos[1]), (pos[0] - playerPos[0]))) - 180.0) * -1
             if angle < 180:
@@ -57,57 +62,58 @@ class Input:
         else:
             angle = 0
 
-        tile = self.set_tile(self, angle)
+        self.set_tile(angle)
 
+    def process_mouse_button(self, button):
+        """:param button: mouseButton"""
         if button == MouseButton.left:
             # left-click
-            self.move_player(self, tile)
+            self.move_player(self.get_selected_tile())
         elif button == MouseButton.right:
             # right-click
-            self.build_mine(self, tile)
-
-        # # # process button clicks here ^^
+            self.build_mine(self.get_selected_tile())
 
     def set_tile(self, angle):
         """
         calculate selected tile from angle
         """
-        # points are arranged in the following manner: [0]=bottom-right,
-        # [1]=bottom-left, [2]=middle-left, [3]=top-left, [4]=top-right, [5]=middle-right. aka, starting right and
-        # then clockwise.
-        if 330 > angle >= 270:
-            # BOTTOM RIGHT
-            selected_tile = 0
-        elif 270 > angle >= 210:
-            # BOTTOM LEFT
-            selected_tile = 1
-        elif 210 > angle >= 150:
-            # MIDDLE LEFT
-            selected_tile = 2
-        elif 150 > angle >= 90:
-            # TOP LEFT
-            selected_tile = 3
-        elif 90 > angle >= 30:
-            # TOP RIGHT
-            selected_tile = 4
-        elif 30 > angle >= 330:
-            # MIDDLE RIGHT
-            selected_tile = 5
+        # neighbours are arranged in the following manner: [0]=top, [1]=bottom, [2]=bottom-left,
+        # [3]=bottom-right, [4]=top-left, [5]=top-right.
+
+        if 120 >= angle > 60:  # top
+            self.selected_tile = 0
+        elif 300 >= angle > 240:  # bottom
+            self.selected_tile = 1
+        elif 60 >= angle > 0:  # bottom left
+            self.selected_tile = 2
+        elif 360 >= angle > 300:  # bottom right
+            self.selected_tile = 3
+        elif 180 >= angle > 120:  # top left
+            self.selected_tile = 4
+        elif 240 >= angle > 180:  # top right
+            self.selected_tile = 5
         else:
-            selected_tile = 5  # should design more robust fallback when error
-        return selected_tile
+            self.selected_tile = 5  # fallback selection
+
+        # TODO: fix tile indexes
+
+        # if newly selected tile, highlight / selected that tile (visually)
+        if self.prev_selected_tile != self.selected_tile:
+            deselected_tile = self.get_tile(self.prev_selected_tile)
+            deselected_tile.unselect_tile()
+            selected_tile = self.get_selected_tile()
+            selected_tile.select_tile()
+            self.prev_selected_tile = self.selected_tile
 
     def move_player(self, tile):
-        # check if move is allowed
-        # do moving stuff
-        pass
+        self.player.move_player(tile.get_position())
 
     def build_mine(self, tile):
-        # check if allowed
-        # check if mining or building
-        # do miney or buildy stuff
-        pass
+        self.player.mine_build(tile)
 
-    def update(self):
-        pass
+    def get_selected_tile(self):
+        return self.player.get_current_tile().get_neighbours()[self.selected_tile]
+
+    def get_tile(self, index):
+        return self.player.get_current_tile().get_neighbours()[index]
 

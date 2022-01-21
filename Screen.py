@@ -88,7 +88,7 @@ class Screen:
                 # call the loop function
                 self.loopFunction()
 
-                pygame.display.flip()  # to_be_updated_rects) # has to be changed for optimalization.
+                pygame.display.flip()  # to_be_updated_rects) # has to be changed for optimization.
 
     # starts the loop
     def start(self):

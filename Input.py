@@ -77,6 +77,11 @@ class Input:
         """
         calculate selected tile from angle
         """
+
+        # if the player is walking then don't highlight a new tile
+        if self.player.is_walking:
+            return
+
         # neighbours are arranged in the following manner: [0]=top-right, [1]=top, [2]=top-left,
         # [3]=bottom-left, [4]=bottom, [5]=bottom-right.
         # so starting from the right going counter clockwise

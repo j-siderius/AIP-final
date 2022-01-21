@@ -77,23 +77,24 @@ class Input:
         """
         calculate selected tile from angle
         """
-        # neighbours are arranged in the following manner: [0]=top, [1]=bottom, [2]=bottom-left,
-        # [3]=bottom-right, [4]=top-left, [5]=top-right.
+        # neighbours are arranged in the following manner: [0]=top-right, [1]=top, [2]=top-left,
+        # [3]=bottom-left, [4]=bottom, [5]=bottom-right.
+        # so starting from the right going counter clockwise
 
-        if 120 >= angle > 60:  # top
+        if 0 <= angle < 60:  # top right
             self.selected_tile = 0
-        elif 300 >= angle > 240:  # bottom
+        elif 60 <= angle < 120:  # top
             self.selected_tile = 1
-        elif 240 >= angle > 180:  # bottom left
+        elif 120 <= angle < 180:  # top left
             self.selected_tile = 2
-        elif 360 >= angle > 300:  # bottom right
+        elif 180 <= angle < 240:  # bottom left
             self.selected_tile = 3
-        elif 180 >= angle > 120:  # top left
+        elif 240 <= angle < 300:  # bottom
             self.selected_tile = 4
-        elif 60 >= angle > 0:  # top right
+        elif 300 <= angle < 360:  # bottom right
             self.selected_tile = 5
         else:
-            self.selected_tile = 5  # fallback selection
+            self.selected_tile = 0  # fallback selection
 
         # TODO: fix tile indexes
 

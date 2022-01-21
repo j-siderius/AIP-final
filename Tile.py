@@ -101,30 +101,36 @@ class Tile(pygame.sprite.Sprite):
 
     def init(self, tiles, fieldSize):
         # find the bordering tiles:
-        if self.y > 0: self.bordering_tiles.append(tiles[int(self.x)][int(self.y - 1)])  # Top
-        if self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x)][int(self.y + 1)])  # bottom
-        if self.x > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y)])  # left
-        if self.x < fieldSize[0] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y)])  # right
-        if self.x % 2 == 0:
-            if self.x > 0 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y - 1)])  # left top
-            if self.x < fieldSize[0] - 1 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y - 1)])
-        else:
-            if self.x > 0 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y + 1)])
-            if self.x < fieldSize[0] - 1 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y + 1)])
+        if self.x % 2 == 0: # no offset
+            if self.x < fieldSize[0] - 1 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y - 1)])  # right (top)
 
+            if self.y > 0: self.bordering_tiles.append(tiles[int(self.x)][int(self.y - 1)])  # Top
+
+            if self.x > 0 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y - 1)])  # left  (top)
+            if self.x > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y)])  # left (bottom)
+
+            if self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x)][int(self.y + 1)])  # bottom
+
+            if self.x < fieldSize[0] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y)])  # right (bottom)
+
+        else:  # offset downwards
+            if self.x < fieldSize[0] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y)])  # right (top)
+
+            if self.y > 0: self.bordering_tiles.append(tiles[int(self.x)][int(self.y - 1)])  # Top
+
+            if self.x > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y)])  # left (top)
+            if self.x > 0 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y + 1)])  # left (bottom)
+
+            if self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x)][int(self.y + 1)])  # bottom
+
+            if self.x < fieldSize[0] - 1 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y + 1)])  # right (bottom)
+
+        # test if this tile borders a water tile
         for tile in self.bordering_tiles:
             if self.pos[1] > tile.pos[1] and tile.is_water:
                 self.coastal_tile = True
 
-    def update(self, mouse):  # update called in field
-        # highlight the tiles when the mouse is over them
-        if self.isOver(mouse) and self.is_highlight and not self.is_selected:
-            self.is_selected = True
-            self.highlight()
-        elif not self.isOver(mouse) and self.is_highlight and self.is_selected:
-            self.is_selected = False
-            self.change_image(self.image_name)
-
+    def update(self):  # update called in field
         # if an action is happening on this tile
         if self.current_action != ActionType.none:
             if self.is_selected:  # if the user is breaking thing type show a little animation
@@ -143,6 +149,15 @@ class Tile(pygame.sprite.Sprite):
         # highlight the tiles around the player to show the options
         if self.is_highlight:
             self.highlight()
+
+    def select_tile(self):
+        self.is_selected = True
+        self.highlight()
+
+    def unselect_tile(self):
+        if self.is_selected:
+            self.is_selected = False
+            self.change_image(self.image_name)
 
     # a generic highlight function to highlight the tile by drawing a colored circle in the middle of it
     def highlight(self, color=Settings.HIGHLIGHT_COLOR):  # highlight the tiles around the player to show the options
@@ -298,6 +313,9 @@ class Tile(pygame.sprite.Sprite):
 
     def get_bottomleft(self):
         return self.hex_rect.bottomleft
+
+    def get_position(self):
+        return [self.x, self.y]
 
     def __lt__(self, other):
         return self.pos[1] < other.pos[1]

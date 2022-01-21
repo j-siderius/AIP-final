@@ -18,9 +18,10 @@ import time
 import numpy as np
 from pygame.locals import *
 
+
 class Screen:
     def __init__(self, width: int, height: int, loopFunction, frameRate=60, title=None, key_pressed_func=None, key_hold_func=None,
-                 mouse_pressed_func=None, mouse_dragged_func=None, mouse_released_func=None):
+                 mouse_pressed_func=None, mouse_dragged_func=None, mouse_released_func=None, mouse_moved_func=None):
         # setup screen
         pygame.init()
         if width == height == 0:
@@ -41,6 +42,7 @@ class Screen:
         self.mouse_pressed_func = mouse_pressed_func
         self.mouse_released_func = mouse_released_func
         self.mouse_dragged_func = mouse_dragged_func
+        self.mouse_moved_func = mouse_moved_func
 
 
         # other variables
@@ -72,6 +74,8 @@ class Screen:
                     self.mouse_pressed_event(event.button)
                 if event.type == pygame.MOUSEBUTTONUP:
                     self.mouse_released_event(event.button)
+                if event.type == pygame.MOUSEMOTION:
+                    self.mouse_moved_event()
 
             self.elapsed_time = time.perf_counter() - self.old_time
 
@@ -121,6 +125,12 @@ class Screen:
         elif self.get_mouse_pressed()[2]:
             self.mouse_dragged_func(self.get_mouse_pos(), MouseButton.right)
 
+    def mouse_moved_event(self):
+        """Detect mouse movement based on relative change in location of the cursor, eliminate unwanted jitter"""
+        movement = self.get_mouse_moved()
+        if (movement[0] > 0.1 or movement[0] < -0.1) or (movement[1] > 0.1 or movement[1] < -0.1):
+            if self.mouse_moved_func is not None: self.mouse_moved_func()
+
     # settings
     def setframeRate(self, frameRate):
         self.frameRate = frameRate
@@ -158,7 +168,24 @@ class Screen:
     def get_mouse_pos(self):
         return pygame.mouse.get_pos()
 
+    def get_mouse_moved(self):
+        return pygame.mouse.get_rel()
+
     def get_pressed_keys(self):
+        '''
+        Keycodes:
+        1   30      q   20      a   4       z   29
+        2   31      w   26      s   22      x   27
+        3   32      e   8       d   7       c   6
+        4   33      r   21      f   9       v   25
+        5   34      t   23      g   10      b   5
+        6   35      y   28      h   11      n   17
+        7   36      u   24      j   13      m   16
+        8   37      i   12      k   14      ,   54
+        9   38      o   18      l   15      .   55
+        0   39      p   19      ;   51      /   56
+        -   45      +   46      '   52
+        '''
         pressed_keys = pygame.key.get_pressed()
         active_keys = set(())
 
@@ -181,6 +208,7 @@ class Screen:
         return pygame.font.get_fonts()
 
     # setters
+
     def color(self, r=-1, g=-1, b=-1):
         # if just 1 value is entered make the r,g and b the same. so 255 -> (255,255,255) = white
         if b == -1:

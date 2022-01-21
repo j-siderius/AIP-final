@@ -62,8 +62,6 @@ class Screen:
         self.current_text_stroke_thickness = 2
         self.text_stroke_active = False
 
-        self.input = None  # object declaration for the input handler
-
     # the loop function that redraws every frame
     def loop(self):
         while self.run:
@@ -210,8 +208,6 @@ class Screen:
         return pygame.font.get_fonts()
 
     # setters
-    def set_input_class(self, input_obj):
-        self.input = input_obj
 
     def color(self, r=-1, g=-1, b=-1):
         # if just 1 value is entered make the r,g and b the same. so 255 -> (255,255,255) = white

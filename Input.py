@@ -84,13 +84,13 @@ class Input:
             self.selected_tile = 0
         elif 300 >= angle > 240:  # bottom
             self.selected_tile = 1
-        elif 60 >= angle > 0:  # bottom left
+        elif 240 >= angle > 180:  # bottom left
             self.selected_tile = 2
         elif 360 >= angle > 300:  # bottom right
             self.selected_tile = 3
         elif 180 >= angle > 120:  # top left
             self.selected_tile = 4
-        elif 240 >= angle > 180:  # top right
+        elif 60 >= angle > 0:  # top right
             self.selected_tile = 5
         else:
             self.selected_tile = 5  # fallback selection

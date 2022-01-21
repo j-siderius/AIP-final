@@ -116,7 +116,7 @@ class Tile(pygame.sprite.Sprite):
             if self.pos[1] > tile.pos[1] and tile.is_water:
                 self.coastal_tile = True
 
-    def update(self, mouse):  # update called in field
+    def update(self):  # update called in field
         # if an action is happening on this tile
         if self.current_action != ActionType.none:
             if self.is_selected:  # if the user is breaking thing type show a little animation

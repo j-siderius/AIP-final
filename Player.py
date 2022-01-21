@@ -1,9 +1,11 @@
 import random
+import pygame
+import math
 
 import Tile
 from Field import Field
 from Data.settings import *
-from Screen import *
+from Screen import Screen, lerp, lerp_2D
 
 
 class Player:
@@ -65,46 +67,42 @@ class Player:
             else:
                 self.x, self.y = lerp_2D(self.from_tile.get_center(), self.target_tile.get_center(), factor)
 
-    def mouse_pressed(self, mousePos, button):
+    def move_player(self, targetTile):
+        """Moves the player to the clicked tile (if valid move)"""
         if self.is_walking or self.doing_an_action:
             return
 
-        # movement
-        if button == MouseButton.left:
-            pressed_tile = self.field.get_tile_from_point(mousePos)
-            self.move_player(pressed_tile.x, pressed_tile.y)
-
-        # mining, building and destroying
-        elif button == MouseButton.right:
-            pressed_tile = self.field.get_tile_from_point(mousePos)  # get the pressed tile
-
-            # if the pressed tile is next to the user
-            if pressed_tile in self.current_tile.get_neighbours():
-
-                # resource mining
-                if pressed_tile.has_resources():  # if the tile has resources
-                    pressed_tile.action_mine_resource(self.end_action)
-
-                # building
-                elif pressed_tile.can_build():
-                    # wooden wall
-                    if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
-                        pressed_tile.action_build_wall(self.end_action)
-                        self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
-
-                # destroying buildings
-                elif pressed_tile.has_structure():
-                    pressed_tile.action_destroy_structure(self.end_action)
-
-    def move_player(self, targetTileX, targetTileY):
+        targetTileX = targetTile[0]
+        targetTileY = targetTile[1]
         neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
+            # neighbour.unselect_tile()
             if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
                 self.current_tile.unhighlight_neighbours()
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME
                 self.target_tile = neighbour
+
+    def mine_build(self, pressed_tile):
+        """Performs the player action on the clicked tile (mine, build, destroy)"""
+        if self.is_walking or self.doing_an_action:
+            return
+
+        # resource mining
+        if pressed_tile.has_resources():  # if the tile has resources
+            pressed_tile.action_mine_resource(self.end_action)
+
+        # building
+        elif pressed_tile.can_build():
+            # wooden wall
+            if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
+                pressed_tile.action_build_wall(self.end_action)
+                self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
+
+        # destroying buildings
+        elif pressed_tile.has_structure():
+            pressed_tile.action_destroy_structure(self.end_action)
 
     # employ walking algorithm to find suitable starting tile
     def find_starting_tile(self, tileX, tileY):
@@ -135,3 +133,10 @@ class Player:
 
         # set doing an action to false so the user can start another action
         self.doing_an_action = False
+
+    def get_player_position(self):
+        return (self.x, self.y)
+
+    def get_current_tile(self):
+        return self.current_tile
+

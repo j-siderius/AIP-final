@@ -140,11 +140,3 @@ class Player:
     def get_current_tile(self):
         return self.current_tile
 
-    def set_resource(self, resource):
-        if resource is not None:
-            if resource in self.inventory:
-                self.inventory[resource] += 1
-            else:
-                self.inventory[resource] = 1
-        pass
-

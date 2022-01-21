@@ -1,14 +1,9 @@
 import random
-import pygame
 
 import Tile
 from Field import Field
-from settings import *
+from Data.settings import *
 from Screen import *
-import helper
-
-# TODO
-#   - add break timer, so like it cost time to break something (prob do it with the cursor is_highlight thingy)
 
 
 class Player:
@@ -34,6 +29,9 @@ class Player:
         self.from_tile = self.current_tile
         self.target_tile = None
 
+        # mining and building
+        # self.last_mouse_down_time = 0
+        self.doing_an_action = False
         self.inventory = {Resources.wood: 100}  # dict()
 
         self.color = (255, 0, 0)
@@ -66,34 +64,37 @@ class Player:
                 self.current_tile.highlight_neighbours()
             else:
                 self.x, self.y = lerp_2D(self.from_tile.get_center(), self.target_tile.get_center(), factor)
-        # else:
-        #     self.current_tile.highlight_neighbours()
 
     def mouse_pressed(self, mousePos, button):
-        if button == MouseButton.left and not self.is_walking:
+        if self.is_walking or self.doing_an_action:
+            return
+
+        # movement
+        if button == MouseButton.left:
             pressed_tile = self.field.get_tile_from_point(mousePos)
             self.move_player(pressed_tile.x, pressed_tile.y)
 
-        elif button == MouseButton.right and not self.is_walking:  # right mouse button
-            pressed_tile = self.field.get_tile_from_point(mousePos)
+        # mining, building and destroying
+        elif button == MouseButton.right:
+            pressed_tile = self.field.get_tile_from_point(mousePos)  # get the pressed tile
 
+            # if the pressed tile is next to the user
             if pressed_tile in self.current_tile.get_neighbours():
-                # resource mining
-                if pressed_tile.has_resources():
-                    resource = pressed_tile.mine_resource()
-                    if resource is not None:
-                        if resource in self.inventory:
-                            self.inventory[resource] += 1
-                        else:
-                            self.inventory[resource] = 1
 
-                elif pressed_tile.can_build():  # building
+                # resource mining
+                if pressed_tile.has_resources():  # if the tile has resources
+                    pressed_tile.action_mine_resource(self.end_action)
+
+                # building
+                elif pressed_tile.can_build():
                     # wooden wall
                     if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
+                        pressed_tile.action_build_wall(self.end_action)
                         self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
-                        pressed_tile.build_wall()
+
+                # destroying buildings
                 elif pressed_tile.has_structure():
-                    pressed_tile.destroy_structure()
+                    pressed_tile.action_destroy_structure(self.end_action)
 
     def move_player(self, targetTileX, targetTileY):
         neighbours = self.current_tile.get_neighbours()
@@ -119,3 +120,18 @@ class Player:
     def align_player(self, tile: Tile):
         self.current_tile = tile
         self.x, self.y = tile.get_center()
+
+    # called when the player starts an action, not called when the player moves
+    def start_action(self):
+        # TODO !!!! @JANNICK set here your time tick thingy, deze is called when an action is started !!!!!!!
+        self.doing_an_action = True
+
+    def end_action(self, gained_resource, amount):
+        if gained_resource is not None:  # if a resource was gained in the action
+            if gained_resource in self.inventory:  # if the user already has a resource then just add it.
+                self.inventory[gained_resource] += amount
+            else:  # if the user doesn't than add the resource to the inventory
+                self.inventory[gained_resource] = amount
+
+        # set doing an action to false so the user can start another action
+        self.doing_an_action = False

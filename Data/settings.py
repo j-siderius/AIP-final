@@ -1,7 +1,9 @@
 from enum import Enum
 
 # a place to store settings and constants, might make a separate JSON file to actual store settings
-
+# TODO
+#   - dict maken met alles tiles en walk speed enzo
+#   - dict maken met structes enz.
 
 class Settings:
     WATER_DROP_OFF_SCALING = 1

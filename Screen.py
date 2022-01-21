@@ -4,7 +4,6 @@
 #  - rotation to rectangles, like dashed line
 #  - correct logging
 #  - a lot
-#  - sleep
 # -
 
 """
@@ -19,14 +18,12 @@ import time
 import numpy as np
 from pygame.locals import *
 
-
 class Screen:
     def __init__(self, width: int, height: int, loopFunction, frameRate=60, title=None, key_pressed_func=None, key_hold_func=None,
                  mouse_pressed_func=None, mouse_dragged_func=None, mouse_released_func=None):
         # setup screen
         pygame.init()
         if width == height == 0:
-            # self.screen = pygame.display.set_mode((width, height), pygame.FULLSCREEN)
             flags = FULLSCREEN | DOUBLEBUF
             self.screen = pygame.display.set_mode((width, height), flags, 8)
         else:
@@ -81,7 +78,7 @@ class Screen:
             # main loop
             if self.elapsed_time > 1 / self.frameRate:
                 self.old_time = time.perf_counter()
-                if self.mouse_dragged_func: self.key_hold_event()
+                if self.key_hold_func: self.key_hold_event()
                 if self.mouse_dragged_func: self.mouse_dragged_event()
 
                 # call the loop function
@@ -92,7 +89,7 @@ class Screen:
     # starts the loop
     def start(self):
         self.loop()
-        # stops the loop and so often the program aswell
+        # stops the loop and so often the program as well
 
     def stop(self):
         self.run = False
@@ -106,10 +103,9 @@ class Screen:
             self.key_pressed_func(active_keys)
 
     def key_hold_event(self):
-        if self.key_hold_func is not None:
-            active_keys = self.get_pressed_keys()
-            if len(active_keys) > 0:
-                self.key_hold_func(active_keys)
+        active_keys = self.get_pressed_keys()
+        if len(active_keys) > 0:
+            self.key_hold_func(active_keys)
 
     def mouse_pressed_event(self, button):  # 3 == right button, 1 == left button, 2 scroll button
         if self.mouse_pressed_func is not None: self.mouse_pressed_func(button)
@@ -119,7 +115,11 @@ class Screen:
 
     def mouse_dragged_event(self):
         if self.get_mouse_pressed()[0]:
-            self.mouse_dragged_func(self.get_mouse_pos())
+            self.mouse_dragged_func(self.get_mouse_pos(), MouseButton.left)
+        elif self.get_mouse_pressed()[1]:
+            self.mouse_dragged_func(self.get_mouse_pos(), MouseButton.scroll)
+        elif self.get_mouse_pressed()[2]:
+            self.mouse_dragged_func(self.get_mouse_pos(), MouseButton.right)
 
     # settings
     def setframeRate(self, frameRate):
@@ -574,12 +574,12 @@ class Screen:
 
 
 # # enums
-# class MouseButton(Enum):
-#     left = 1
-#     scroll = 2
-#     right = 3
-#     scroll_up = 4
-#     scroll_down = 5
+class MouseButton:
+    left: int = 1
+    scroll: int = 2
+    right: int = 3
+    scroll_up: int = 4
+    scroll_down: int = 5
 
 
 def format_color(color):

@@ -6,10 +6,6 @@ from Data.settings import *
 from Screen import *
 
 
-# TODO
-#   - add break timer, so like it cost time to break something (prob do it with the cursor is_highlight thingy)
-
-
 class Player:
 
     def __init__(self, screen, field_size, field: Field):
@@ -125,6 +121,7 @@ class Player:
         self.current_tile = tile
         self.x, self.y = tile.get_center()
 
+    # called when the player starts an action, not called when the player moves
     def start_action(self):
         # TODO !!!! @JANNICK set here your time tick thingy, deze is called when an action is started !!!!!!!
         self.doing_an_action = True

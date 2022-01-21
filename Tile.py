@@ -117,14 +117,6 @@ class Tile(pygame.sprite.Sprite):
                 self.coastal_tile = True
 
     def update(self, mouse):  # update called in field
-        # highlight the tiles when the mouse is over them
-        if self.isOver(mouse) and self.is_highlight and not self.is_selected:
-            self.is_selected = True
-            self.highlight()
-        elif not self.isOver(mouse) and self.is_highlight and self.is_selected:
-            self.is_selected = False
-            self.change_image(self.image_name)
-
         # if an action is happening on this tile
         if self.current_action != ActionType.none:
             if self.is_selected:  # if the user is breaking thing type show a little animation
@@ -143,6 +135,14 @@ class Tile(pygame.sprite.Sprite):
         # highlight the tiles around the player to show the options
         if self.is_highlight:
             self.highlight()
+
+    def select_tile(self):
+        self.is_selected = True
+        self.highlight()
+
+    def unselect_tile(self):
+        self.is_selected = False
+        self.change_image(self.image_name)
 
     # a generic highlight function to highlight the tile by drawing a colored circle in the middle of it
     def highlight(self, color=Settings.HIGHLIGHT_COLOR):  # highlight the tiles around the player to show the options
@@ -298,6 +298,9 @@ class Tile(pygame.sprite.Sprite):
 
     def get_bottomleft(self):
         return self.hex_rect.bottomleft
+
+    def get_position(self):
+        return [self.x, self.y]
 
     def __lt__(self, other):
         return self.pos[1] < other.pos[1]

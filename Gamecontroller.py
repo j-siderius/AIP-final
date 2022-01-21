@@ -18,6 +18,7 @@ class Gamecontroller:
 			(102, 150, 186), (255, 255, 255), (231, 165, 83), (126, 75, 104), (0, 0, 0), (41, 41, 101))
 		self.sky_color = (255, 255, 255)
 		self.sky_opacity = 0
+		self.sky = pygame.Surface(self.screen.get_size())
 
 	def tick(self):
 		"""
@@ -46,20 +47,19 @@ class Gamecontroller:
 			self.sky_opacity = 50
 		elif (7 / 12) * self.timescale > self.day_night_time >= (6 / 12) * self.timescale:
 			self.sky_color = self.day_night_colors[3]
-			self.sky_opacity = 75
+			self.sky_opacity = 50
 		elif (11 / 12) * self.timescale > self.day_night_time >= (7 / 12) * self.timescale:
 			self.sky_color = self.day_night_colors[4]
-			self.sky_opacity = 125
+			self.sky_opacity = 100
 		elif self.day_night_time >= (11 / 12) * self.timescale:
 			self.sky_color = self.day_night_colors[5]
-			self.sky_opacity = 75
+			self.sky_opacity = 50
 
 	def update_sky(self):
 		"""draw sky over the screen"""
 
-		sky = pygame.Surface(self.screen.get_size())
-		sky.fill(self.sky_color)
-		sky.set_alpha(self.sky_opacity)
+		self.sky.fill(self.sky_color)
+		self.sky.set_alpha(self.sky_opacity)
 		# blit overlay over whole screen
-		# self.screen.get_screen().blit(sky, (0, 0))
+		self.screen.get_screen().blit(self.sky, (0, 0))
 		# TODO: enable blit when water tiles are fixed

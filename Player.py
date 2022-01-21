@@ -9,7 +9,7 @@ from Screen import *
 from Input import *
 
 # TODO
-#   - add break timer, so like it cost time to break something (prob do it with the cursor highlight thingy)
+#   - add break timer, so like it cost time to break something (prob do it with the cursor is_highlight thingy)
 
 
 class Player:
@@ -26,6 +26,8 @@ class Player:
         self.radius = self.field.hex_size / 2.3  # base this on hex_size of Tiles
         # assign starting position to a viable tile
         self.find_starting_tile(int(hex_amount[0] / 2), int(hex_amount[1] / 2))
+        # is_highlight the next moves
+        self.current_tile.highlight_neighbours()
 
         # walking
         self.is_walking = False
@@ -33,7 +35,7 @@ class Player:
         self.from_tile = self.current_tile
         self.target_tile = None
 
-        self.inventory = dict()
+        self.inventory = {Resources.wood: 100}  # dict()
 
         self.color = (255, 0, 0)
 
@@ -46,8 +48,7 @@ class Player:
         menu_txt = ["Inventory: "]
         for key, value in self.inventory.items():
             menu_txt.append(f"{key}: {value}")
-        # if len(menu_txt) == 1:
-        #     menu_txt.append("Empty")
+
         self.screen.text_font(25)
         width, height = self.screen.get_size()
         self.screen.text_array(width - 110, 20, menu_txt, 255, background_color=0)
@@ -61,23 +62,39 @@ class Player:
                 self.is_walking = False
                 self.align_player(self.target_tile)
                 self.from_tile = self.current_tile
+
+                # is_highlight the next moves
+                self.current_tile.highlight_neighbours()
             else:
                 self.x, self.y = lerp_2D(self.from_tile.get_center(), self.target_tile.get_center(), factor)
+        # else:
+        #     self.current_tile.highlight_neighbours()
 
     def mouse_pressed(self, mousePos, button):
         if button == MouseButton.left and not self.is_walking:
             pressed_tile = self.field.get_tile_from_point(mousePos)
             self.move_player(pressed_tile.x, pressed_tile.y)
-        elif button == MouseButton.right and not self.is_walking:
+
+        elif button == MouseButton.right and not self.is_walking:  # right mouse button
             pressed_tile = self.field.get_tile_from_point(mousePos)
 
             if pressed_tile in self.current_tile.get_neighbours():
-                resource = pressed_tile.mine_resource()
-                if resource is not None:
-                    if resource in self.inventory:
-                        self.inventory[resource] += 1
-                    else:
-                        self.inventory[resource] = 1
+                # resource mining
+                if pressed_tile.has_resources():
+                    resource = pressed_tile.mine_resource()
+                    if resource is not None:
+                        if resource in self.inventory:
+                            self.inventory[resource] += 1
+                        else:
+                            self.inventory[resource] = 1
+
+                elif pressed_tile.can_build():  # building
+                    # wooden wall
+                    if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
+                        self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
+                        pressed_tile.build_wall()
+                elif pressed_tile.has_structure():
+                    pressed_tile.destroy_structure()
 
         # TODO: make mouse position checking continuous (when mouse is moved)
         Input.process_mouse(Input, mousePos, button, self.get_player_position())
@@ -85,8 +102,9 @@ class Player:
     def move_player(self, targetTileX, targetTileY):
         neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
-            if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).walkable:
+            if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
+                self.current_tile.unhighlight_neighbours()
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME
                 self.target_tile = neighbour

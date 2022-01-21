@@ -13,14 +13,14 @@ class Field:
                 print(f"Field could not be initialized, because field_size or hex_amount is none!!!")
                 return
 
-            self.hex_width = (field_size[0] / hex_amount[0]) * 4/3
+            self.hex_width = (field_size[0] / hex_amount[0]) * 4 / 3
             self.hex_size = self.hex_width / 2
             hex_height = round(math.sqrt(3) * self.hex_size)
             self.hex_size = round(self.hex_size)
             self.hex_width = round(self.hex_width)
 
             if hex_amount[1] == 0:
-                hex_amount = (hex_amount[0], int(hex_amount[0] * (field_size[1] / field_size[0]))-3)
+                hex_amount = (hex_amount[0], int(hex_amount[0] * (field_size[1] / field_size[0])) - 3)
 
             self.field_size = hex_amount
         else:
@@ -28,7 +28,8 @@ class Field:
             self.hex_size = hex_width / 2
             hex_height = round(math.sqrt(3) * self.hex_size)
             self.hex_size = round(self.hex_size)
-            self.field_size = (math.ceil((field_size[0] + self.hex_width/4) / (self.hex_width + self.hex_width/2) * 2), math.ceil(field_size[1] / hex_height)+1)
+            self.field_size = (
+            math.ceil((field_size[0] + self.hex_width / 4) / (self.hex_width + self.hex_width / 2) * 2), math.ceil(field_size[1] / hex_height) + 1)
 
         self.tiles = []
         self.screen = screen
@@ -44,19 +45,26 @@ class Field:
             "water": [pygame.image.load(f"./Sprites/water/water{i}.png").convert_alpha() for i in range(0, 8)],
 
             # resources:
-            "forest": pygame.image.load("./Sprites/Tiles/forest.png").convert_alpha(),
-            "large_forest": pygame.image.load("./Sprites/Tiles/large_forest.png").convert_alpha(),
-            "foresthills": [pygame.image.load("./Sprites/Tiles/foresthills.png").convert_alpha(),
-                            pygame.image.load("./Sprites/Tiles/foresthills2.png").convert_alpha()],
+            "forest_grass": pygame.image.load("./Sprites/Tiles/forest.png").convert_alpha(),
+            "large_forest_grass": pygame.image.load("./Sprites/Tiles/large_forest.png").convert_alpha(),
+            "forest_hills": [pygame.image.load("./Sprites/Tiles/foresthills.png").convert_alpha(),
+                             pygame.image.load("./Sprites/Tiles/foresthills2.png").convert_alpha()],
 
             # highlighted tiles:
             "selected_grass": pygame.image.load("./Sprites/Selected_tilles/grass.png").convert_alpha(),
             "selected_hills": [pygame.image.load("./Sprites/Selected_tilles/hills.png").convert_alpha(),
                                pygame.image.load("./Sprites/Selected_tilles/hills2.png").convert_alpha()],
-            "selected_forest": pygame.image.load("./Sprites/Selected_tilles/forest.png").convert_alpha(),
-            "selected_large_forest": pygame.image.load("./Sprites/Selected_tilles/large_forest.png").convert_alpha(),
-            "selected_foresthills": [pygame.image.load("./Sprites/Selected_tilles/foresthills.png").convert_alpha(),
+            "selected_forest_grass": pygame.image.load("./Sprites/Selected_tilles/forest.png").convert_alpha(),
+            "selected_large_forest_grass": pygame.image.load("./Sprites/Selected_tilles/large_forest.png").convert_alpha(),
+            "selected_forest_hills": [pygame.image.load("./Sprites/Selected_tilles/foresthills.png").convert_alpha(),
                                      pygame.image.load("./Sprites/Selected_tilles/foresthills2.png").convert_alpha()],
+
+            # new highlights
+            "is_highlight": pygame.image.load("./Sprites/Selected_tilles/highlight-white.png").convert_alpha(),
+
+            # structures
+            "wall_grass": pygame.image.load("./Sprites/Tiles/wall_grass.png").convert_alpha(),
+            "wall_hills": pygame.image.load("./Sprites/Tiles/wall_hills2.png").convert_alpha()
         }
         for key, sprite in sprite_dict.items():
             if isinstance(sprite, list):
@@ -78,7 +86,7 @@ class Field:
             self.tiles.append([])
             for y in range(0, self.field_size[1]):
                 self.tiles[x].append(
-                    Tile(pos=(x * round(self.hex_width * (3/4)) + self.hex_width/4, y * hex_height - hex_height/2 + y_offset), place=(x, y),
+                    Tile(pos=(x * round(self.hex_width * (3 / 4)) + self.hex_width / 4, y * hex_height - hex_height / 2 + y_offset), place=(x, y),
                          size=(self.hex_width, hex_height), radius=self.hex_size, points=points, screen=screen, noise=noise,
                          resource_noise=resource_noise, sprite_dict=sprite_dict, field=self))
 
@@ -90,10 +98,9 @@ class Field:
 
         self.tiles_list = []
         self.water_tiles = []
-        self.coastal_tiles = []
         for tiles in self.tiles:
             for tile in tiles:
-                if not tile.isWater:
+                if not tile.is_water:
                     self.tiles_list.append(tile)
                 else:
                     self.water_tiles.append(tile)
@@ -116,7 +123,7 @@ class Field:
 
         # for tile_row in self.tiles:
         #     for tile in tile_row:
-        #         tile.mouse_pointer(self.screen.get_mouse_pos())
+        #         pass
 
     def update_coastal_waters(self):
         self.water_group.draw(self.screen.get_screen())

@@ -6,6 +6,11 @@ from enum import Enum
 class Settings:
     WATER_DROP_OFF_SCALING = 1
     PLAYER_WALKING_TIME = 0.25
+    WOODEN_WALL_COST = 2
+
+    HIGHLIGHT_COLOR = (255, 100)
+    HIGHLIGHT_COLOR_SELECTED = (255, 140, 0, 200)
+    HIGHLIGHT_COLOR_ACTION = (65, 105, 225, 150)
 
 
 class ResourceTiles(Enum):
@@ -19,6 +24,12 @@ class ResourceTiles(Enum):
 class Resources(Enum):
     wood = "Wood"
     stone = "Stone"
+
+
+# for the future, not used yet
+class Structures(Enum):
+    wooden_wall = "Wooden wall"
+    stone_wall = "Stone wall"
 
 
 class MouseButton:

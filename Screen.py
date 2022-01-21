@@ -128,7 +128,7 @@ class Screen:
     def mouse_moved_event(self):
         """Detect mouse movement based on relative change in location of the cursor, eliminate unwanted jitter"""
         movement = self.get_mouse_moved()
-        if (movement[0] > 1 or movement[0] < -1) or (movement[1] > 1 or movement[1] < -1):
+        if (movement[0] > 0.1 or movement[0] < -0.1) or (movement[1] > 0.1 or movement[1] < -0.1):
             if self.mouse_moved_func is not None: self.mouse_moved_func()
 
     # settings

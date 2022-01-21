@@ -155,8 +155,9 @@ class Tile(pygame.sprite.Sprite):
         self.highlight()
 
     def unselect_tile(self):
-        self.is_selected = False
-        self.change_image(self.image_name)
+        if self.is_selected:
+            self.is_selected = False
+            self.change_image(self.image_name)
 
     # a generic highlight function to highlight the tile by drawing a colored circle in the middle of it
     def highlight(self, color=Settings.HIGHLIGHT_COLOR):  # highlight the tiles around the player to show the options

@@ -10,7 +10,7 @@ class Input:
         :param player: pass the main player object here:
         """
         self.selected_tile = 5
-        self.prev_selected_tile = 5
+        self.prev_selected_tile = -1
         self.player = player
 
     def process_nunchuck_movement(self, joystick):
@@ -73,7 +73,7 @@ class Input:
             # right-click
             self.build_mine(self.get_selected_tile())
 
-    def set_tile(self, angle):
+    def set_tile(self, angle, ):
         """
         calculate selected tile from angle
         """
@@ -96,8 +96,6 @@ class Input:
         else:
             self.selected_tile = 0  # fallback selection
 
-        # TODO: fix tile indexes
-
         # if newly selected tile, highlight / selected that tile (visually)
         if self.prev_selected_tile != self.selected_tile:
             deselected_tile = self.get_tile(self.prev_selected_tile)
@@ -108,6 +106,7 @@ class Input:
 
     def move_player(self, tile):
         self.player.move_player(tile.get_position())
+        self.prev_selected_tile = -1
 
     def build_mine(self, tile):
         self.player.mine_build(tile)

@@ -10,12 +10,14 @@ from Screen import *
 
 class Player:
 
-    def __init__(self, screen, field_size, field: Field):
+    def __init__(self, screen, field_size, field: Field, time_ticker_func=None):
         self.screen = screen
         self.field = field
         hex_amount = field.field_size
 
         self.field_size = field_size
+
+        self.time_ticker = time_ticker_func
 
         self.x, self.y = None, None  # pos on the world map
         self.current_tile: Tile = None
@@ -79,6 +81,8 @@ class Player:
             neighbour.unselect_tile()
             if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
+                self.time_ticker()
+                # implementation ^ Work In Progress
                 self.current_tile.unhighlight_neighbours()
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME
@@ -122,6 +126,8 @@ class Player:
     # called when the player starts an action, not called when the player moves
     def start_action(self):
         # TODO !!!! @JANNICK set here your time tick thingy, deze is called when an action is started !!!!!!!
+        self.time_ticker()
+        # implementation ^ Work In Progress
         self.doing_an_action = True
 
     def end_action(self, gained_resource, amount):

@@ -101,17 +101,31 @@ class Tile(pygame.sprite.Sprite):
 
     def init(self, tiles, fieldSize):
         # find the bordering tiles:
-        if self.y > 0: self.bordering_tiles.append(tiles[int(self.x)][int(self.y - 1)])  # Top
-        if self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x)][int(self.y + 1)])  # bottom
-        if self.x > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y)])  # left
-        if self.x < fieldSize[0] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y)])  # right
-        if self.x % 2 == 0:
-            if self.x > 0 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y - 1)])  # left top
-            if self.x < fieldSize[0] - 1 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y - 1)])
-        else:
-            if self.x > 0 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y + 1)])
-            if self.x < fieldSize[0] - 1 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y + 1)])
+        if self.x % 2 == 0: # no offset
+            if self.x < fieldSize[0] - 1 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y - 1)])  # right (top)
 
+            if self.y > 0: self.bordering_tiles.append(tiles[int(self.x)][int(self.y - 1)])  # Top
+
+            if self.x > 0 and self.y > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y - 1)])  # left  (top)
+            if self.x > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y)])  # left (bottom)
+
+            if self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x)][int(self.y + 1)])  # bottom
+
+            if self.x < fieldSize[0] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y)])  # right (bottom)
+
+        else:  # offset downwards
+            if self.x < fieldSize[0] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y)])  # right (top)
+
+            if self.y > 0: self.bordering_tiles.append(tiles[int(self.x)][int(self.y - 1)])  # Top
+
+            if self.x > 0: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y)])  # left (top)
+            if self.x > 0 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x - 1)][int(self.y + 1)])  # left (bottom)
+
+            if self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x)][int(self.y + 1)])  # bottom
+
+            if self.x < fieldSize[0] - 1 and self.y < fieldSize[1] - 1: self.bordering_tiles.append(tiles[int(self.x + 1)][int(self.y + 1)])  # right (bottom)
+
+        # test if this tile borders a water tile
         for tile in self.bordering_tiles:
             if self.pos[1] > tile.pos[1] and tile.is_water:
                 self.coastal_tile = True

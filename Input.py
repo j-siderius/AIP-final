@@ -31,7 +31,7 @@ class Input:
         else:
             angle = 0
 
-        self.set_tile(self, angle)
+        self.set_tile(angle)
 
     def process_nunchuck_button(self, buttons):
         """:param buttons: [joyZ, joyC]"""

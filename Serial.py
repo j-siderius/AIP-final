@@ -65,16 +65,6 @@ class Serial:
             except UnicodeDecodeError:
                 print("decoding error")
 
-            # test code
-            if time.perf_counter() > self.waitTime + 2.000:
-                self.waitTime = time.perf_counter()
-
-                self.updateDayNight(self.dayNightCycle)  # send daynight update
-                if self.dayNightCycle < 11:
-                    self.dayNightCycle += 1
-                else:
-                    self.dayNightCycle = 0
-
     def updateDayNight(self, time):
         """
         Updates the time of the LED clock

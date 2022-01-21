@@ -12,6 +12,8 @@ class Serial:
         Initialize the serial object, specify the communication
         baud-rate and connection port. Leave port empty if you want a
         list of all available serial devices.
+        :param port: serial port that the controller is connected to
+        :param baud_rate: communication baud rate of the specified port
         """
         if port is None:
             self.port = None
@@ -56,7 +58,8 @@ class Serial:
                     self.joyZ = False if int(msg[15:16]) == 0 else True
                     self.joyC = False if int(msg[19:20]) == 0 else True
 
-                    Input.process_nunchuck([self.joyX, self.joyY], [self.joyZ, self.joyC])
+                    Input.process_nunchuck_movement(Input, [self.joyX, self.joyY])
+                    Input.process_nunchuck_button(Input, [self.joyZ, self.joyC])
 
                 self.port.reset_input_buffer()
             except UnicodeDecodeError:

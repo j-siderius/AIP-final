@@ -60,5 +60,5 @@ class Gamecontroller:
 		self.sky.fill(self.sky_color)
 		self.sky.set_alpha(self.sky_opacity)
 		# blit overlay over whole screen
-		self.screen.get_screen().blit(self.sky, (0, 0))
+		# self.screen.get_screen().blit(self.sky, (0, 0))
 		# TODO: enable blit when water tiles are fixed

@@ -25,7 +25,6 @@ class Program:
         self.field.display(self.screen)
         self.player.update()
         self.player.display()
-        self.serial.update()
 
         self.screen.toggle_stroke(False)
         self.screen.rect(5, 5, 100, 20, (255))

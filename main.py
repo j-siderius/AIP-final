@@ -18,6 +18,7 @@ class Program:
         self.input = Input(self.player)
         self.controller = Gamecontroller(self.screen, self.serial)
 
+        self.screen.set_serial_func(self.serial.update)
         self.screen.start()
 
     def loop(self):

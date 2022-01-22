@@ -13,15 +13,13 @@ class Gamecontroller:
 		self.serial = serial
 
 		self.game_time = 0
-		self.day_night_time = 0  # always start game at beginning of day
+		self.day_night_time = 1  # always start game at beginning of day
 		self.timescale = int(timescale)
 		if self.timescale < 12:
 			self.timescale = 12
 		self.start_night = int(self.timescale / 2) - 1
 
-		self.day_night_colors = (
-			(102, 150, 186), (255, 255, 255), (231, 165, 83), (126, 75, 104), (0, 0, 0), (41, 41, 101))
-		self.sky_color = (255, 255, 255)
+		self.sky_color = (0, 0, 0)
 		self.sky_opacity = 0
 		self.sky = pygame.Surface(self.screen.get_size())
 
@@ -42,23 +40,17 @@ class Gamecontroller:
 		"""Manages the day/night cycle and sky color and opacity"""
 
 		if self.day_night_time < (1/12) * self.timescale:
-			self.sky_color = self.day_night_colors[0]
 			self.sky_opacity = 50
 		elif (5 / 12) * self.timescale > self.day_night_time >= (1 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[1]
 			self.sky_opacity = 0
 		elif (6 / 12) * self.timescale > self.day_night_time >= (5 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[2]
 			self.sky_opacity = 50
 		elif (7 / 12) * self.timescale > self.day_night_time >= (6 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[3]
-			self.sky_opacity = 50
+			self.sky_opacity = 75
 		elif (11 / 12) * self.timescale > self.day_night_time >= (7 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[4]
 			self.sky_opacity = 100
 		elif self.day_night_time >= (11 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[5]
-			self.sky_opacity = 50
+			self.sky_opacity = 75
 
 		self.serial.updateDayNight(int((self.day_night_time / self.timescale) * 11))
 

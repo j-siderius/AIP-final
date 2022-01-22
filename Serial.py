@@ -30,7 +30,6 @@ class Serial:
             self.joyX, self.joyY, self.joyC, self.joyZ = None, None, False, False
             self.updateDayNight(self.dayNightCycle)
             self.updateHealth(self.health)
-            self.waitTime = 0
 
     def list_serial_devices(self):
         """
@@ -50,7 +49,7 @@ class Serial:
         """
         if self.port is not None:
             try:
-                msg = self.port.readline().decode('ascii')
+                msg = self.port.readline().decode('ascii')  # < ORIGINAL
                 if 'JOY:' in msg:
                     self.joyX = int(msg[5:8])
                     self.joyY = int(msg[9:12])

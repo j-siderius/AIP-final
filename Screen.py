@@ -43,7 +43,7 @@ class Screen:
         self.mouse_released_func = mouse_released_func
         self.mouse_dragged_func = mouse_dragged_func
         self.mouse_moved_func = mouse_moved_func
-
+        self.serial_update_func = None
 
         # other variables
         self.run = True
@@ -76,6 +76,10 @@ class Screen:
                     self.mouse_released_event(event.button)
                 if event.type == pygame.MOUSEMOTION:
                     self.mouse_moved_event()
+
+            # call serial
+            if self.serial_update_func is not None:
+                self.serial_update_func()
 
             self.elapsed_time = time.perf_counter() - self.old_time
 
@@ -134,6 +138,9 @@ class Screen:
     # settings
     def setframeRate(self, frameRate):
         self.frameRate = frameRate
+
+    def set_serial_func(self, func):
+        self.serial_update_func = func
 
     # getters
     def get_screen(self):

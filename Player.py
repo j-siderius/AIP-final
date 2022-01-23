@@ -1,14 +1,11 @@
 import random
 import pygame
+import math
 
 import Tile
 from Field import Field
-from settings import *
-from Screen import *
-import helper
-
-# TODO
-#   - add break timer, so like it cost time to break something (prob do it with the cursor is_highlight thingy)
+from Data.settings import *
+from Screen import Screen, lerp, lerp_2D
 
 
 class Player:
@@ -34,6 +31,9 @@ class Player:
         self.from_tile = self.current_tile
         self.target_tile = None
 
+        # mining and building
+        # self.last_mouse_down_time = 0
+        self.doing_an_action = False
         self.inventory = {Resources.wood: 100}  # dict()
 
         self.color = (255, 0, 0)
@@ -66,44 +66,43 @@ class Player:
                 self.current_tile.highlight_neighbours()
             else:
                 self.x, self.y = lerp_2D(self.from_tile.get_center(), self.target_tile.get_center(), factor)
-        # else:
-        #     self.current_tile.highlight_neighbours()
 
-    def mouse_pressed(self, mousePos, button):
-        if button == MouseButton.left and not self.is_walking:
-            pressed_tile = self.field.get_tile_from_point(mousePos)
-            self.move_player(pressed_tile.x, pressed_tile.y)
+    def move_player(self, targetTile):
+        """Moves the player to the clicked tile (if valid move)"""
+        if self.is_walking or self.doing_an_action:
+            return
 
-        elif button == MouseButton.right and not self.is_walking:  # right mouse button
-            pressed_tile = self.field.get_tile_from_point(mousePos)
-
-            if pressed_tile in self.current_tile.get_neighbours():
-                # resource mining
-                if pressed_tile.has_resources():
-                    resource = pressed_tile.mine_resource()
-                    if resource is not None:
-                        if resource in self.inventory:
-                            self.inventory[resource] += 1
-                        else:
-                            self.inventory[resource] = 1
-
-                elif pressed_tile.can_build():  # building
-                    # wooden wall
-                    if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
-                        self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
-                        pressed_tile.build_wall()
-                elif pressed_tile.has_structure():
-                    pressed_tile.destroy_structure()
-
-    def move_player(self, targetTileX, targetTileY):
+        targetTileX = targetTile[0]
+        targetTileY = targetTile[1]
         neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
+            # neighbour.unselect_tile()
             if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
                 self.current_tile.unhighlight_neighbours()
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME
                 self.target_tile = neighbour
+
+    def mine_build(self, pressed_tile):
+        """Performs the player action on the clicked tile (mine, build, destroy)"""
+        if self.is_walking or self.doing_an_action:
+            return
+
+        # resource mining
+        if pressed_tile.has_resources():  # if the tile has resources
+            pressed_tile.action_mine_resource(self.end_action)
+
+        # building
+        elif pressed_tile.can_build():
+            # wooden wall
+            if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
+                pressed_tile.action_build_wall(self.end_action)
+                self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
+
+        # destroying buildings
+        elif pressed_tile.has_structure():
+            pressed_tile.action_destroy_structure(self.end_action)
 
     # employ walking algorithm to find suitable starting tile
     def find_starting_tile(self, tileX, tileY):
@@ -119,3 +118,25 @@ class Player:
     def align_player(self, tile: Tile):
         self.current_tile = tile
         self.x, self.y = tile.get_center()
+
+    # called when the player starts an action, not called when the player moves
+    def start_action(self):
+        # TODO !!!! @JANNICK set here your time tick thingy, deze is called when an action is started !!!!!!!
+        self.doing_an_action = True
+
+    def end_action(self, gained_resource, amount):
+        if gained_resource is not None:  # if a resource was gained in the action
+            if gained_resource in self.inventory:  # if the user already has a resource then just add it.
+                self.inventory[gained_resource] += amount
+            else:  # if the user doesn't than add the resource to the inventory
+                self.inventory[gained_resource] = amount
+
+        # set doing an action to false so the user can start another action
+        self.doing_an_action = False
+
+    def get_player_position(self):
+        return (self.x, self.y)
+
+    def get_current_tile(self):
+        return self.current_tile
+

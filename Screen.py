@@ -709,3 +709,33 @@ def lerp_color(color1, color2, factor):
     a = (color2[3] - color1[3]) * factor + color1[3]
 
     return format_color((r, g, b, a))
+
+
+def lerp_colors(color_list, factor):
+    """
+     return the color inbetween the the given colors in a list. \n
+     when the factor is 0 it will be the first color, when it's 1 it is the last color
+    """
+    if factor > 1:
+        factor = 1
+    elif factor < 0:
+        factor = 0
+
+    list_factor = factor * float(len(color_list))
+
+    color1 = color_list[math.floor(list_factor)]
+    color2 = color_list[math.ceil(list_factor) if math.ceil(list_factor) < len(color_list) -1 else 0]
+
+    color1 = format_color(color1)
+    color2 = format_color(color2)
+
+    delta = list_factor - math.floor(list_factor)
+    if delta == 0:
+        return color1
+
+    r = (color2[0] - color1[0]) * delta + color1[0]
+    g = (color2[1] - color1[1]) * delta + color1[1]
+    b = (color2[2] - color1[2]) * delta + color1[2]
+    a = (color2[3] - color1[3]) * delta + color1[3]
+
+    return format_color((r, g, b, a))

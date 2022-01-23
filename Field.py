@@ -103,9 +103,18 @@ class Field:
 
         # draw the water sprites on the screen
         self.water_group.draw(screen.get_screen())
+
+        # stores the default land tile surface
+        self.land_tile_surface = pygame.Surface(self.screen.get_size())
+        self.tiles_group.draw(self.land_tile_surface)
+        self.land_tile_surface.set_colorkey((0, 0, 0))
+
         # save the water sprite as one image for faster loading
-        pygame.image.save(screen.get_screen(), "Data/Sprites/water.bmp")
-        self.water_img = pygame.image.load("Data/Sprites/water.bmp").convert()
+        # pygame.image.save(screen.get_screen(), "Data/Sprites/water.bmp")
+        # self.water_img = pygame.image.load("Data/Sprites/water.bmp").convert()
+        self.water_img = pygame.Surface(self.screen.get_size())
+        self.water_group.draw(self.water_img)
+        self.water_img.set_colorkey((0, 0, 0))
 
         print(f"Field has been generated, {self.hex_size = }, {len(self.tiles) = }, {self.field_size = }")
 
@@ -115,11 +124,21 @@ class Field:
         screen.get_screen().blit(self.water_img, (0, 0))
 
         self.tiles_group.update()
-        self.tiles_group.draw(screen.get_screen())
 
+        # should_update = False
         # for tile_row in self.tiles:
         #     for tile in tile_row:
-        #         pass
+        #         if tile.should_update():
+        #             should_update = True
+        #             tile.set_should_update(False)
+        #             # break
+        #     # if should_update:
+        #     #     break
+        # if should_update or True:
+        #     self.tiles_group.draw(self.land_tile_surface)
+        #
+        # screen.get_screen().blit(self.land_tile_surface, (0, 0))
+        self.tiles_group.draw(screen.get_screen())
 
     def update_water(self):  # update the water tiles
         self.water_group.draw(self.screen.get_screen())

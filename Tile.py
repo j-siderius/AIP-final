@@ -1,5 +1,7 @@
 import random
 
+import pygame
+
 import Screen
 from Screen import *
 from perlin_noise import PerlinNoise
@@ -27,7 +29,9 @@ class Tile(pygame.sprite.Sprite):
         self.index_of_sprite = None
         self.image_name = ""
         self.is_highlight = False
+        self.highlighted = HighlightedStated.none
         self.is_selected = False
+        self.is_night = False
 
         # noise for the terrain and resource generation
         self.height = noise([self.pos[0] / 300, self.pos[1] / 300]) * 1.5
@@ -90,6 +94,12 @@ class Tile(pygame.sprite.Sprite):
         self.rect = self.image.get_rect()
         self.rect.center = self.pos
 
+        # setup the night
+        self.night_overlay = pygame.Surface(self.rect.size)
+        self.night_overlay.set_alpha(0)
+        self.is_night = True
+        self.change_image(self.image_name)
+
         # setup the rectangle over the actual hexagon instead of the sprite.
         self.hex_rect = pygame.Rect((0, 0), size)
         self.hex_rect.bottomleft = self.rect.bottomleft
@@ -98,6 +108,9 @@ class Tile(pygame.sprite.Sprite):
         # points are arranged in the following manner: [0]=bottom-right, [1]=bottom-left, [2]=middle-left, [3]=top-left, [4]=top-right,
         # [5]=middle-right. aka, starting right and then clockwise.
         self.points = np.array(points) + self.hex_rect.center + np.array([0, -2])
+
+        # decide if the screen should be updated
+        self.should_update_bool = False
 
     def init(self, tiles, fieldSize):
         # find the bordering tiles:
@@ -149,6 +162,7 @@ class Tile(pygame.sprite.Sprite):
         # highlight the tiles around the player to show the options
         if self.is_highlight:
             self.highlight()
+        self.should_update_bool = True
 
     def select_tile(self):
         self.is_selected = True
@@ -163,10 +177,17 @@ class Tile(pygame.sprite.Sprite):
     def highlight(self, color=Settings.HIGHLIGHT_COLOR):  # highlight the tiles around the player to show the options
         if self.is_selected and color == Settings.HIGHLIGHT_COLOR:  # when the mouse is over it, make it a different color
             color = Settings.HIGHLIGHT_COLOR_SELECTED
-        if self.is_wall and color == Settings.HIGHLIGHT_COLOR:  # show the action icon when the user can only do an action
+            self.highlighted = HighlightedStated.selected
+        elif self.is_wall and color == Settings.HIGHLIGHT_COLOR:  # show the action icon when the user can only do an action
             color = Settings.HIGHLIGHT_COLOR_ACTION
+            self.highlighted = HighlightedStated.actionOnly
+        elif color == Settings.HIGHLIGHT_COLOR:
+            self.highlighted = HighlightedStated.default
         elif (not self.is_wall and not self.tile_property.walkable) or self.is_water:  # don't show an action when the user can't do an action
             return
+
+        # if self.highlighted != HighlightedStated.none and not (self.current_action_time != self.tile_property.action_time and self.tile_property.action_time != 0):
+        #     return
 
         # if an action is happening, change the circle to reflect it
         if self.current_action_time != self.tile_property.action_time and self.tile_property.action_time != 0:
@@ -178,6 +199,7 @@ class Tile(pygame.sprite.Sprite):
         self.image = self.image.copy()
 
         draw.filled_circle(self.image, round(self.size[0] / 2), round(self.image.get_height() - self.size[1] / 2 - 3), int(self.radius * 0.5), color)
+        self.should_update_bool = True
 
     def unhighlight(self):  # remove the highlight from the tile
         self.is_highlight = False
@@ -263,7 +285,6 @@ class Tile(pygame.sprite.Sprite):
             self.end_action_func(None, 0)
         if self.current_action == ActionType.destroying:
             resource, amount = self.destroy_structure()
-            print(resource, amount)
             self.end_action_func(resource, amount)
 
         self.current_action_time = self.tile_property.action_time
@@ -278,10 +299,17 @@ class Tile(pygame.sprite.Sprite):
         else:
             self.image = self.sprite_dict[image_name]
 
+        # if self.is_night:
+        #     if isinstance(self.sprite_dict["night_" + image_name], list):
+        #         self.image = self.sprite_dict["night_" + image_name][self.index_of_sprite]
+        #     else:
+        #         self.image = self.sprite_dict["night_" + image_name]
+
         # set the new sprite properties
         self.tile_property: TileProperty = tiles_dict[self.image_name]
 
         if update_tile:
+            self.highlighted = HighlightedStated.none
             self.update_Tile()
 
     def isOver(self, point):
@@ -318,6 +346,12 @@ class Tile(pygame.sprite.Sprite):
     def get_position(self):
         return [self.x, self.y]
 
+    def should_update(self):
+        return self.should_update_bool
+
+    def set_should_update(self, state):
+        self.should_update_bool = state
+
     def __lt__(self, other):
         return self.pos[1] < other.pos[1]
 
@@ -327,6 +361,13 @@ class ActionType(Enum):
     mining = 1
     building = 2
     destroying = 3
+
+
+class HighlightedStated(Enum):
+    none = 0
+    default = 1
+    actionOnly = 2
+    selected = 3
 
 
 def limit(value, min, max):

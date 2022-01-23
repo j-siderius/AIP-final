@@ -1,5 +1,7 @@
 import pygame
 
+from Screen import lerp_colors
+
 
 class Gamecontroller:
 	def __init__(self, screen, serial, timescale=12):
@@ -41,24 +43,28 @@ class Gamecontroller:
 	def update_day_night(self):
 		"""Manages the day/night cycle and sky color and opacity"""
 
-		if self.day_night_time < (1/12) * self.timescale:
-			self.sky_color = self.day_night_colors[0]
-			self.sky_opacity = 50
-		elif (5 / 12) * self.timescale > self.day_night_time >= (1 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[1]
-			self.sky_opacity = 0
-		elif (6 / 12) * self.timescale > self.day_night_time >= (5 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[2]
-			self.sky_opacity = 50
-		elif (7 / 12) * self.timescale > self.day_night_time >= (6 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[3]
-			self.sky_opacity = 50
-		elif (11 / 12) * self.timescale > self.day_night_time >= (7 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[4]
-			self.sky_opacity = 100
-		elif self.day_night_time >= (11 / 12) * self.timescale:
-			self.sky_color = self.day_night_colors[5]
-			self.sky_opacity = 50
+		# if self.day_night_time < (1/12) * self.timescale:
+		# 	self.sky_color = self.day_night_colors[0]
+		# 	self.sky_opacity = 50
+		# elif (5 / 12) * self.timescale > self.day_night_time >= (1 / 12) * self.timescale:
+		# 	self.sky_color = self.day_night_colors[1]
+		# 	self.sky_opacity = 0
+		# elif (6 / 12) * self.timescale > self.day_night_time >= (5 / 12) * self.timescale:
+		# 	self.sky_color = self.day_night_colors[2]
+		# 	self.sky_opacity = 50
+		# elif (7 / 12) * self.timescale > self.day_night_time >= (6 / 12) * self.timescale:
+		# 	self.sky_color = self.day_night_colors[3]
+		# 	self.sky_opacity = 50
+		# elif (11 / 12) * self.timescale > self.day_night_time >= (7 / 12) * self.timescale:
+		# 	self.sky_color = self.day_night_colors[4]
+		# 	self.sky_opacity = 100
+		# elif self.day_night_time >= (11 / 12) * self.timescale:
+		# 	self.sky_color = self.day_night_colors[5]
+		# 	self.sky_opacity = 50
+
+		self.sky_color = lerp_colors(self.day_night_colors, self.day_night_time/12)
+		self.sky_opacity = 100
+		print(self.day_night_time/12)
 
 		self.serial.updateDayNight(int((self.day_night_time / self.timescale) * 11))
 
@@ -70,3 +76,5 @@ class Gamecontroller:
 		# blit overlay over whole screen
 		self.screen.get_screen().blit(self.sky, (0, 0))
 		# TODO: enable blit when water tiles are fixed
+
+

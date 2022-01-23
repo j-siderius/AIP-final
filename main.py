@@ -10,13 +10,15 @@ from Gamecontroller import Gamecontroller
 class Program:
 
     def __init__(self):
-        self.screen = Screen(0, 0, self.loop, title="HexZomb", mouse_pressed_func=self.mouse_pressed, mouse_moved_func=self.mouse_moved)
+        self.screen = Screen(0, 0, self.loop, title="HexZomb", mouse_pressed_func=self.mouse_pressed, mouse_moved_func=self.mouse_moved, fps_func=self.print_avg_fps)
 
         self.field = Field(self.screen, hex_width=4 * 11, field_size=(self.screen.get_size()))
         self.player = Player(self.screen, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer)
         self.serial = Serial('/dev/cu.wchusbserial1410', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC
         self.input = Input(self.player)
         self.controller = Gamecontroller(self.screen, self.serial)
+
+        self.fps = []
 
         self.screen.set_serial_func(self.serial.update)
         self.screen.start()
@@ -31,6 +33,7 @@ class Program:
         self.screen.text_font(20)
         self.screen.text_color(0)
         self.screen.text(5, 5, f"{self.screen.get_frameRate():.2f}", False)
+        self.fps.append(self.screen.get_frameRate())
 
         self.controller.update_sky()
 
@@ -48,6 +51,9 @@ class Program:
 
     def tick_timer(self):
         self.controller.tick()
+
+    def print_avg_fps(self):
+        print(f"average fps={sum(self.fps)/len(self.fps)}")
 
 
 if __name__ == '__main__':

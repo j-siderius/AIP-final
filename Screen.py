@@ -21,7 +21,7 @@ from pygame.locals import *
 
 class Screen:
     def __init__(self, width: int, height: int, loopFunction, frameRate=60, title=None, key_pressed_func=None, key_hold_func=None,
-                 mouse_pressed_func=None, mouse_dragged_func=None, mouse_released_func=None, mouse_moved_func=None):
+                 mouse_pressed_func=None, mouse_dragged_func=None, mouse_released_func=None, mouse_moved_func=None, fps_func=None):
         # setup screen
         pygame.init()
         if width == height == 0:
@@ -44,6 +44,7 @@ class Screen:
         self.mouse_dragged_func = mouse_dragged_func
         self.mouse_moved_func = mouse_moved_func
         self.serial_update_func = None
+        self.fps_func = fps_func
 
         # other variables
         self.run = True
@@ -67,6 +68,7 @@ class Screen:
         while self.run:
             for event in pygame.event.get():
                 if event.type == pygame.QUIT or pygame.K_ESCAPE in self.get_pressed_keys() or pygame.KSCAN_ESCAPE in self.get_pressed_keys():
+                    self.fps_func()
                     self.run = False
                 if event.type == pygame.KEYDOWN or event.type == pygame.KEYUP:
                     self.key_pressed_event()

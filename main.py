@@ -31,6 +31,7 @@ class Program:
         self.screen.text_font(20)
         self.screen.text_color(0)
         self.screen.text(5, 5, f"{self.screen.get_frameRate():.2f}", False)
+        # print(f"{self.screen.get_frameRate():.2f}")
 
         self.controller.update_sky()
 

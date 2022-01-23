@@ -1,5 +1,6 @@
 import pygame
 
+from Data.settings import MouseButton
 from Zombie import Zombie
 from Screen import Screen
 from Field import Field
@@ -7,8 +8,6 @@ from Player import Player
 from Serial import Serial
 import time
 from Input import Input
-from settings import *
-
 
 class program:
 
@@ -45,16 +44,15 @@ class program:
 
     def mouse_pressed(self, button):
         self.input.process_mouse_button(button)
+        if button == MouseButton.scroll:
+            self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field))
+            self.zombies[len(self.zombies) - 1].a_star(self.player.current_tile)
 
     def controller_moved(self, position):
         self.input.process_nunchuck_movement(position)
 
     def controller_pressed(self, buttons):
         self.input.process_nunchuck_button(buttons)
-
-        if button == MouseButton.left:
-            self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field))
-            self.zombies[len(self.zombies)-1].a_star_test(self.player.current_tile)
 
 
 if __name__ == '__main__':

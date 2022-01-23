@@ -37,7 +37,7 @@ class Gamecontroller:
 		# TODO: add zombie update function here
 
 	def update_day_night(self):
-		"""Manages the day/night cycle and sky color and opacity"""
+		"""Manages the day/night cycle and sky color and opacity as well as zombie spawning"""
 
 		if self.day_night_time < (1/12) * self.timescale:
 			self.sky_opacity = 50
@@ -52,6 +52,10 @@ class Gamecontroller:
 		elif self.day_night_time >= (11 / 12) * self.timescale:
 			self.sky_opacity = 75
 
+		if (9 / 12) * self.timescale > self.day_night_time >= (6 / 12) * self.timescale:
+			# TODO: add zombie spawning function here
+			pass
+
 		self.serial.updateDayNight(int((self.day_night_time / self.timescale) * 11))
 
 	def update_sky(self):
@@ -61,4 +65,3 @@ class Gamecontroller:
 		self.sky.set_alpha(self.sky_opacity)
 		# blit overlay over whole screen
 		self.screen.get_screen().blit(self.sky, (0, 0))
-		# TODO: enable blit when water tiles are fixed

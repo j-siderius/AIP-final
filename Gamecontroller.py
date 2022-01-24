@@ -13,7 +13,7 @@ class Gamecontroller:
 		self.serial = serial
 
 		self.game_time = 0
-		self.day_night_time = 1  # always start game at beginning of day
+		self.day_night_time = 0  # always start game at beginning of day
 		self.timescale = int(timescale)
 		if self.timescale < 12:
 			self.timescale = 12

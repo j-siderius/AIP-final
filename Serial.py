@@ -70,6 +70,7 @@ class Serial:
                                 self.controller_pressed_func([self.joyZ, self.joyC])
                         except ValueError:
                             print("serial message error")
+                            # TODO: delete error messages and move them to a log
                 except IndexError:
                     print("serial error")
 

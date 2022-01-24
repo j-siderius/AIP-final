@@ -5,6 +5,7 @@ from Player import Player
 from Serial import Serial
 from Input import Input
 from Gamecontroller import Gamecontroller
+from Overlay import Overlay
 
 
 class Program:
@@ -20,7 +21,7 @@ class Program:
 
         self.fps = []
 
-        self.screen.set_serial_func(self.serial.update)
+        self.overlay = Overlay(self.screen)
         self.screen.start()
 
     def loop(self):
@@ -35,6 +36,7 @@ class Program:
         self.screen.text(5, 5, f"{self.screen.get_frameRate():.2f}", False)
         self.fps.append(self.screen.get_frameRate())
 
+        self.overlay.display()
         self.controller.update_sky()
 
     def mouse_moved(self):

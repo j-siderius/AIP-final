@@ -55,7 +55,7 @@ class Zombie:
         self.health -= 1
         self.a_star(self.player.current_tile, zombies_tiles)
         if len(self.path) > 0:
-            self.move_zombie(self.path.pop(0))
+            self.move_zombie(self.path[0])
 
     def dead(self) -> bool:
         return self.health <= 0
@@ -130,6 +130,12 @@ class Zombie:
             self.target_tile = targetTile
             self.is_walking = True
             self.walk_timer = Settings.PLAYER_WALKING_TIME
+
+    def get_next_tile(self):
+        next_tile = self.path[0] if len(self.path) > 0 else self.current_tile
+        if not next_tile.is_walkable:
+            return self.current_tile
+        return next_tile
 
 
 class Node:

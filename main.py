@@ -13,7 +13,7 @@ from Gamecontroller import Gamecontroller
 class Program:
 
     def __init__(self):
-        self.screen = Screen(0, 0, self.loop, title="HexZomb", mouse_pressed_func=self.mouse_pressed, mouse_moved_func=self.mouse_moved, fps_func=self.print_avg_fps)
+        self.screen = Screen(0, 0, self.loop, title="HexZomb", mouse_pressed_func=self.mouse_pressed, mouse_moved_func=self.mouse_moved, fps_func=self.print_avg_fps, key_pressed_func=self.key_pressed)
 
         self.field = Field(self.screen, hex_width=4 * 11, field_size=(self.screen.get_size()))
         self.player = Player(self.screen, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer)
@@ -70,6 +70,10 @@ class Program:
     def print_avg_fps(self):
         print(f"average fps={sum(self.fps)/len(self.fps)}")
         print(f"lowest fps={min(self.fps)}")
+
+    # for testing without mouse
+    def key_pressed(self, keys):
+        self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player, []))
 
 
 if __name__ == '__main__':

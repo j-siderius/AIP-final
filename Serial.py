@@ -31,7 +31,7 @@ class Serial:
             self.updateDayNight(self.dayNightCycle)
             self.updateHealth(self.health)
 
-            self.buffer = bytearray()
+            self.msg = None
 
     def list_serial_devices(self):
         """
@@ -50,36 +50,28 @@ class Serial:
         receive JOY:X000Y000BTZ0BTC0\r\n
         """
         if self.port is not None:
-            try:
-                msg = self.port.readline().decode('ascii')  # < ORIGINAL
-                # if 'JOY:' in msg:
-                if msg.find('JOY:') >= 0:
-                    self.joyX = int(msg[5:8])
-                    self.joyY = int(msg[9:12])
-                    self.joyZ = False if int(msg[15:16]) == 0 else True
-                    self.joyC = False if int(msg[19:20]) == 0 else True
+            wait = self.port.in_waiting
+            if wait > 0:
+                try:
+                    buffer = self.port.read(wait)
+                    msg = str(buffer)
+                    begin = msg.rfind('JOY:')
+                    end = msg.rfind('BTC')+4
+                    if end - begin == 20:
+                        try:
+                            msg = msg[begin: end]
+                            self.joyX = int(msg[5:8])
+                            self.joyY = int(msg[9:12])
+                            self.joyZ = False if int(msg[15:16]) == 0 else True
+                            self.joyC = False if int(msg[19:20]) == 0 else True
 
-                    if self.controller_moved_func is not None and self.controller_pressed_func is not None:
-                        self.controller_moved_func([self.joyX, self.joyY])
-                        self.controller_pressed_func([self.joyZ, self.joyC])
-
-                self.port.reset_input_buffer()
-            except UnicodeDecodeError:
-                print("decoding error")
-
-    # this should be more efficient code, but it does not work as expected:
-    def read(self):
-        if self.port is not None:
-            for i in range(25):
-                d = self.port.read(1)
-                if d == b'\n':
-                    print(self.buffer)
-                    self.decode_serial(str(self.buffer))
-                    self.buffer = bytearray()
-                    self.port.reset_input_buffer()
-                    break
-                else:
-                    self.buffer.extend(d)
+                            if self.controller_moved_func is not None and self.controller_pressed_func is not None:
+                                self.controller_moved_func([self.joyX, self.joyY])
+                                self.controller_pressed_func([self.joyZ, self.joyC])
+                        except ValueError:
+                            print("serial message error")
+                except IndexError:
+                    print("serial error")
 
     def updateDayNight(self, time):
         """

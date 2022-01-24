@@ -28,7 +28,7 @@ class Program:
         self.screen.start()
 
     def loop(self):
-        self.field.display(self.screen)
+        self.field.render(self.screen)
         self.player.update()
         self.player.display()
 

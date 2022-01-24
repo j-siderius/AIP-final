@@ -100,9 +100,9 @@ class Zombie:
                     nodes[next_tile] = new_node
 
                     # show the AI path
-                    next_tile.unhighlight()
-                    next_tile.highlight((255, 255, 0, 100))
-                    next_tile.show_score(int(-priority))
+                    # next_tile.unhighlight()
+                    # next_tile.highlight((255, 255, 0, 100))
+                    # next_tile.show_score(int(-priority))
 
         if target_tile not in nodes.keys():
             return
@@ -122,10 +122,10 @@ class Zombie:
             zombies_tiles.append(self.current_tile)
 
         # debugging and showing the AI path
-        for node in node_path:
-            node.get_tile().unhighlight()
-            node.get_tile().highlight((255, 0, 0, 100))
-            node.get_tile().show_score(int(node.priority))
+        # for node in node_path:
+        #     node.get_tile().unhighlight()
+        #     node.get_tile().highlight((255, 0, 0, 100))
+        #     node.get_tile().show_score(int(node.priority))
 
     def manhattan_distance(self, startTile, endTile):
         # return abs(startTile.get_center()[0] - endTile.get_center()[0]) + abs(startTile.get_center()[1] - endTile.get_center()[1])

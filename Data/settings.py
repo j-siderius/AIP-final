@@ -1,9 +1,7 @@
 from enum import Enum
 
 # a place to store settings and constants, might make a separate JSON file to actual store settings
-# TODO
-#   - dict maken met alles tiles en walk speed enzo
-#   - dict maken met structes enz.
+
 
 class Settings:
     WATER_DROP_OFF_SCALING = 1
@@ -17,6 +15,10 @@ class Settings:
     # AI
     MOVEMENT_COST_MULTIPLIER = 25
     WALL_BREAK_TIME = 3  # it takes ten turns to break a wall
+
+    # spawning
+    MIN_SPAWN_DISTANCE = 200
+    MAX_SPAWN_DISTANCE = 500
 
 
 class ResourceTiles(Enum):

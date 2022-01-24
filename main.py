@@ -1,6 +1,6 @@
 import pygame
 
-from Data.settings import MouseButton
+from Data.settings import MouseButton, Settings
 from Zombie import Zombie
 from Screen import Screen
 from Field import Field
@@ -45,6 +45,12 @@ class Program:
         self.fps.append(self.screen.get_frameRate())
 
         self.controller.update_sky()
+
+        # debug show
+        x, y = self.player.get_player_position()
+        # self.screen.outline_circle(x, y, Settings.MIN_SPAWN_DISTANCE, color=(255, 0, 255))
+        # self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, color=(255, 0, 255))
+        self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, thickness=int((Settings.MAX_SPAWN_DISTANCE - Settings.MIN_SPAWN_DISTANCE)), color=(255, 0, 255, 100))
 
     def mouse_moved(self):
         self.input.process_mouse_movement(self.screen.get_mouse_pos())

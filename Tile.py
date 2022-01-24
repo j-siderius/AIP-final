@@ -263,7 +263,6 @@ class Tile(pygame.sprite.Sprite):
             self.end_action_func(None, 0)
         if self.current_action == ActionType.destroying:
             resource, amount = self.destroy_structure()
-            print(resource, amount)
             self.end_action_func(resource, amount)
 
         self.current_action_time = self.tile_property.action_time
@@ -321,6 +320,14 @@ class Tile(pygame.sprite.Sprite):
     def __lt__(self, other):
         return self.pos[1] < other.pos[1]
 
+    #
+    # testing
+    def show_score(self, score):
+        x, y = self.hex_rect.center
+        x -= self.rect.x
+        y -= self.rect.y
+        self.screen.stroke([0]*3)
+        self.screen.text(x, y, score, color=[255]*3, surface=self.image)
 
 class ActionType(Enum):
     none = 0

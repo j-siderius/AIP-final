@@ -14,6 +14,10 @@ class Settings:
     HIGHLIGHT_COLOR_SELECTED = (255, 140, 0, 200)
     HIGHLIGHT_COLOR_ACTION = (65, 105, 225, 150)
 
+    # AI
+    MOVEMENT_COST_MULTIPLIER = 25
+    WALL_BREAK_TIME = 3  # it takes ten turns to break a wall
+
 
 class ResourceTiles(Enum):
     none = -1

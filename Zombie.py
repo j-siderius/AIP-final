@@ -64,11 +64,13 @@ class Zombie:
         self.pos = self.current_tile.get_center()
 
     def a_star(self, target_tile: Tile, zombies_tiles: list):
+        start_node: Node = Node(self.current_tile, 0, None)
+
         frontier = list()
-        frontier.append(Node(self.current_tile, 0))  # self.current_tile)
-        came_from = dict()
+        frontier.append(start_node)
+        nodes = dict()
+        nodes[self.current_tile] = start_node
         cost_so_far = dict()
-        came_from[self.current_tile] = None
         cost_so_far[self.current_tile] = 0
 
         while len(frontier) > 0:
@@ -83,37 +85,51 @@ class Zombie:
 
             for next_tile in neighbours:
                 # calculate (travel-dist) cost score g-score
-                if next_tile.is_walkable() and next_tile not in zombies_tiles:  # zombies_tiles.count(next_tile) < 2:  # next_tile not in zombies_tiles:
-                    new_cost = cost_so_far[current_tile] + (1 / next_tile.is_walkable()) * 2
+                if next_tile.is_walkable() and next_tile not in zombies_tiles:
+                    new_cost = cost_so_far[current_tile] + (1 / next_tile.is_walkable()) * Settings.MOVEMENT_COST_MULTIPLIER
                 elif next_tile.has_structure():
-                    new_cost = cost_so_far[current_tile] + 10  # temp
+                    new_cost = cost_so_far[current_tile] + Settings.WALL_BREAK_TIME * Settings.MOVEMENT_COST_MULTIPLIER  # temp
                 else:
                     continue
 
                 if next_tile not in cost_so_far or new_cost < cost_so_far[next_tile]:
-                    # next_tile.highlight((255, 255, 0, 50))
                     cost_so_far[next_tile] = new_cost
                     priority = new_cost + self.manhattan_distance(target_tile, next_tile)  # g-score + f-score
-                    bisect.insort(frontier, Node(next_tile, -priority))
-                    came_from[next_tile] = current_tile
+                    new_node: Node = Node(next_tile, -priority, current_tile)
+                    bisect.insort(frontier, new_node)
+                    nodes[next_tile] = new_node
 
-        if target_tile not in came_from.keys():
+                    # show the AI path
+                    next_tile.unhighlight()
+                    next_tile.highlight((255, 255, 0, 100))
+                    next_tile.show_score(int(-priority))
+
+        if target_tile not in nodes.keys():
             return
 
         current_tile = target_tile
         self.path.clear()
+        node_path = []
         while current_tile != self.current_tile:
             self.path.insert(0, current_tile)
-            current_tile = came_from[current_tile]
+            node_path.insert(0, nodes[current_tile])
+            current_tile = nodes[current_tile].get_came_from()
 
-        zombies_tiles.append(self.path[0])
+        if len(self.path) > 0 and self.path[0].is_walkable():
+            zombies_tiles.append(self.path[0])
+        else:
+            print("hoi")
+            zombies_tiles.append(self.current_tile)
 
-        # for tile in self.path:
-        #     tile.highlight((255, 0, 0, 50))
+        # debugging and showing the AI path
+        for node in node_path:
+            node.get_tile().unhighlight()
+            node.get_tile().highlight((255, 0, 0, 100))
+            node.get_tile().show_score(int(node.priority))
 
     def manhattan_distance(self, startTile, endTile):
-        return abs(startTile.get_center()[0] - endTile.get_center()[0]) + abs(startTile.get_center()[1] - endTile.get_center()[1])
-        # return math.dist(startTile.get_center(), endTile.get_center())
+        # return abs(startTile.get_center()[0] - endTile.get_center()[0]) + abs(startTile.get_center()[1] - endTile.get_center()[1])
+        return math.dist(startTile.get_center(), endTile.get_center())
 
     def move_zombie(self, targetTile):
         """Moves the player to the clicked tile (if valid move)"""
@@ -141,12 +157,16 @@ class Zombie:
 
 
 class Node:
-    def __init__(self, tile: Tile, priority):
+    def __init__(self, tile: Tile, priority, came_from):
         self.tile = tile
         self.priority = priority
+        self.came_from = came_from
 
     def __lt__(self, other):
         return self.priority > other.priority
 
     def get_tile(self) -> Tile:
         return self.tile
+
+    def get_came_from(self) -> Tile:
+        return self.came_from

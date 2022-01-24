@@ -26,7 +26,7 @@ class Gamecontroller:
 		self.zombies = zombies
 		# self.zombies_tiles = [zombie.current_tile for zombie in self.zombies]
 		self.zombies_tiles = [zombie.get_next_tile() for zombie in self.zombies]
-
+		# self.zombies_tiles = list()
 		self.zombie_death_func = zombie_death_func
 
 	def tick(self):
@@ -40,9 +40,10 @@ class Gamecontroller:
 			self.day_night_time += 1  # increment time
 		self.update_day_night()
 
-		self.zombies_tiles = [zombie.current_tile for zombie in self.zombies]
+		self.zombies_tiles = []
 		for zombie in self.zombies:
 			if zombie.dead() is not True:
+				# pass the zombies the reference to the list so they create a shared list of where they are, making them not walk on top of each other
 				zombie.update_tick(self.zombies_tiles)
 			else:
 				self.zombie_death_func(zombie)

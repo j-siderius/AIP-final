@@ -32,7 +32,6 @@ class Zombie:
         self.a_star(self.player.current_tile, zombies_tiles)
 
         self.health = random.randint(0, 15)
-        print(len(self.path))
         self.health += len(self.path)
 
     def display(self):
@@ -55,7 +54,7 @@ class Zombie:
         self.health -= 1
         self.a_star(self.player.current_tile, zombies_tiles)
         if len(self.path) > 0:
-            self.move_zombie(self.path[0])
+            self.move_zombie(self.path.pop(0))
 
     def dead(self) -> bool:
         return self.health <= 0
@@ -75,7 +74,6 @@ class Zombie:
         while len(frontier) > 0:
             current_node: Node = frontier.pop(0)
             current_tile: Tile = current_node.get_tile()
-            print(current_node)
 
             if current_tile == target_tile:
                 break
@@ -85,7 +83,7 @@ class Zombie:
 
             for next_tile in neighbours:
                 # calculate (travel-dist) cost score g-score
-                if next_tile.is_walkable() and next_tile not in zombies_tiles:
+                if next_tile.is_walkable() and next_tile not in zombies_tiles:  # zombies_tiles.count(next_tile) < 2:  # next_tile not in zombies_tiles:
                     new_cost = cost_so_far[current_tile] + (1 / next_tile.is_walkable()) * 2
                 elif next_tile.has_structure():
                     new_cost = cost_so_far[current_tile] + 10  # temp
@@ -99,17 +97,16 @@ class Zombie:
                     bisect.insort(frontier, Node(next_tile, -priority))
                     came_from[next_tile] = current_tile
 
-        if target_tile in cost_so_far:
-            print(f"{came_from = }, {cost_so_far[target_tile]}")
-
         if target_tile not in came_from.keys():
             return
 
         current_tile = target_tile
-        self.path = []
+        self.path.clear()
         while current_tile != self.current_tile:
             self.path.insert(0, current_tile)
             current_tile = came_from[current_tile]
+
+        zombies_tiles.append(self.path[0])
 
         # for tile in self.path:
         #     tile.highlight((255, 0, 0, 50))
@@ -132,7 +129,12 @@ class Zombie:
             self.walk_timer = Settings.PLAYER_WALKING_TIME
 
     def get_next_tile(self):
-        next_tile = self.path[0] if len(self.path) > 0 else self.current_tile
+        next_tile: Tile
+        if len(self.path) > 0:
+            next_tile = self.path[0]
+        else:
+            next_tile = self.current_tile
+
         if not next_tile.is_walkable:
             return self.current_tile
         return next_tile

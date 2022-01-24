@@ -72,8 +72,9 @@ class Program:
         print(f"lowest fps={min(self.fps)}")
 
     # for testing without mouse
-    def key_pressed(self, keys):
-        self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player, []))
+    def key_pressed(self, keys: set):
+        if 226 not in keys and len(keys) > 0:
+            self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player, []))
 
 
 if __name__ == '__main__':

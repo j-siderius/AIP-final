@@ -82,7 +82,6 @@ class Player:
             if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
                 self.time_ticker()
-                # implementation ^ Work In Progress
                 self.current_tile.unhighlight_neighbours()
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME

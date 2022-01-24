@@ -2,7 +2,7 @@ import pygame
 
 
 class Gamecontroller:
-	def __init__(self, screen, serial, timescale=12):
+	def __init__(self, screen, serial, zombies, zombie_death_func, timescale=12):
 		"""
 		The gamecontroller manages miscellaneous functions like keeping track of time and the day/night cycle
 		:param screen: pygame screen obj to blit to
@@ -23,6 +23,9 @@ class Gamecontroller:
 		self.sky_opacity = 0
 		self.sky = pygame.Surface(self.screen.get_size())
 
+		self.zombies = zombies
+		self.zombie_death_func = zombie_death_func
+
 	def tick(self):
 		"""
 		Call this function to forward the time one tick (e.g. when player moved or did an action)
@@ -34,6 +37,11 @@ class Gamecontroller:
 			self.day_night_time += 1  # increment time
 		self.update_day_night()
 
+		for z in self.zombies:
+			if z.dead() is not True:
+				z.update_tick()
+			else:
+				self.zombie_death_func(z)
 		# TODO: add zombie update function here
 
 	def update_day_night(self):

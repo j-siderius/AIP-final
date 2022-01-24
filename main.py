@@ -20,7 +20,7 @@ class Program:
         self.serial = Serial('COM14', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC
         self.input = Input(self.player)
         self.zombies = []
-        self.controller = Gamecontroller(self.screen, self.serial)
+        self.controller = Gamecontroller(self.screen, self.serial, self.zombies, zombie_death_func=self.zombie_death)
 
         self.fps = []
 
@@ -33,6 +33,7 @@ class Program:
         self.player.display()
 
         for zombie in self.zombies:
+            zombie.update()
             zombie.display()
 
         # fps counter
@@ -51,8 +52,8 @@ class Program:
     def mouse_pressed(self, button):
         self.input.process_mouse_button(button)
         if button == MouseButton.scroll:
-            self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field))
-            self.zombies[len(self.zombies) - 1].a_star(self.player.current_tile)
+            self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player))
+            # self.zombies[len(self.zombies) - 1].a_star(self.player.current_tile)
 
     def controller_moved(self, position):
         self.input.process_nunchuck_movement(position)
@@ -63,8 +64,12 @@ class Program:
     def tick_timer(self):
         self.controller.tick()
 
+    def zombie_death(self, zombie):
+        self.zombies.remove(zombie)
+
     def print_avg_fps(self):
         print(f"average fps={sum(self.fps)/len(self.fps)}")
+        print(f"lowest fps={min(self.fps)}")
 
 
 if __name__ == '__main__':

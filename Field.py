@@ -103,11 +103,17 @@ class Field:
 
         # draw the water sprites on the screen
         self.water_group.draw(screen.get_screen())
+        # save the water sprite as one image for faster loading
+        pygame.image.save(screen.get_screen(), "Data/Sprites/water.bmp")
+        self.water_img = pygame.image.load("Data/Sprites/water.bmp").convert()
 
         print(f"Field has been generated, {self.hex_size = }, {len(self.tiles) = }, {self.field_size = }")
 
     # TODO fix deze naam
     def display(self, screen):  # render and update the land tiles
+        # TODO: do your drawing sprites magic thing
+        screen.get_screen().blit(self.water_img, (0, 0))
+
         self.tiles_group.update()
         self.tiles_group.draw(screen.get_screen())
 

@@ -1,6 +1,7 @@
 import math
 from Data.settings import *
 from Player import *
+import time
 
 
 class Input:
@@ -12,6 +13,8 @@ class Input:
         self.selected_tile = 5
         self.prev_selected_tile = -1
         self.player = player
+        self.elapsed_time = 0
+        self.old_time = time.perf_counter()
 
     def process_nunchuck_movement(self, joystick):
         """
@@ -35,12 +38,15 @@ class Input:
 
     def process_nunchuck_button(self, buttons):
         """:param buttons: [joyZ, joyC]"""
-        if buttons[0]:
-            # Z button from joystick (comparable to left-click)
-            self.move_player(self.get_selected_tile())
-        elif buttons[1]:
-            # C button from joystick (comparable to right-click)
-            self.build_mine(self.get_selected_tile())
+        self.elapsed_time = time.perf_counter() - self.old_time
+        if self.elapsed_time > 0.050:  # introduce 50ms delay to avoid double clicking
+            self.old_time = time.perf_counter()
+            if buttons[0]:
+                # Z button from joystick (comparable to left-click)
+                self.move_player(self.get_selected_tile())
+            elif buttons[1]:
+                # C button from joystick (comparable to right-click)
+                self.build_mine(self.get_selected_tile())
 
     def process_mouse_movement(self, pos):
         """

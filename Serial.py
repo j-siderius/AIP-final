@@ -30,7 +30,8 @@ class Serial:
             self.joyX, self.joyY, self.joyC, self.joyZ = None, None, False, False
             self.updateDayNight(self.dayNightCycle)
             self.updateHealth(self.health)
-            self.waitTime = 0
+
+            self.msg = None
 
     def list_serial_devices(self):
         """
@@ -49,31 +50,29 @@ class Serial:
         receive JOY:X000Y000BTZ0BTC0\r\n
         """
         if self.port is not None:
-            try:
-                msg = self.port.readline().decode('ascii')
-                if 'JOY:' in msg:
-                    self.joyX = int(msg[5:8])
-                    self.joyY = int(msg[9:12])
-                    self.joyZ = False if int(msg[15:16]) == 0 else True
-                    self.joyC = False if int(msg[19:20]) == 0 else True
+            wait = self.port.in_waiting
+            if wait > 0:
+                try:
+                    buffer = self.port.read(wait)
+                    msg = str(buffer)
+                    begin = msg.rfind('JOY:')
+                    end = msg.rfind('BTC')+4
+                    if end - begin == 20:
+                        try:
+                            msg = msg[begin: end]
+                            self.joyX = int(msg[5:8])
+                            self.joyY = int(msg[9:12])
+                            self.joyZ = False if int(msg[15:16]) == 0 else True
+                            self.joyC = False if int(msg[19:20]) == 0 else True
 
-                    if self.controller_moved_func is not None and self.controller_pressed_func is not None:
-                        self.controller_moved_func([self.joyX, self.joyY])
-                        self.controller_pressed_func([self.joyZ, self.joyC])
-
-                self.port.reset_input_buffer()
-            except UnicodeDecodeError:
-                print("decoding error")
-
-            # test code
-            if time.perf_counter() > self.waitTime + 2.000:
-                self.waitTime = time.perf_counter()
-
-                self.updateDayNight(self.dayNightCycle)  # send daynight update
-                if self.dayNightCycle < 11:
-                    self.dayNightCycle += 1
-                else:
-                    self.dayNightCycle = 0
+                            if self.controller_moved_func is not None and self.controller_pressed_func is not None:
+                                self.controller_moved_func([self.joyX, self.joyY])
+                                self.controller_pressed_func([self.joyZ, self.joyC])
+                        except ValueError:
+                            print("serial message error")
+                            # TODO: delete error messages and move them to a log
+                except IndexError:
+                    print("serial error")
 
     def updateDayNight(self, time):
         """

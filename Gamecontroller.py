@@ -24,6 +24,7 @@ class Gamecontroller:
 		self.sky = pygame.Surface(self.screen.get_size())
 
 		self.zombies = zombies
+		self.zombies_tiles = [zombie.current_tile for zombie in self.zombies]
 		self.zombie_death_func = zombie_death_func
 
 	def tick(self):
@@ -37,12 +38,13 @@ class Gamecontroller:
 			self.day_night_time += 1  # increment time
 		self.update_day_night()
 
-		for z in self.zombies:
-			if z.dead() is not True:
-				z.update_tick()
+		self.zombies_tiles = [zombie.current_tile for zombie in self.zombies]
+		for zombie in self.zombies:
+			if zombie.dead() is not True:
+				zombie.update_tick(self.zombies_tiles)
 			else:
-				self.zombie_death_func(z)
-		# TODO: add zombie update function here
+				self.zombie_death_func(zombie)
+
 
 	def update_day_night(self):
 		"""Manages the day/night cycle and sky color and opacity as well as zombie spawning"""

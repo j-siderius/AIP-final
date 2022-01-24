@@ -17,7 +17,7 @@ class Program:
 
         self.field = Field(self.screen, hex_width=4 * 11, field_size=(self.screen.get_size()))
         self.player = Player(self.screen, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer)
-        self.serial = Serial('COM14', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC
+        self.serial = Serial('COM3', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC # and com3 voor Frank
         self.input = Input(self.player)
         self.zombies = []
         self.controller = Gamecontroller(self.screen, self.serial, self.zombies, zombie_death_func=self.zombie_death)
@@ -52,7 +52,7 @@ class Program:
     def mouse_pressed(self, button):
         self.input.process_mouse_button(button)
         if button == MouseButton.scroll:
-            self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player))
+            self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player, []))
             # self.zombies[len(self.zombies) - 1].a_star(self.player.current_tile)
 
     def controller_moved(self, position):

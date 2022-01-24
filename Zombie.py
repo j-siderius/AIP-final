@@ -5,14 +5,14 @@ from queue import PriorityQueue
 import Tile
 from Data.settings import Settings
 
-
-# TODO enemy can spawn on mountains
-from Screen import lerp, lerp_2D
+from Field import Field
+from Player import Player
+from Screen import lerp, lerp_2D, Screen
 
 
 class Zombie:
 
-    def __init__(self, pos, screen, field, player):
+    def __init__(self, pos, screen: Screen, field: Field, player: Player, zombies_tiles: list):
         self.field = field
         self.pos = pos
         self.screen = screen
@@ -29,7 +29,7 @@ class Zombie:
         self.align_enemy(self.current_tile)
 
         self.player = player
-        self.a_star(self.player.current_tile)
+        self.a_star(self.player.current_tile, zombies_tiles)
 
         self.health = random.randint(0, 15)
         print(len(self.path))
@@ -51,9 +51,9 @@ class Zombie:
             else:
                 self.pos = lerp_2D(self.current_tile.get_center(), self.target_tile.get_center(), factor)
 
-    def update_tick(self):
+    def update_tick(self, zombies_tiles: list):
         self.health -= 1
-        self.a_star(self.player.current_tile)
+        self.a_star(self.player.current_tile, zombies_tiles)
         if len(self.path) > 0:
             self.move_zombie(self.path.pop(0))
 
@@ -64,7 +64,7 @@ class Zombie:
         self.current_tile = tile
         self.pos = self.current_tile.get_center()
 
-    def a_star(self, target_tile):
+    def a_star(self, target_tile: Tile, zombies_tiles: list):
         frontier = list()
         frontier.append(Node(self.current_tile, 0))  # self.current_tile)
         came_from = dict()
@@ -85,7 +85,7 @@ class Zombie:
 
             for next_tile in neighbours:
                 # calculate (travel-dist) cost score g-score
-                if next_tile.is_walkable():
+                if next_tile.is_walkable() and next_tile not in zombies_tiles:
                     new_cost = cost_so_far[current_tile] + (1 / next_tile.is_walkable()) * 2
                 elif next_tile.has_structure():
                     new_cost = cost_so_far[current_tile] + 10  # temp

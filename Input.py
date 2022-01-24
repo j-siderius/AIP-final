@@ -115,8 +115,8 @@ class Input:
             selected_tile.select_tile()
             self.prev_selected_tile = self.selected_tile
 
-    def move_player(self, tile):
-        self.player.move_player(tile.get_position())
+    def move_player(self, tile: Tile):
+        self.player.move_player(tile)
         self.prev_selected_tile = -1
 
     def build_mine(self, tile):

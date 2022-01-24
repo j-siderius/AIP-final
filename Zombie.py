@@ -60,8 +60,8 @@ class Zombie:
     def dead(self) -> bool:
         return self.health <= 0
 
-    def align_enemy(self, point):
-        self.current_tile = self.field.get_tile_from_point(point)
+    def align_enemy(self, tile: Tile):
+        self.current_tile = tile
         self.pos = self.current_tile.get_center()
 
     def a_star(self, target_tile):
@@ -80,7 +80,7 @@ class Zombie:
             if current_tile == target_tile:
                 break
 
-            neighbours = current_tile.get_neighbours()
+            neighbours = current_tile.get_neighbours().copy()
             random.shuffle(neighbours)
 
             for next_tile in neighbours:

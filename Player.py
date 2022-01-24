@@ -69,17 +69,15 @@ class Player:
             else:
                 self.x, self.y = lerp_2D(self.from_tile.get_center(), self.target_tile.get_center(), factor)
 
-    def move_player(self, targetTile):
+    def move_player(self, target_tile: Tile):
         """Moves the player to the clicked tile (if valid move)"""
         if self.is_walking or self.doing_an_action:
             return
 
-        targetTileX = targetTile[0]
-        targetTileY = targetTile[1]
         neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
             # neighbour.unselect_tile()
-            if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
+            if neighbour == target_tile and target_tile.is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
                 self.time_ticker()
                 self.current_tile.unhighlight_neighbours()

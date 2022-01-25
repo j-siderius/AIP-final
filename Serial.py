@@ -26,7 +26,7 @@ class Serial:
             self.controller_moved_func = controller_moved_func
             self.controller_pressed_func = controller_pressed_func
             self.dayNightCycle = 0
-            self.health = 0
+            self.health = 4  # start with full health
             self.joyX, self.joyY, self.joyC, self.joyZ = None, None, False, False
             self.updateDayNight(self.dayNightCycle)
             self.updateHealth(self.health)
@@ -82,6 +82,7 @@ class Serial:
         """
         self.send('DN' + str(time).zfill(2) + "\n")
 
+    # TODO: @frank call health function if health is decreased (damage by zombie)
     def updateHealth(self, health):
         """
         Updates the health of the LED clock

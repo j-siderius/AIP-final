@@ -11,12 +11,12 @@ from Zombie import Zombie
 
 
 class Gamecontroller:
-	def __init__(self, screen: Screen, serial, game_end_func, zombies, zombie_death_func, field: Field, player: Player, timescale: int = 12, game_duration: int = 24):
+	def __init__(self, screen: Screen, serial, game_end_func, zombies, zombie_death_func, field: Field, player: Player, timescale: int = 12, game_duration: int = 4):
 		"""
 		The gamecontroller manages miscellaneous functions like keeping track of time and the day/night cycle
 		:param screen: pygame screen obj to blit to
 		:param timescale: how quickly or slowly time progresses in the game (e.g. timescale=12 -> day lasts 12 ticks)
-		:param game_duration: how long the game lasts (e.g. if timescale=12 and game_duration=24 -> game lasts 2 days)
+		:param game_duration: how long the game lasts (e.g. game_duration=4 -> game lasts 4 days)
 		"""
 		# save the references to the objects as class members
 		self.player = player
@@ -59,9 +59,10 @@ class Gamecontroller:
 		self.update_day_night()
 
 		# check if game is done
-		if self.game_time >= self.game_duration:
+		if self.game_day >= self.game_duration:
 			self.game_end_func()
 
+		# update the zombies
 		self.zombies_tiles = []
 		for zombie in self.zombies:
 			if zombie.dead() is not True:

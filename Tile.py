@@ -9,6 +9,20 @@ from Data.TilesData import tiles_dict, ResourceTiles, Resources, Structures, Til
 
 
 class Tile(pygame.sprite.Sprite):
+    """
+    The tile class, this stores the property and sprite of the tile
+    :param pos: the coords of the tile
+    :param place: the x,y place in the grid
+    :param radius: the radius of the hexagon
+    :param points: the points of the hexagon
+    :param screen: the screen instance to draw
+    :param noise: the noise of the terrain
+    :param resource_noise: the noise of the resources
+    :param sprite_dict: the dict containing all the sprites
+    :param field: the field instance to communicate with other tiles
+
+    """
+
     def __init__(self, pos, place, size, radius, points, screen: Screen, noise: PerlinNoise, resource_noise: PerlinNoise, sprite_dict: dict, field):
         super().__init__()
         self.field = field
@@ -332,6 +346,7 @@ class Tile(pygame.sprite.Sprite):
         y -= self.rect.y
         self.screen.stroke([0]*3)
         self.screen.text(x, y, score, color=[255]*3, surface=self.image)
+
 
 class ActionType(Enum):
     none = 0

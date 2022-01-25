@@ -97,7 +97,7 @@ class Gamecontroller:
 			for i in range(Settings.SPAWN_TRY_AMOUNT[self.game_day]):
 				tile = tile_list[random.randint(0, len(tile_list)-1)]
 				if Settings.MIN_SPAWN_DISTANCE < math.dist(self.player.get_player_position(), tile.get_center()) < Settings.MAX_SPAWN_DISTANCE and tile.is_walkable():
-					self.zombies.append(Zombie(tile, self.screen, self.field, self.player, []))
+					self.zombies.append(Zombie(tile, self.screen, self.player))
 
 		# send the new day/night-time to the LEDs
 		self.serial.updateDayNight(int(self.day_night_time/(self.timescale / 12)))

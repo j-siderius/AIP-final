@@ -71,20 +71,21 @@ class Overlay:
         displays start and end screens if we have the correct game state, as well as UI elements
         """
 
+        player_menu_left = self.screen_width - 30 - (self.heart_full.get_width() * 5)
         # display health bar
         health = self.player.get_health()
         for i in range(4):
             if i > health - 1:
-                self.screen.get_screen().blit(self.heart_empty, (self.screen_width - 250 + (50 * i), 30))
+                self.screen.get_screen().blit(self.heart_empty, (player_menu_left + (self.heart_full.get_width() * i), 30))
             else:
-                self.screen.get_screen().blit(self.heart_full, (self.screen_width - 250 + (50 * i), 30))
+                self.screen.get_screen().blit(self.heart_full,(player_menu_left + (self.heart_full.get_width() * i), 30))
 
         # display inventory
         inventory = self.player.get_resources()
         woods = inventory[Resources.wood]
-        self.screen.get_screen().blit(self.log, (self.screen_width - 220, 80))
+        self.screen.get_screen().blit(self.log, (player_menu_left, 80))
         self.screen.set_font(self.regular_font)
-        self.screen.text(self.screen_width - 120, 75 + self.log.get_height()/2, woods)
+        self.screen.text(player_menu_left + (self.heart_full.get_width() * 1), 75 - self.log.get_height()/2, woods, centered=False)
 
         # display start and end screen
         if self.start:

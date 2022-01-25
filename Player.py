@@ -109,7 +109,7 @@ class Player:
         """Updates the player position and animates the movement from tile to tile"""
         if self.is_walking:  # walking
             factor = 1 - self.walk_timer / Settings.PLAYER_WALKING_TIME
-            walkspeed = lerp(self.current_tile.is_walkable(), self.target_tile.is_walkable(), factor)
+            walkspeed = lerp(self.from_tile.is_walkable(), self.target_tile.is_walkable(), factor)
             self.walk_timer -= self.screen.get_elapsed_time() * walkspeed
 
             # is the player done walking?
@@ -139,6 +139,7 @@ class Player:
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME
                 self.target_tile = neighbour
+                self.time_ticker()
 
     def mine_build(self, pressed_tile):
         """Performs the player action on the clicked tile (mine, build, destroy)"""

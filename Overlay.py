@@ -5,6 +5,11 @@ from Screen import Screen
 
 class Overlay:
     def __init__(self, screen: Screen, controller):
+        """
+        The overlay class manages the tutorial overlay, the end screen and the inventory and health UI
+        :param screen: main screen class so we can render stuff on screen
+        :param controller: controller class so we can get the timescale of the game
+        """
         self.screen: Screen = screen
         self.screen_width, self.screen_height = self.screen.get_size()[0], self.screen.get_size()[1]
 
@@ -48,7 +53,9 @@ class Overlay:
         self.bold_font = pygame.font.Font("Data/Fonts/Athelas-Bold.ttf", 40)
 
     def display(self):
-        # TODO: add check to Input.py for tutorial and end of game
+        """
+        displays start and end screens if we have the correct game state
+        """
         if self.start:
             self.start_screen()
         elif self.end:
@@ -58,6 +65,7 @@ class Overlay:
         """
         Shows the current tutorial overlay
         """
+        # fill the background with a light hue/mist
         self.background.fill((150, 150, 150))
         self.background.set_alpha(75)
         self.screen.get_screen().blit(self.background, (0, 0))
@@ -98,6 +106,7 @@ class Overlay:
         else:  # show the win screen overlay
             self.screen.get_screen().blit(self.won_screen, self.won_rect.topleft)
 
+        # add the played duration to the screen
         self.screen.set_font(self.bold_font)
         self.screen.text(self.screen_width/2, (self.screen_height/5) * 2.8, f"You survived {self.score} hours")
         self.screen.set_font(self.small_font)

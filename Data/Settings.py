@@ -10,7 +10,7 @@ class Settings:
     TIMESCALE = 24          # The amount of ticks (player actions) in a day (has to be a multiple of 12)
 
     # Debug
-    SHOW_FPS = False
+    SHOW_FPS = True
     SHOW_PATH_FINDING = False
     SHOW_SPAWN_AREA = False
 

@@ -41,22 +41,24 @@ class Program:
             zombie.update()
             zombie.display()
 
-        # fps counter
-        self.screen.toggle_stroke(False)
-        self.screen.rect(5, 5, 100, 20, (255))
-        self.screen.text_font(20)
-        self.screen.text_color(0)
-        self.screen.text(5, 5, f"{self.screen.get_frameRate():.2f}", False)
-        self.fps.append(self.screen.get_frameRate())
-
         self.overlay.display()
         self.controller.update_sky()
 
-        # debug show
-        # x, y = self.player.get_player_position()
-        # self.screen.outline_circle(x, y, Settings.MIN_SPAWN_DISTANCE, color=(255, 0, 255))
-        # self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, color=(255, 0, 255))
-        # self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, thickness=int((Settings.MAX_SPAWN_DISTANCE - Settings.MIN_SPAWN_DISTANCE)), color=(255, 0, 255, 100))
+        # Show spawn area
+        if Settings.SHOW_SPAWN_AREA:
+            x, y = self.player.get_player_position()
+            self.screen.outline_circle(x, y, Settings.MIN_SPAWN_DISTANCE, color=(255, 0, 255))
+            self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, color=(255, 0, 255))
+            self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, thickness=int((Settings.MAX_SPAWN_DISTANCE - Settings.MIN_SPAWN_DISTANCE)), color=(255, 0, 255, 100))
+
+        # fps counter
+        if Settings.SHOW_FPS:
+            self.screen.toggle_stroke(False)
+            self.screen.rect(5, 5, 100, 20, (255))
+            self.screen.text_font(20)
+            self.screen.text_color(0)
+            self.screen.text(5, 5, f"{self.screen.get_frameRate():.2f}", False)
+            self.fps.append(self.screen.get_frameRate())
 
     def mouse_moved(self):
         self.input.process_mouse_movement(self.screen.get_mouse_pos())

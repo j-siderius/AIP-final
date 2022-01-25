@@ -73,6 +73,7 @@ class Input:
             angle = 0
 
         self.set_tile(angle)
+        self.set_looking_direction(angle)
 
     def process_mouse_button(self, button):
         """:param button: mouseButton"""
@@ -83,7 +84,7 @@ class Input:
             # right-click
             self.build_mine(self.get_selected_tile())
 
-    def set_tile(self, angle, ):
+    def set_tile(self, angle):
         """
         calculate selected tile from angle
         """
@@ -118,6 +119,12 @@ class Input:
             selected_tile = self.get_selected_tile()
             selected_tile.select_tile()
             self.prev_selected_tile = self.selected_tile
+
+    def set_looking_direction(self, angle):
+        if angle > 300 or angle <= 120:
+            self.player.set_look_direction('left')
+        else:
+            self.player.set_look_direction('right')
 
     def move_player(self, tile):
         if self.overlay.start:  # check for starting tutorial

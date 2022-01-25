@@ -37,9 +37,7 @@ class Gamecontroller:
 		self.sky = pygame.Surface(self.screen.get_size())
 
 		self.zombies = zombies
-		# self.zombies_tiles = [zombie.current_tile for zombie in self.zombies]
-		self.zombies_tiles = [zombie.get_next_tile() for zombie in self.zombies]
-		# self.zombies_tiles = list()
+		self.zombies_tiles = list()
 		self.zombie_death_func = zombie_death_func
 
 	def tick(self):

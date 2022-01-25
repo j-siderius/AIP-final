@@ -53,6 +53,7 @@ blue skies and a yellow sun, while the night sky has a faint blue glow with a fu
 Below you can find an inheritance diagram which explains the relations between all classes.
 <div align="center">
     <img src="Doc/Inheritance_diagram.png" width="65%">
+    <p><a href="Doc/Inheritance_diagram.png">click to enlarge</a></p>
 </div>
 
 ### Libraries

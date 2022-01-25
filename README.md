@@ -40,7 +40,7 @@ blue skies and a yellow sun, while the night sky has a faint blue glow with a fu
 <div align="center">
     <img src="Doc/LED_clock1.png" alt="LED clock during daytime" width="45%">
     <img src="Doc/LED_clock2.png" alt="LED clock during nighttime" width="45%">
-    <img src="Doc/Nunchuck.png" alt="Nunchuck controller" height="50%">
+    <img src="Doc/Nunchuck.png" alt="Nunchuck controller" width="45%">
 </div>
 
 ### Code overview

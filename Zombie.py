@@ -3,7 +3,7 @@ import math
 import random
 import pygame
 import Tile
-from Data.settings import Settings
+from Data.Settings import Settings
 
 from Field import Field
 from Player import Player

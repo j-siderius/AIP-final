@@ -1,5 +1,5 @@
 import math
-from Data.settings import *
+from Data.Settings import *
 from Player import *
 import time
 

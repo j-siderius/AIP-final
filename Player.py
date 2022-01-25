@@ -5,8 +5,9 @@ import time
 
 import Tile
 from Field import Field
-from Data.settings import *
-from Screen import Screen, lerp, lerp_2D
+from Data.Settings import Settings
+from Data.TilesData import Resources
+from Screen import lerp, lerp_2D
 
 
 class Player:
@@ -109,7 +110,6 @@ class Player:
 
         neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
-            # neighbour.unselect_tile()
             if neighbour == target_tile and target_tile.is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
                 self.time_ticker()
@@ -123,21 +123,22 @@ class Player:
         if self.is_walking or self.doing_an_action:
             return
 
-        self.start_action()
-
         # resource mining
         if pressed_tile.has_resources():  # if the tile has resources
+            self.start_action()
             pressed_tile.action_mine_resource(self.end_action)
 
         # building
         elif pressed_tile.can_build():
             # wooden wall
             if self.inventory[Resources.wood] >= Settings.WOODEN_WALL_COST:
+                self.start_action()
                 pressed_tile.action_build_wall(self.end_action)
                 self.inventory[Resources.wood] -= Settings.WOODEN_WALL_COST
 
         # destroying buildings
         elif pressed_tile.has_structure():
+            self.start_action()
             pressed_tile.action_destroy_structure(self.end_action)
 
     # employ walking algorithm to find suitable starting tile

@@ -4,8 +4,8 @@ import Screen
 from Screen import *
 from perlin_noise import PerlinNoise
 import math
-from Data.settings import *
-from Data.TilesData import *
+from Data.Settings import Settings
+from Data.TilesData import tiles_dict, ResourceTiles, Resources, Structures, TileProperty
 
 
 class Tile(pygame.sprite.Sprite):

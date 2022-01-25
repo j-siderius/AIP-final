@@ -1,10 +1,11 @@
 import pygame
 
+from Data.settings import Resources
 from Screen import Screen
 
 
 class Overlay:
-    def __init__(self, screen: Screen, controller):
+    def __init__(self, screen: Screen, controller, player):
         """
         The overlay class manages the tutorial overlay, the end screen and the inventory and health UI
         :param screen: main screen class so we can render stuff on screen
@@ -12,6 +13,7 @@ class Overlay:
         """
         self.screen: Screen = screen
         self.screen_width, self.screen_height = self.screen.get_size()[0], self.screen.get_size()[1]
+        self.player = player
 
         self.start = True
         self.end = False
@@ -43,6 +45,14 @@ class Overlay:
 
         self.tutorial_slide = 0
 
+        # initialize UI sprites
+        self.heart_full = pygame.image.load("Data/Sprites/UI/ui_heart_full.png").convert_alpha()
+        self.heart_full, temp = self.scale_image(self.heart_full, int(self.screen_width * 0.02))
+        self.heart_empty = pygame.image.load("Data/Sprites/UI/ui_heart_empty.png").convert_alpha()
+        self.heart_empty, temp = self.scale_image(self.heart_empty, int(self.screen_width * 0.02))
+        self.log = pygame.image.load("Data/Sprites/UI/log.png").convert_alpha()
+        self.log, temp = self.scale_image(self.log, int(self.screen_width * 0.015))
+
         self.background = pygame.Surface(self.screen.get_size())
         self.background.fill((150, 150, 150))
         self.background.set_alpha(75)
@@ -54,8 +64,25 @@ class Overlay:
 
     def display(self):
         """
-        displays start and end screens if we have the correct game state
+        displays start and end screens if we have the correct game state, as well as UI elements
         """
+
+        # display health bar
+        health = self.player.get_health()
+        for i in range(4):
+            if i > health - 1:
+                self.screen.get_screen().blit(self.heart_empty, (self.screen_width - 250 + (50 * i), 30))
+            else:
+                self.screen.get_screen().blit(self.heart_full, (self.screen_width - 250 + (50 * i), 30))
+
+        # display inventory
+        inventory = self.player.get_resources()
+        woods = inventory[Resources.wood]
+        self.screen.get_screen().blit(self.log, (self.screen_width - 220, 80))
+        self.screen.set_font(self.regular_font)
+        self.screen.text(self.screen_width - 120, 75 + self.log.get_height()/2, woods)
+
+        # display start and end screen
         if self.start:
             self.start_screen()
         elif self.end:
@@ -76,24 +103,28 @@ class Overlay:
 
             # show the continue text
             self.screen.set_font(self.small_font)
-            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * self.continue_height_scale, "Press [left] or [z] to continue")
+            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * self.continue_height_scale,
+                             "Press [left] or [z] to continue")
         elif self.tutorial_slide == 1:
             # show the tutorial image on the screen
             self.screen.get_screen().blit(self.tut1, self.tut1_rect.topleft)
 
             # show the continue text
             self.screen.set_font(self.small_font)
-            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * self.continue_height_scale, "Press [left] or [z] to continue")
+            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * self.continue_height_scale,
+                             "Press [left] or [z] to continue")
         elif self.tutorial_slide == 2:
             self.screen.get_screen().blit(self.tut2, self.tut2_rect.topleft)
 
             self.screen.set_font(self.small_font)
-            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * self.continue_height_scale, "Press [left] or [z] to continue")
+            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * self.continue_height_scale,
+                             "Press [left] or [z] to continue")
         else:
             self.screen.get_screen().blit(self.tut3, self.tut3_rect.topleft)
 
             self.screen.set_font(self.small_font)
-            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * self.continue_height_scale, "Press [left] or [z] to start")
+            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * self.continue_height_scale,
+                             "Press [left] or [z] to start")
 
     def end_screen(self):
         """
@@ -101,14 +132,14 @@ class Overlay:
         """
         self.screen.get_screen().blit(self.background, (0, 0))
 
-        if self.score < self.game_duration:  # if you lost it shows you the lose screen overlay
+        if self.score < self.game_duration * self.timescale:  # if you lost it shows you the lose screen overlay
             self.screen.get_screen().blit(self.lost_screen, self.lost_rect.topleft)
         else:  # show the win screen overlay
             self.screen.get_screen().blit(self.won_screen, self.won_rect.topleft)
 
         # add the played duration to the screen
         self.screen.set_font(self.bold_font)
-        self.screen.text(self.screen_width/2, (self.screen_height/5) * 2.8, f"You survived {self.score} hours")
+        self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 2.8, f"You survived {self.score} hours")
         self.screen.set_font(self.small_font)
         self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press [esc] to quit)")
 
@@ -131,22 +162,26 @@ class Overlay:
             self.background.set_alpha(0)
             self.screen.get_screen().blit(self.background, (0, 0))
 
-    def scale_image(self, image: pygame.Surface) -> (pygame.Surface, pygame.Rect):
+    def scale_image(self, image: pygame.Surface, new_width: int = None) -> (pygame.Surface, pygame.Rect):
         """
         Resizes the images to fit the screen while keeping the aspect ratio the intact.
         And makes a rectangle of the image that is centered on the screen.
         :param image: The image that has to be resized
+        :param new_width: Width to be resized to (can be left empty)
         :return: The resized image and the centered rectangle
         """
         width, height = image.get_size()
         screen_width, screen_height = self.screen.get_size()
         aspect_ratio = width / height
 
-        img_width = int(self.screen_width * 0.5)
+        if new_width is None:
+            img_width = int(self.screen_width * 0.5)
+        else:
+            img_width = new_width
         img_height = int(img_width / aspect_ratio)
         img = pygame.transform.scale(image, (img_width, img_height))
 
         # get the rectangle bounding box and move it to be centered on the screen
         rect: pygame.Rect = img.get_rect()
-        rect.center = (screen_width/2, screen_height/2)
+        rect.center = (screen_width / 2, screen_height / 2)
         return img, rect

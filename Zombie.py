@@ -4,8 +4,6 @@ import random
 import pygame
 import Tile
 from Data.Settings import Settings
-
-from Field import Field
 from Player import Player
 from Screen import lerp, lerp_2D, Screen
 
@@ -122,83 +120,111 @@ class Zombie:
             self.move_zombie(self.path.pop(0))
 
     def dead(self) -> bool:
+        """ Returns if the zombie is dead or alive"""
         return self.health <= 0
 
     def align_enemy(self, tile: Tile):
+        """ aligns the enemy on the given tile"""
         self.current_tile = tile
         self.pos = self.current_tile.get_center()
 
     def look_player(self):
+        """ make the enemy look at the player by flipping it sprite"""
         if self.pos[0] > self.player.get_player_position()[0]:
             self.look_direction = 1
         else:
             self.look_direction = 0
 
     def a_star(self, target_tile: Tile, zombies_tiles: list):
-        start_node: Node = Node(self.current_tile, 0, None)
+        """
+        A star path finding, it uses the distance to the target and the costs of moving to the next tile
+        to find the optimal path
 
+        :param target_tile: The target tile the enemy wishes to array, the tile of the player
+        :param zombies_tiles: The reference to the list of tiles currently occupy by other zombies
+        """
+
+        # set the start node at the current tile
+        start_node: Node = Node(self.current_tile, 0, None)
+        # the frontier is the unvisited tiles that have been explored and is sorted by priority
         frontier = list()
         frontier.append(start_node)
+
+        # list of nodes the a* has visited, used to find the path at the end
         nodes = dict()
         nodes[self.current_tile] = start_node
+
+        # the cost so far dict is the keeps tracks of the cost of the current optimal route till that tile
         cost_so_far = dict()
         cost_so_far[self.current_tile] = 0
 
+        # if the show path finding is enabled, unhighlight the old highlighted tiles
         if Settings.SHOW_PATH_FINDING:
             for tile in self.highlighted_path:
                 tile.unhighlight()
             self.highlighted_path.clear()
 
         while len(frontier) > 0:
+            # get the current node and corresponding tile
             current_node: Node = frontier.pop(0)
             current_tile: Tile = current_node.get_tile()
 
+            # if it is the wanted tile, then the AI is done
             if current_tile == target_tile:
                 break
 
+            # get the neighboring tiles and shuffle them
             neighbours = current_tile.get_neighbours().copy()
             random.shuffle(neighbours)
 
             for next_tile in neighbours:
                 # calculate (travel-dist) cost score g-score
-                if next_tile.is_walkable() and next_tile not in zombies_tiles:
+                if next_tile.is_walkable() and next_tile not in zombies_tiles:  # tiles that take longer to traverse have a higher cost
                     new_cost = cost_so_far[current_tile] + (1 / next_tile.is_walkable()) * Settings.MOVEMENT_COST_MULTIPLIER
-                elif next_tile.has_structure():
+                elif next_tile.has_structure():  # walls take longer to break so the cost will be higher
                     new_cost = cost_so_far[current_tile] + Settings.WALL_BREAK_TIME * Settings.MOVEMENT_COST_MULTIPLIER  # temp
-                else:
+                else: # else the tile is not walkable so skip it
                     continue
 
                 if next_tile not in cost_so_far or new_cost < cost_so_far[next_tile]:
+                    # save the new cost and calculate the new priority
                     cost_so_far[next_tile] = new_cost
                     priority = new_cost + self.manhattan_distance(target_tile, next_tile)  # g-score + f-score
+
+                    # create a new node and sort it in the frontier and nodes list
                     new_node: Node = Node(next_tile, -priority, current_tile)
                     bisect.insort(frontier, new_node)
                     nodes[next_tile] = new_node
 
-                    # show the AI path
+                    # show the AI path when enabled
                     if Settings.SHOW_PATH_FINDING:
                         self.highlighted_path.append(next_tile)
                         next_tile.unhighlight()
                         next_tile.highlight((255, 255, 0, 100))
                         next_tile.show_score(int(-priority))
 
+        # if the target hasn't been found, so the enemy is on a island, end the function
         if target_tile not in nodes.keys():
             return
 
+        # turn the nodes list into a path
         current_tile = target_tile
         self.path.clear()
         node_path = []
+
+        # loop through the entire nodes tree backwards and build the path
         while current_tile != self.current_tile:
             self.path.insert(0, current_tile)
             node_path.insert(0, nodes[current_tile])
             current_tile = nodes[current_tile].get_came_from()
 
+        # append it's future location to the reference list so the zombies around it know and won't try to walk on the same tile
         if len(self.path) > 0 and self.path[0].is_walkable():
             zombies_tiles.append(self.path[0])
         else:
             zombies_tiles.append(self.current_tile)
 
-        # debugging and showing the AI path
+        # show the AI path if enabled in Settings.py
         if Settings.SHOW_PATH_FINDING:
             for node in node_path:
                 node.get_tile().unhighlight()
@@ -206,21 +232,29 @@ class Zombie:
                 node.get_tile().show_score(int(node.priority))
 
     def manhattan_distance(self, startTile, endTile):
+        """
+        calculates an approximate distance to the player
+        :param startTile: the start tile, from.
+        :param endTile:  the end tile, until.
+        """
         # return abs(startTile.get_center()[0] - endTile.get_center()[0]) + abs(startTile.get_center()[1] - endTile.get_center()[1])
         return math.dist(startTile.get_center(), endTile.get_center())
 
     def move_zombie(self, targetTile: Tile):
-        """Moves the player to the clicked tile (if valid move)"""
-        if targetTile.is_wall:
+        """Moves the zombie to the clicked tile (if valid move)"""
+        if targetTile.is_wall: # if the next move is through a wall, attack the wall
             targetTile.attack_wall(self.attack_damage)
+        # if the next move is the player, attack the player
         elif self.player.current_tile == targetTile or self.player.current_tile == self.current_tile or self.player.target_tile == targetTile:
             self.player.attack_player(self.attack_damage)
+        # if the next move is walkable tile, walk there
         elif targetTile.is_walkable():
             self.target_tile = targetTile
             self.is_walking = True
             self.walk_timer = Settings.PLAYER_WALKING_TIME
 
     def get_next_tile(self):
+        """ get the tile the zombie will be on in the next turn"""
         next_tile: Tile
         if len(self.path) > 0:
             next_tile = self.path[0]
@@ -233,11 +267,18 @@ class Zombie:
 
 
 class Node:
+    """
+    The node class, this class is used in the A* to bind a tile and priority together so they can be sorted
+    :param tile: the tile bound to this node
+    :param priority: the priority of the tile
+    :param came_from: the tile that is before this tile on the path
+    """
     def __init__(self, tile: Tile, priority, came_from):
         self.tile = tile
         self.priority = priority
         self.came_from = came_from
 
+    # sorts the nodes based on priority
     def __lt__(self, other):
         return self.priority > other.priority
 

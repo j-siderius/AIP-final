@@ -1,6 +1,7 @@
 import random
 import pygame
 import math
+import time
 
 import Tile
 from Field import Field
@@ -40,10 +41,49 @@ class Player:
 
         self.color = (255, 0, 0)
 
+        self.idle_sprite = [[
+            pygame.image.load("Data/Sprites/Player/elf_m_idle_anim_f0.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_idle_anim_f1.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_idle_anim_f2.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_idle_anim_f3.png").convert_alpha()
+        ], [
+            pygame.image.load("Data/Sprites/Player/elf_m_idle_anim_left_f0.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_idle_anim_left_f1.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_idle_anim_left_f2.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_idle_anim_left_f3.png").convert_alpha()
+        ]]
+        self.run_sprite = [[
+            pygame.image.load("Data/Sprites/Player/elf_m_run_anim_f0.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_run_anim_f1.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_run_anim_f2.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_run_anim_f3.png").convert_alpha()
+        ], [
+            pygame.image.load("Data/Sprites/Player/elf_m_run_anim_left_f0.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_run_anim_left_f1.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_run_anim_left_f2.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Player/elf_m_run_anim_left_f3.png").convert_alpha()
+        ]]
+        self.image = self.idle_sprite[1][0]
+        self.rect = self.image.get_rect()
+        self.look_direction = 1
+        self.frame = 0
+        self.timer: float = 0.0
+
     def display(self):
-        self.screen.stroke_size(0)
-        self.screen.stroke(self.color)
-        self.screen.circle(self.x, self.y, self.radius, self.color)
+        self.timer += self.screen.get_elapsed_time()
+        if self.timer > 0.10:
+            self.timer: float = 0.0
+            if self.frame < 3:
+                self.frame += 1
+            else:
+                self.frame = 0
+
+        if self.is_walking:
+            self.image = self.run_sprite[self.look_direction][self.frame]
+        else:
+            self.image = self.idle_sprite[self.look_direction][self.frame]
+
+        self.screen.get_screen().blit(self.image, (self.x-8, self.y-18))
 
         # inventory menu
         menu_txt = ["Inventory: "]
@@ -143,8 +183,12 @@ class Player:
         self.doing_an_action = False
 
     def get_player_position(self):
-        return (self.x, self.y)
+        return self.x, self.y
 
     def get_current_tile(self):
         return self.current_tile
+
+    def set_look_direction(self, direction: str):
+        if direction == "left": self.look_direction = 0
+        elif direction == "right": self.look_direction = 1
 

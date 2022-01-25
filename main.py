@@ -20,7 +20,7 @@ class Program:
         self.serial = Serial('COM3', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC # and com3 voor Frank
         self.input = Input(self.player)
         self.zombies = []
-        self.controller = Gamecontroller(self.screen, self.serial, self.zombies, zombie_death_func=self.zombie_death)
+        self.controller = Gamecontroller(self.screen, self.serial, self.zombies, zombie_death_func=self.zombie_death, field=self.field, player=self.player)
 
         self.fps = []
 
@@ -50,15 +50,15 @@ class Program:
         x, y = self.player.get_player_position()
         # self.screen.outline_circle(x, y, Settings.MIN_SPAWN_DISTANCE, color=(255, 0, 255))
         # self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, color=(255, 0, 255))
-        self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, thickness=int((Settings.MAX_SPAWN_DISTANCE - Settings.MIN_SPAWN_DISTANCE)), color=(255, 0, 255, 100))
+        # self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, thickness=int((Settings.MAX_SPAWN_DISTANCE - Settings.MIN_SPAWN_DISTANCE)), color=(255, 0, 255, 100))
 
     def mouse_moved(self):
         self.input.process_mouse_movement(self.screen.get_mouse_pos())
 
     def mouse_pressed(self, button):
         self.input.process_mouse_button(button)
-        if button == MouseButton.scroll:
-            self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player, []))
+        # if button == MouseButton.scroll:
+            # self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player, []))
             # self.zombies[len(self.zombies) - 1].a_star(self.player.current_tile)
 
     def controller_moved(self, position):
@@ -80,8 +80,8 @@ class Program:
     # for testing without mouse
     def key_pressed(self, keys: set):
         pass
-    #     if 226 not in keys and len(keys) > 0:
-    #         self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player, []))
+        # if 226 not in keys and len(keys) > 0:
+        #     self.zombies.append(Zombie(self.screen.get_mouse_pos(), self.screen, self.field, self.player, []))
 
 
 if __name__ == '__main__':

@@ -12,9 +12,9 @@ from Screen import lerp, lerp_2D, Screen
 
 class Zombie:
 
-    def __init__(self, pos, screen: Screen, field: Field, player: Player, zombies_tiles: list):
+    def __init__(self, tile, screen: Screen, field: Field, player: Player, zombies_tiles: list):
         self.field = field
-        self.pos = pos
+        # self.pos = pos
         self.screen = screen
         self.color = (0, 0, 255)
         self.radius = self.field.hex_size / 2.3  # base this on hex_size of Tiles
@@ -24,7 +24,10 @@ class Zombie:
         self.is_walking = False
         self.target_tile: Tile = None
 
-        self.current_tile = self.field.get_tile_from_point(pos)  # TODO change tho start tile
+        # self.current_tile = self.field.get_tile_from_point(pos)  # TODO change tho start tile
+        self.current_tile = tile
+        self.pos = tile.get_center()
+
         self.path = []
         self.align_enemy(self.current_tile)
 

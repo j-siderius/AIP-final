@@ -1,16 +1,27 @@
+import math
+import random
+
 import pygame
+
+from Data.settings import Settings
+from Field import Field
+from Player import Player
+from Screen import Screen
+from Zombie import Zombie
 
 
 class Gamecontroller:
-	def __init__(self, screen, serial, zombies, zombie_death_func, timescale=12):
+	def __init__(self, screen: Screen, serial, zombies, zombie_death_func, field: Field, player: Player, timescale=12):
 		"""
 		The gamecontroller manages miscellaneous functions like keeping track of time and the day/night cycle
 		:param screen: pygame screen obj to blit to
 		:param timescale: how quickly or slowly time progresses in the game (e.g. timescale=12 -> day lasts 12 ticks)
 		"""
+		self.player = player
 		self.screen = screen
 		self.screen_size = self.screen.get_size()
 		self.serial = serial
+		self.field = field
 
 		self.game_time = 0
 		self.day_night_time = 0  # always start game at beginning of day
@@ -67,7 +78,12 @@ class Gamecontroller:
 
 		if (9 / 12) * self.timescale > self.day_night_time >= (6 / 12) * self.timescale:
 			# TODO: add zombie spawning function here
-			pass
+			tile_list = self.field.get_land_tiles()
+			for i in range(5):
+				tile = tile_list[random.randint(0, len(tile_list))]
+				if Settings.MIN_SPAWN_DISTANCE < math.dist(self.player.get_player_position(), tile.get_center()) < Settings.MAX_SPAWN_DISTANCE and tile.is_walkable():
+					self.zombies.append(Zombie(tile, self.screen, self.field, self.player, []))
+					break
 
 		self.serial.updateDayNight(int((self.day_night_time / self.timescale) * 11))
 

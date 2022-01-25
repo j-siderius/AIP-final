@@ -24,7 +24,7 @@ class Program:
         self.zombies = []
         self.controller = Gamecontroller(self.screen, self.serial, player=self.player, zombies=self.zombies, field=self.field, zombie_death_func=self.zombie_death,
                                          timescale=Settings.TIMESCALE, game_duration=Settings.GAME_DURATION, game_end_func=self.end_game_state)
-        self.overlay = Overlay(self.screen, self.controller)
+        self.overlay = Overlay(self.screen, self.controller, self.player)
         self.input = Input(self.player, self.overlay, self.quit_game)
 
         self.fps = []

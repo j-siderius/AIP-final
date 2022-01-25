@@ -40,7 +40,7 @@ class Player:
         # mining and building
         # self.last_mouse_down_time = 0
         self.doing_an_action = False
-        self.inventory = {Resources.wood: 100}  # dict()
+        self.inventory = {Resources.wood: 0}  # dict()
 
         self.color = (255, 0, 0)
 
@@ -87,15 +87,6 @@ class Player:
             self.image = self.idle_sprite[self.look_direction][self.frame]
 
         self.screen.get_screen().blit(self.image, (self.x-8, self.y-18))
-
-        # inventory menu
-        menu_txt = ["Inventory: "]
-        for key, value in self.inventory.items():
-            menu_txt.append(f"{key}: {value}")
-
-        self.screen.text_font(25)
-        width, height = self.screen.get_size()
-        self.screen.text_array(width - 110, 20, menu_txt, 255, background_color=0)
 
     def update(self):
         if self.is_walking:  # walking
@@ -197,3 +188,10 @@ class Player:
         self.serial_update_health(self.health)
         if self.health <= 0:
             self.game_end_func()
+
+    def get_resources(self):
+        return self.inventory
+
+    def get_health(self) -> int:
+        return self.health
+

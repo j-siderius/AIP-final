@@ -11,11 +11,12 @@ from Zombie import Zombie
 
 
 class Gamecontroller:
-	def __init__(self, screen: Screen, serial, zombies, zombie_death_func, field: Field, player: Player, timescale=12):
+	def __init__(self, screen: Screen, serial, game_end_func, zombies, zombie_death_func, field: Field, player: Player, timescale: int = 12, game_duration: int = 24):
 		"""
 		The gamecontroller manages miscellaneous functions like keeping track of time and the day/night cycle
 		:param screen: pygame screen obj to blit to
 		:param timescale: how quickly or slowly time progresses in the game (e.g. timescale=12 -> day lasts 12 ticks)
+		:param game_duration: how long the game lasts (e.g. if timescale=12 and game_duration=24 -> game lasts 2 days)
 		"""
 		self.player = player
 		self.screen = screen
@@ -27,10 +28,12 @@ class Gamecontroller:
 		self.game_time = 0
 		self.game_day = 0
 		self.day_night_time = 0  # always start game at beginning of day
-		self.timescale = int(timescale)
-		if self.timescale < 12:
-			self.timescale = 12
+		self.timescale = timescale
+
+		self.game_duration = game_duration
 		self.start_night = int(self.timescale / 2) - 1
+
+		self.game_end_func = game_end_func
 
 		self.sky_color = (0, 0, 0)
 		self.sky_opacity = 0
@@ -51,6 +54,10 @@ class Gamecontroller:
 		else:
 			self.day_night_time += 1  # increment time
 		self.update_day_night()
+
+		# check if game is done
+		if self.game_time >= self.game_duration:
+			self.game_end_func()
 
 		self.zombies_tiles = []
 		for zombie in self.zombies:
@@ -90,3 +97,7 @@ class Gamecontroller:
 		self.sky.set_alpha(self.sky_opacity)
 		# blit overlay over whole screen
 		self.screen.get_screen().blit(self.sky, (0, 0))
+
+	def get_timescale(self) -> (int, int):
+		"""returns timescale and game_duration"""
+		return self.timescale, self.game_duration

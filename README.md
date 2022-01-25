@@ -1,7 +1,13 @@
-# AIP-final
+# AIP-final 2022
+## Final project for the CreaTe MOD6 course AI Programming.
 
-### Final project for the CreaTe MOD6 course AI Programming.
+[Description](#description)\
+[Gameplay](#gameplay)\
+[Hardware](#hardware)\
+[Code Overview](#code-overview)\
+[Libraries](#libraries)
 
+### Description
 This Zombie survival game is based in a far away, hexagonally shaped world.
 The objective of the game is to survive long nights and days until help arrives to save you.
 The player is stranded on a island with lush fields, dense forests and big mountains.

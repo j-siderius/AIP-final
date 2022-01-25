@@ -26,10 +26,9 @@ class Serial:
             self.controller_moved_func = controller_moved_func
             self.controller_pressed_func = controller_pressed_func
             self.dayNightCycle = 0
-            self.health = 4  # start with full health
             self.joyX, self.joyY, self.joyC, self.joyZ = None, None, False, False
-            self.updateDayNight(self.dayNightCycle)
-            self.updateHealth(self.health)
+            self.updateDayNight(self.dayNightCycle)  # start at beginning of day
+            self.updateHealth(4)  # start with full health
 
             self.msg = None
 

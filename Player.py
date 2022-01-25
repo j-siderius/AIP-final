@@ -5,8 +5,9 @@ import time
 
 import Tile
 from Field import Field
-from Data.settings import *
-from Screen import Screen, lerp, lerp_2D
+from Data.Settings import Settings
+from Data.TilesData import Resources
+from Screen import lerp, lerp_2D
 
 
 class Player:

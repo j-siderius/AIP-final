@@ -1,5 +1,26 @@
+from enum import Enum
+
 import pygame
-from Data.settings import *
+# from Data.settings import *
+
+
+class ResourceTiles(Enum):
+    none = -1
+    forest = 0
+    large_forest = 1
+    rock = 2
+    large_rock = 3
+
+
+class Resources(Enum):
+    wood = "Wood"
+    stone = "Stone"
+
+
+# for the future, not used yet
+class Structures(Enum):
+    wooden_wall = "Wooden wall"
+    stone_wall = "Stone wall"
 
 
 class TilesData:

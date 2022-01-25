@@ -1,6 +1,6 @@
 import pygame
 
-from Data.settings import MouseButton, Settings
+from Data.Settings import MouseButton, Settings
 from Zombie import Zombie
 from Screen import Screen
 from Field import Field
@@ -17,10 +17,13 @@ class Program:
         self.screen = Screen(0, 0, self.loop, title="HexZomb", mouse_pressed_func=self.mouse_pressed, mouse_moved_func=self.mouse_moved, fps_func=self.print_avg_fps)
 
         self.field = Field(self.screen, hex_width=4 * 11, field_size=(self.screen.get_size()))
-        self.player = Player(self.screen, self.serial_update_lives, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer, game_end_func=self.end_game_state)
-        self.serial = Serial('COM3', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC
+        self.player = Player(self.screen, self.serial_update_lives, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer,
+                             game_end_func=self.end_game_state)
+        self.serial = Serial(Settings.SERIAL_PORT, controller_moved_func=self.controller_moved,
+                             controller_pressed_func=self.controller_pressed)
         self.zombies = []
-        self.controller = Gamecontroller(self.screen, self.serial, player=self.player, zombies=self.zombies, field=self.field, zombie_death_func=self.zombie_death, timescale=24, game_duration=4, game_end_func=self.end_game_state)
+        self.controller = Gamecontroller(self.screen, self.serial, player=self.player, zombies=self.zombies, field=self.field, zombie_death_func=self.zombie_death,
+                                         timescale=Settings.TIMESCALE, game_duration=Settings.GAME_DURATION, game_end_func=self.end_game_state)
         self.overlay = Overlay(self.screen, self.controller)
         self.input = Input(self.player, self.overlay, self.quit_game)
 
@@ -50,7 +53,7 @@ class Program:
         self.controller.update_sky()
 
         # debug show
-        x, y = self.player.get_player_position()
+        # x, y = self.player.get_player_position()
         # self.screen.outline_circle(x, y, Settings.MIN_SPAWN_DISTANCE, color=(255, 0, 255))
         # self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, color=(255, 0, 255))
         # self.screen.outline_circle(x, y, Settings.MAX_SPAWN_DISTANCE, thickness=int((Settings.MAX_SPAWN_DISTANCE - Settings.MIN_SPAWN_DISTANCE)), color=(255, 0, 255, 100))
@@ -84,11 +87,12 @@ class Program:
         self.zombies.remove(zombie)
 
     def print_avg_fps(self):
-        print(f"average fps={sum(self.fps)/len(self.fps)}")
+        print(f"average fps={sum(self.fps) / len(self.fps)}")
         print(f"lowest fps={min(self.fps)}")
 
     def serial_update_lives(self, health):
         self.serial.updateHealth(health)
+
 
 if __name__ == '__main__':
     Program()

@@ -3,7 +3,7 @@ import random
 
 import pygame
 
-from Data.settings import Settings
+from Data.Settings import Settings
 from Field import Field
 from Player import Player
 from Screen import Screen

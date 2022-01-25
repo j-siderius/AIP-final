@@ -9,7 +9,6 @@
 CRGB leds[NUM_LEDS];
 
 int Red = 0x0A0000;
-int Green = 0x000A00;
 int Blue = 0x0A0AFF;
 int LightBlue = 0x00000D;
 int Yellow = 0xAFFF00;
@@ -93,18 +92,18 @@ void ledLoop() {
   //health tracker.
   //full health=4, half health=2, dead=0
   if (healthTracker == 0) {
-    leds[0] = leds[1] = leds[2] = leds[3] = Red;
+    leds[0] = leds[1] = leds[2] = leds[3] = Black;
   } else if (healthTracker == 1) {
-    leds[0] = leds[1] = leds[2] = Red;
-    leds[3] = Green;
+    leds[0] = leds[1] = leds[2] = Black;
+    leds[3] = Red;
   } else if (healthTracker == 2) {
-    leds[0] = leds[1] = Red;
-    leds[2] = leds[3] = Green;
+    leds[0] = leds[1] = Black;
+    leds[2] = leds[3] = Red;
   } else if (healthTracker == 3) {
-    leds[0] = Red;
-    leds[1] = leds[2] = leds[3] = Green;
+    leds[0] = Black;
+    leds[1] = leds[2] = leds[3] = Red;
   } else if (healthTracker >= 4) {
-    leds[0] = leds[1] = leds[2] = leds[3] = Green;
+    leds[0] = leds[1] = leds[2] = leds[3] = Red;
   }
 
   FastLED.show();

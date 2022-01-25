@@ -39,9 +39,7 @@ class Gamecontroller:
 	def update_day_night(self):
 		"""Manages the day/night cycle and sky color and opacity as well as zombie spawning"""
 
-		if self.day_night_time < (1/12) * self.timescale:
-			self.sky_opacity = 50
-		elif (5 / 12) * self.timescale > self.day_night_time >= (1 / 12) * self.timescale:
+		if (5 / 12) * self.timescale > self.day_night_time:
 			self.sky_opacity = 0
 		elif (6 / 12) * self.timescale > self.day_night_time >= (5 / 12) * self.timescale:
 			self.sky_opacity = 50
@@ -56,7 +54,7 @@ class Gamecontroller:
 			# TODO: add zombie spawning function here
 			pass
 
-		self.serial.updateDayNight(int((self.day_night_time / self.timescale) * 11))
+		self.serial.updateDayNight(self.day_night_time)
 
 	def update_sky(self):
 		"""draw sky over the screen"""

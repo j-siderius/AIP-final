@@ -15,6 +15,12 @@ class Gamecontroller:
 		"""
 		The gamecontroller manages miscellaneous functions like keeping track of time and the day/night cycle
 		:param screen: pygame screen obj to blit to
+		:param serial: serial object, so we can pass time updates to the LEDs
+		:param game_end_func: we call this when the time is up / you are 'rescued'
+		:param zombies: zombies array so we can update all of them when a tick occurs
+		:param zombie_death_func: if a zombie is older than its lifespan, we can delete it from the array with this function
+		:param field: to access and interface the tiles
+		:param player: to spawn the zombies in a radius around the player
 		:param timescale: how quickly or slowly time progresses in the game (e.g. timescale=12 -> day lasts 12 ticks)
 		:param game_duration: how long the game lasts (e.g. game_duration=4 -> game lasts 4 days)
 		"""
@@ -93,6 +99,7 @@ class Gamecontroller:
 				if Settings.MIN_SPAWN_DISTANCE < math.dist(self.player.get_player_position(), tile.get_center()) < Settings.MAX_SPAWN_DISTANCE and tile.is_walkable():
 					self.zombies.append(Zombie(tile, self.screen, self.player))
 
+		# send the new day/night-time to the LEDs
 		self.serial.updateDayNight(int(self.day_night_time/(self.timescale / 12)))
 
 	def update_sky(self):
@@ -104,7 +111,6 @@ class Gamecontroller:
 		self.screen.get_screen().blit(self.sky, (0, 0))
 
 	def get_timescale(self) -> (int, int):
-		"""returns timescale and game_duration"""
 		return self.timescale, self.game_duration
 
 	def get_score(self) -> int:

@@ -91,24 +91,23 @@ class Serial:
                         # error handling
                         except ValueError:
                             print("serial message error")
-                            # TODO: delete error messages and move them to a log
                 except IndexError:
                     print("serial error")
 
-    def updateDayNight(self, time):
+    def updateDayNight(self, time: int):
         """
         Updates the time of the LED clock
         send DN+00 to change day-night display
-        time value from 0 to 11, describes the sun and moon phase >> 0=beginning of day,
+        :param time: value from 0 to 11, describes the sun and moon phase >> 0=beginning of day,
         5=end of daytime, 6=beginning of night, 11=end of nighttime
         """
         self.send('DN' + str(time).zfill(2) + "\n")
 
-    def updateHealth(self, health):
+    def updateHealth(self, health: int):
         """
         Updates the health of the LED clock
         send HLT+0 to change health display
-        full health=4, half health=2, dead=0
+        :param health: value from 0 to 4, describes the health status of the player, full health=4, half health=2, dead=0
         """
         self.send('HLT' + str(health) + "\n")
 

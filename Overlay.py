@@ -10,6 +10,7 @@ class Overlay:
         The overlay class manages the tutorial overlay, the end screen and the inventory and health UI
         :param screen: main screen class so we can render stuff on screen
         :param controller: controller class so we can get the timescale of the game
+        :param player: to get the player health and inventory for the UI
         """
         self.screen: Screen = screen
         self.screen_width, self.screen_height = self.screen.get_size()[0], self.screen.get_size()[1]
@@ -48,11 +49,14 @@ class Overlay:
         # initialize UI sprites
         self.heart_full = pygame.image.load("Data/Sprites/UI/ui_heart_full.png").convert_alpha()
         self.heart_full, temp = self.scale_image(self.heart_full, int(self.screen_width * 0.02))
+
         self.heart_empty = pygame.image.load("Data/Sprites/UI/ui_heart_empty.png").convert_alpha()
         self.heart_empty, temp = self.scale_image(self.heart_empty, int(self.screen_width * 0.02))
+
         self.log = pygame.image.load("Data/Sprites/UI/log.png").convert_alpha()
         self.log, temp = self.scale_image(self.log, int(self.screen_width * 0.015))
 
+        # making background surface for fading
         self.background = pygame.Surface(self.screen.get_size())
         self.background.fill((150, 150, 150))
         self.background.set_alpha(75)
@@ -144,7 +148,7 @@ class Overlay:
         self.screen.set_font(self.small_font)
         self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press [esc] to quit)")
 
-    def update_end(self, score: int = -1):
+    def update_end(self, score: int):
         """
         Set the end, win/lose state
         :param score: The amount of 'hours' you survived
@@ -156,9 +160,9 @@ class Overlay:
         """
         show the next tutorial overlay or closes it
         """
-        if self.tutorial_slide < 3:
+        if self.tutorial_slide < 3:  # go to the next slide
             self.tutorial_slide += 1
-        else:
+        else:  # start the game and remove overlay fade
             self.start = False
             self.background.set_alpha(0)
             self.screen.get_screen().blit(self.background, (0, 0))
@@ -175,10 +179,13 @@ class Overlay:
         screen_width, screen_height = self.screen.get_size()
         aspect_ratio = width / height
 
+        # calculate the new image width
         if new_width is None:
             img_width = int(self.screen_width * 0.5)
         else:
             img_width = new_width
+
+        # calculate the new image height
         img_height = int(img_width / aspect_ratio)
         img = pygame.transform.scale(image, (img_width, img_height))
 

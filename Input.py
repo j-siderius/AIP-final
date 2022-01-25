@@ -5,17 +5,17 @@ import time
 
 
 class Input:
-    def __init__(self, player, overlay, quit_game_func):
+    def __init__(self, player, overlay):
         """
-        Processes all the different inputs into usable variables
+        Processes all the different inputs into usable variables and manipulates player and overlay accordingly
         :param player: pass the main player object here:
+        :param overlay: so we can move to the next tutorial slide
         """
         self.selected_tile = 5
         self.prev_selected_tile = -1
 
         self.player = player
         self.overlay = overlay
-        self.quit_game_func = quit_game_func
 
         self.elapsed_time = 0
         self.old_time = time.perf_counter()
@@ -38,7 +38,9 @@ class Input:
         else:
             angle = 0
 
+        # process the calculated angle further
         self.set_tile(angle)
+        self.set_looking_direction(angle)
 
     def process_nunchuck_button(self, buttons):
         """:param buttons: [joyZ, joyC]"""
@@ -72,6 +74,7 @@ class Input:
         else:
             angle = 0
 
+        # process the calculated angle further
         self.set_tile(angle)
         self.set_looking_direction(angle)
 
@@ -127,6 +130,7 @@ class Input:
             self.player.set_look_direction('right')
 
     def move_player(self, tile: Tile):
+        """Move the player to the currently selected tile (except if we are in the tutorial)"""
         if self.overlay.start:  # check for starting tutorial
             self.overlay.update_start()
         elif self.overlay.end:  # check for end screen
@@ -136,7 +140,13 @@ class Input:
             self.prev_selected_tile = -1
 
     def build_mine(self, tile):
-        self.player.mine_build(tile)
+        """Mine or build on the currently selected tile (except if we are in the tutorial)"""
+        if self.overlay.start:  # check for starting tutorial
+            self.overlay.update_start()
+        elif self.overlay.end:  # check for end screen
+            return
+        else:
+            self.player.mine_build(tile)
 
     def get_selected_tile(self):
         return self.player.get_current_tile().get_neighbours()[self.selected_tile]

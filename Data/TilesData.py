@@ -1,7 +1,5 @@
 from enum import Enum
-
 import pygame
-# from Data.settings import *
 
 
 class ResourceTiles(Enum):

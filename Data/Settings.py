@@ -1,9 +1,5 @@
-from enum import Enum
-
-# a place to store settings and constants, might make a separate JSON file to actual store settings
-
-
 class Settings:
+    """Provides a place to store settings and constants used in the game"""
     # Overall
     SERIAL_PORT = 'COM3'
     GAME_DURATION = 4       # The amount of days the user needs to survive for

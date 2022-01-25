@@ -112,11 +112,11 @@ class Player:
         for neighbour in neighbours:
             if neighbour == target_tile and target_tile.is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
-                self.time_ticker()
                 self.current_tile.unhighlight_neighbours()
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME
                 self.target_tile = neighbour
+                self.time_ticker()
 
     def mine_build(self, pressed_tile):
         """Performs the player action on the clicked tile (mine, build, destroy)"""

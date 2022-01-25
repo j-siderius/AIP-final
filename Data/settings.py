@@ -19,7 +19,7 @@ class Settings:
     # spawning
     MIN_SPAWN_DISTANCE = 200
     MAX_SPAWN_DISTANCE = 500
-    SPAWN_TRY_AMOUNT = [2, 2, 3, 4, 5, 7]
+    SPAWN_TRY_AMOUNT = [1, 1, 2, 2, 3, 3]
 
 
 class ResourceTiles(Enum):

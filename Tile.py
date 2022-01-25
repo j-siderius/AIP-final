@@ -283,6 +283,11 @@ class Tile(pygame.sprite.Sprite):
         if update_tile:
             self.update_Tile()
 
+    def attack_wall(self, damage):
+        self.hitpoints -= damage
+        if self.hitpoints <= 0:
+            self.destroy_structure()
+
     def isOver(self, point):
         return math.dist(point, self.hex_rect.center) <= self.radius
 
@@ -320,8 +325,7 @@ class Tile(pygame.sprite.Sprite):
     def __lt__(self, other):
         return self.pos[1] < other.pos[1]
 
-    #
-    # testing
+    # Debugging, show a number on the tile, used for demonstrating the AI
     def show_score(self, score):
         x, y = self.hex_rect.center
         x -= self.rect.x

@@ -22,12 +22,12 @@ class Zombie:
         self.walk_timer = 0
         self.is_walking = False
         self.target_tile: Tile = None
-
         self.current_tile = tile
         self.pos = tile.get_center()
 
+        self.attack_damage = 1
+
         self.path = []
-        self.align_enemy(self.current_tile)
 
         self.player = player
         self.a_star(self.player.current_tile, zombies_tiles)
@@ -177,10 +177,11 @@ class Zombie:
         # return abs(startTile.get_center()[0] - endTile.get_center()[0]) + abs(startTile.get_center()[1] - endTile.get_center()[1])
         return math.dist(startTile.get_center(), endTile.get_center())
 
-    def move_zombie(self, targetTile):
+    def move_zombie(self, targetTile: Tile):
         """Moves the player to the clicked tile (if valid move)"""
         if targetTile.is_wall:
             # TODO: damage wall
+            targetTile.attack_wall(self.attack_damage)
             pass
         elif self.player.current_tile == targetTile:
             # TODO: subtract -1 health from player

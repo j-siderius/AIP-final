@@ -53,6 +53,6 @@ tiles_dict = {
     "large_forest_grass": TileProperty(walkspeed=1, resource=Resources.wood, resource_tile=ResourceTiles.large_forest),
 
     # structures
-    "wall_grass": TileProperty(walkable=False, hitpoints=100, resource=Resources.wood),
-    "wall_hills": TileProperty(walkable=False, hitpoints=100, resource=Resources.wood),
+    "wall_grass": TileProperty(walkable=False, hitpoints=3, resource=Resources.wood),
+    "wall_hills": TileProperty(walkable=False, hitpoints=3, resource=Resources.wood),
 }

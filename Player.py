@@ -15,10 +15,10 @@ class Player:
         self.screen = screen
         self.field = field
         hex_amount = field.field_size
-
         self.field_size = field_size
-
         self.time_ticker = time_ticker_func
+
+        self.health = 4
 
         self.x, self.y = None, None  # pos on the world map
         self.current_tile: Tile = None
@@ -189,3 +189,6 @@ class Player:
         if direction == "left": self.look_direction = 0
         elif direction == "right": self.look_direction = 1
 
+    def attack_player(self, damage):
+        self.health -= damage
+        # TODO UPDATE LIVES IN SERIAL

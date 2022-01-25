@@ -5,6 +5,7 @@ from Player import Player
 from Serial import Serial
 from Input import Input
 from Gamecontroller import Gamecontroller
+from Overlay import Overlay
 
 
 class Program:
@@ -15,12 +16,12 @@ class Program:
         self.field = Field(self.screen, hex_width=4 * 11, field_size=(self.screen.get_size()))
         self.player = Player(self.screen, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer)
         self.serial = Serial('COM14', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC
-        self.input = Input(self.player)
-        self.controller = Gamecontroller(self.screen, self.serial)
+        self.controller = Gamecontroller(self.screen, self.serial, timescale=12, game_duration=12 * 2, game_end_func=self.end_game_state)
+        self.overlay = Overlay(self.screen, self.controller)
+        self.input = Input(self.player, self.overlay, self.quit_game)
 
         self.fps = []
 
-        self.screen.set_serial_func(self.serial.update)
         self.screen.start()
 
     def loop(self):
@@ -35,6 +36,7 @@ class Program:
         self.screen.text(5, 5, f"{self.screen.get_frameRate():.2f}", False)
         self.fps.append(self.screen.get_frameRate())
 
+        self.overlay.display()
         self.controller.update_sky()
 
     def mouse_moved(self):
@@ -51,6 +53,12 @@ class Program:
 
     def tick_timer(self):
         self.controller.tick()
+
+    def end_game_state(self):
+        self.overlay.update_end()
+
+    def quit_game(self):
+        self.screen.stop()
 
     def print_avg_fps(self):
         print(f"average fps={sum(self.fps)/len(self.fps)}")

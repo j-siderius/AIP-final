@@ -11,12 +11,18 @@ from Screen import lerp, lerp_2D, Screen
 
 
 class Zombie:
+    """
+    The Zombie class handles the actions of the zombie, the a* pathfinding, movement, attacking the player when it is in reach and attacking walls
+    This class also draws the sprite and animation of the zombie
 
-    def __init__(self, tile, screen: Screen, field: Field, player: Player, zombies_tiles: list):
-        self.field = field
+    :param tile: The starting tile of the zombie
+    :param screen: Is used to draw the sprite on the screen and to get the time elapsed between frames
+    :param player: Player is used by the zombie to attack
+    """
+
+    def __init__(self, tile, screen: Screen, player: Player):
         self.screen = screen
-        self.color = (0, 0, 255)
-        self.radius = self.field.hex_size / 2.3  # base this on hex_size of Tiles
+        self.player = player
 
         # walking
         self.walk_timer = 0
@@ -27,14 +33,16 @@ class Zombie:
 
         self.attack_damage = 1
 
+        # pathfiding
         self.path = []
-
-        self.player = player
-        self.a_star(self.player.current_tile, zombies_tiles)
+        if Settings.SHOW_PATH_FINDING:
+            self.highlighted_path = []
+        self.a_star(self.player.current_tile, [])
 
         self.health = random.randint(0, 15)
         self.health += len(self.path)
 
+        # sprites
         self.idle_sprite = [[
             pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_f0.png").convert_alpha(),
             pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_f1.png").convert_alpha(),
@@ -64,6 +72,11 @@ class Zombie:
         self.timer: float = 0.0
 
     def display(self):
+        """
+        Draw the zombie sprite on the screen
+        """
+
+        # decide which frame of the animation should be shown
         self.timer += self.screen.get_elapsed_time()
         if self.timer > 0.10:
             self.timer: float = 0.0
@@ -72,6 +85,7 @@ class Zombie:
             else:
                 self.frame = 0
 
+        # decide witch animation should be shown, walking or idle
         if self.is_walking:
             self.image = self.run_sprite[self.look_direction][self.frame]
         else:
@@ -80,21 +94,31 @@ class Zombie:
         self.screen.get_screen().blit(self.image, (self.pos[0] - 8, self.pos[1] - 16))
 
     def update(self):
+        """
+        Update the walking of the zombie
+        """
         if self.is_walking:  # walking
-            factor = 1 - self.walk_timer / Settings.PLAYER_WALKING_TIME
-            walkspeed = lerp(self.current_tile.is_walkable(), self.target_tile.is_walkable(), factor)
+            factor = 1 - self.walk_timer / Settings.PLAYER_WALKING_TIME  # how far along the walk the enemy is
+            walkspeed = lerp(self.current_tile.is_walkable(), self.target_tile.is_walkable(), factor)   # walk speed on the current journey
             self.walk_timer -= self.screen.get_elapsed_time() * walkspeed
+
+            # if the walk animation is done, move the player
             if self.walk_timer <= 0:
                 self.is_walking = False
                 self.align_enemy(self.target_tile)
                 self.look_player()  # updating look direction
-            else:
+            else:  # if the walk animation isn't yet completed
                 self.pos = lerp_2D(self.current_tile.get_center(), self.target_tile.get_center(), factor)
 
     def update_tick(self, zombies_tiles: list):
+        """
+        The update tick is called once the player does an action
+        :param zombies_tiles: a reference to the list of tiles that the zombies updated before him already occupy
+        """
+        # lower the healht, as zombies die over time
         self.health -= 1
         self.a_star(self.player.current_tile, zombies_tiles)
-        if len(self.path) > 0:
+        if len(self.path) > 0:  # if there is a path to the player move one stap closer
             self.move_zombie(self.path.pop(0))
 
     def dead(self) -> bool:
@@ -119,6 +143,11 @@ class Zombie:
         nodes[self.current_tile] = start_node
         cost_so_far = dict()
         cost_so_far[self.current_tile] = 0
+
+        if Settings.SHOW_PATH_FINDING:
+            for tile in self.highlighted_path:
+                tile.unhighlight()
+            self.highlighted_path.clear()
 
         while len(frontier) > 0:
             current_node: Node = frontier.pop(0)
@@ -147,9 +176,11 @@ class Zombie:
                     nodes[next_tile] = new_node
 
                     # show the AI path
-                    # next_tile.unhighlight()
-                    # next_tile.highlight((255, 255, 0, 100))
-                    # next_tile.show_score(int(-priority))
+                    if Settings.SHOW_PATH_FINDING:
+                        self.highlighted_path.append(next_tile)
+                        next_tile.unhighlight()
+                        next_tile.highlight((255, 255, 0, 100))
+                        next_tile.show_score(int(-priority))
 
         if target_tile not in nodes.keys():
             return
@@ -168,10 +199,11 @@ class Zombie:
             zombies_tiles.append(self.current_tile)
 
         # debugging and showing the AI path
-        # for node in node_path:
-        #     node.get_tile().unhighlight()
-        #     node.get_tile().highlight((255, 0, 0, 100))
-        #     node.get_tile().show_score(int(node.priority))
+        if Settings.SHOW_PATH_FINDING:
+            for node in node_path:
+                node.get_tile().unhighlight()
+                node.get_tile().highlight((255, 0, 0, 100))
+                node.get_tile().show_score(int(node.priority))
 
     def manhattan_distance(self, startTile, endTile):
         # return abs(startTile.get_center()[0] - endTile.get_center()[0]) + abs(startTile.get_center()[1] - endTile.get_center()[1])

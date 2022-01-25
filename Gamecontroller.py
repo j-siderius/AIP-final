@@ -23,7 +23,9 @@ class Gamecontroller:
 		self.serial = serial
 		self.field = field
 
+		# time
 		self.game_time = 0
+		self.game_day = 0
 		self.day_night_time = 0  # always start game at beginning of day
 		self.timescale = int(timescale)
 		if self.timescale < 12:
@@ -47,6 +49,7 @@ class Gamecontroller:
 		self.game_time += 1
 		if self.day_night_time >= self.timescale - 1:
 			self.day_night_time = 0  # reset daytime
+			self.game_day += 1
 		else:
 			self.day_night_time += 1  # increment time
 		self.update_day_night()
@@ -58,7 +61,6 @@ class Gamecontroller:
 				zombie.update_tick(self.zombies_tiles)
 			else:
 				self.zombie_death_func(zombie)
-
 
 	def update_day_night(self):
 		"""Manages the day/night cycle and sky color and opacity as well as zombie spawning"""
@@ -77,13 +79,11 @@ class Gamecontroller:
 			self.sky_opacity = 75
 
 		if (9 / 12) * self.timescale > self.day_night_time >= (6 / 12) * self.timescale:
-			# TODO: add zombie spawning function here
 			tile_list = self.field.get_land_tiles()
-			for i in range(5):
-				tile = tile_list[random.randint(0, len(tile_list))]
+			for i in range(Settings.SPAWN_TRY_AMOUNT[self.game_day]):
+				tile = tile_list[random.randint(0, len(tile_list)-1)]
 				if Settings.MIN_SPAWN_DISTANCE < math.dist(self.player.get_player_position(), tile.get_center()) < Settings.MAX_SPAWN_DISTANCE and tile.is_walkable():
 					self.zombies.append(Zombie(tile, self.screen, self.field, self.player, []))
-					break
 
 		self.serial.updateDayNight(int((self.day_night_time / self.timescale) * 11))
 

@@ -180,12 +180,9 @@ class Zombie:
     def move_zombie(self, targetTile: Tile):
         """Moves the player to the clicked tile (if valid move)"""
         if targetTile.is_wall:
-            # TODO: damage wall
             targetTile.attack_wall(self.attack_damage)
-            pass
         elif self.player.current_tile == targetTile:
-            # TODO: subtract -1 health from player
-            pass
+            self.player.attack_player(self.attack_damage)
         elif targetTile.is_walkable():
             self.target_tile = targetTile
             self.is_walking = True

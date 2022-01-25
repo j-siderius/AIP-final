@@ -17,8 +17,8 @@ class Program:
         self.screen = Screen(0, 0, self.loop, title="HexZomb", mouse_pressed_func=self.mouse_pressed, mouse_moved_func=self.mouse_moved, fps_func=self.print_avg_fps)
 
         self.field = Field(self.screen, hex_width=4 * 11, field_size=(self.screen.get_size()))
-        self.player = Player(self.screen, self.serial_update_lives, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer)
-        self.serial = Serial('COM14', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC
+        self.player = Player(self.screen, self.serial_update_lives, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer, game_end_func=self.end_game_state)
+        self.serial = Serial('COM3', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC
         self.zombies = []
         self.controller = Gamecontroller(self.screen, self.serial, player=self.player, zombies=self.zombies, field=self.field, zombie_death_func=self.zombie_death, timescale=24, game_duration=24 * 3, game_end_func=self.end_game_state)
         self.overlay = Overlay(self.screen, self.controller)
@@ -74,7 +74,8 @@ class Program:
         self.controller.tick()
 
     def end_game_state(self):
-        self.overlay.update_end()
+        score = self.controller.get_score()
+        self.overlay.update_end(score)
 
     def quit_game(self):
         self.screen.stop()

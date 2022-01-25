@@ -92,7 +92,7 @@ class Gamecontroller:
 				if Settings.MIN_SPAWN_DISTANCE < math.dist(self.player.get_player_position(), tile.get_center()) < Settings.MAX_SPAWN_DISTANCE and tile.is_walkable():
 					self.zombies.append(Zombie(tile, self.screen, self.field, self.player, []))
 
-		self.serial.updateDayNight(self.day_night_time)
+		self.serial.updateDayNight(int(self.day_night_time/(self.timescale / 12)))
 
 	def update_sky(self):
 		"""draw sky over the screen"""
@@ -105,3 +105,6 @@ class Gamecontroller:
 	def get_timescale(self) -> (int, int):
 		"""returns timescale and game_duration"""
 		return self.timescale, self.game_duration
+
+	def get_score(self) -> int:
+		return self.game_time

@@ -11,13 +11,14 @@ from Screen import Screen, lerp, lerp_2D
 
 class Player:
 
-    def __init__(self, screen, serial_update_health, field_size, field: Field, time_ticker_func=None):
+    def __init__(self, screen,  serial_update_health, field_size, field: Field, game_end_func, time_ticker_func=None):
         self.screen = screen
         self.field = field
         hex_amount = field.field_size
         self.field_size = field_size
         self.time_ticker = time_ticker_func
         self.serial_update_health = serial_update_health
+        self.game_end_func = game_end_func
 
         self.health = 4
 
@@ -193,4 +194,5 @@ class Player:
     def attack_player(self, damage):
         self.health -= damage
         self.serial_update_health(self.health)
-        # TODO UPDATE LIVES IN SERIAL
+        if self.health <= 0:
+            self.game_end_func()

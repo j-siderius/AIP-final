@@ -63,18 +63,20 @@ class Player:
             pygame.image.load("Data/Sprites/Player/elf_m_run_anim_left_f2.png").convert_alpha(),
             pygame.image.load("Data/Sprites/Player/elf_m_run_anim_left_f3.png").convert_alpha()
         ]]
-        self.image = self.idle_sprite[0]
+        self.image = self.idle_sprite[1][0]
+        self.rect = self.image.get_rect()
         self.look_direction = 1
-        self.frame_counter = 0
         self.frame = 0
+        self.timer: float = 0.0
 
     def display(self):
-        if self.frame < 3:
-            self.frame_counter += 1
-            self.frame = int(self.frame_counter / 5)
-        else:
-            self.frame = 0
-            self.frame_counter = 0
+        self.timer += self.screen.get_elapsed_time()
+        if self.timer > 0.10:
+            self.timer: float = 0.0
+            if self.frame < 3:
+                self.frame += 1
+            else:
+                self.frame = 0
 
         if self.is_walking:
             self.image = self.run_sprite[self.look_direction][self.frame]

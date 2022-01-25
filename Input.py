@@ -126,13 +126,13 @@ class Input:
         else:
             self.player.set_look_direction('right')
 
-    def move_player(self, tile):
+    def move_player(self, tile: Tile):
         if self.overlay.start:  # check for starting tutorial
             self.overlay.update_start()
         elif self.overlay.end:  # check for end screen
             return
         else:
-            self.player.move_player(tile.get_position())
+            self.player.move_player(tile)
             self.prev_selected_tile = -1
 
     def build_mine(self, tile):

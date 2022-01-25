@@ -104,7 +104,6 @@ class Serial:
         """
         self.send('DN' + str(time).zfill(2) + "\n")
 
-    # TODO: @frank call health function if health is decreased (damage by zombie)
     def updateHealth(self, health):
         """
         Updates the health of the LED clock

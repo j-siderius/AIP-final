@@ -108,7 +108,6 @@ class Field:
 
         print(f"Field has been generated, {self.hex_size = }, {len(self.tiles) = }, {self.field_size = }")
 
-    # TODO fix deze naam
     def render(self, screen):  # render and update the land tiles
         screen.get_screen().blit(self.water_img, (0, 0))
 
@@ -119,7 +118,7 @@ class Field:
         self.water_group.draw(self.screen.get_screen())
 
     # returns the tile object at given coordinates
-    def get_tile(self, tileX, tileY):
+    def get_tile(self, tileX, tileY) -> Tile:
         return self.tiles[int(tileX)][int(tileY)]
 
     # returns the size of a hex (to base other objects off of)
@@ -130,10 +129,14 @@ class Field:
         return self.hex_width
 
     def highlight_tile(self, tileX, tileY):
-        self.tiles[tileX][tileY].highlight()
+        self.get_tile(tileX, tileY).highlight()
+        # self.tiles[tileX][tileY].highlight()
 
-    def get_tile_from_point(self, point):
+    def get_tile_from_point(self, point) -> Tile:
         for tile_row in self.tiles:
             for tile in tile_row:
                 if tile.isOver(point):
                     return tile
+
+    def get_land_tiles(self) -> list:
+        return self.tiles_list

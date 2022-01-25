@@ -11,14 +11,16 @@ from Screen import Screen, lerp, lerp_2D
 
 class Player:
 
-    def __init__(self, screen, field_size, field: Field, time_ticker_func=None):
+    def __init__(self, screen,  serial_update_health, field_size, field: Field, game_end_func, time_ticker_func=None):
         self.screen = screen
         self.field = field
         hex_amount = field.field_size
-
         self.field_size = field_size
-
         self.time_ticker = time_ticker_func
+        self.serial_update_health = serial_update_health
+        self.game_end_func = game_end_func
+
+        self.health = 4
 
         self.x, self.y = None, None  # pos on the world map
         self.current_tile: Tile = None
@@ -109,20 +111,17 @@ class Player:
             else:
                 self.x, self.y = lerp_2D(self.from_tile.get_center(), self.target_tile.get_center(), factor)
 
-    def move_player(self, targetTile):
+    def move_player(self, target_tile: Tile):
         """Moves the player to the clicked tile (if valid move)"""
         if self.is_walking or self.doing_an_action:
             return
 
-        targetTileX = targetTile[0]
-        targetTileY = targetTile[1]
         neighbours = self.current_tile.get_neighbours()
         for neighbour in neighbours:
             # neighbour.unselect_tile()
-            if (neighbour.x, neighbour.y) == (targetTileX, targetTileY) and self.field.get_tile(targetTileX, targetTileY).is_walkable():
+            if neighbour == target_tile and target_tile.is_walkable():
                 # TODO: implement tick rate with something like nextTile = this.tile
                 self.time_ticker()
-                # implementation ^ Work In Progress
                 self.current_tile.unhighlight_neighbours()
                 self.is_walking = True
                 self.walk_timer = Settings.PLAYER_WALKING_TIME
@@ -192,3 +191,8 @@ class Player:
         if direction == "left": self.look_direction = 0
         elif direction == "right": self.look_direction = 1
 
+    def attack_player(self, damage):
+        self.health -= damage
+        self.serial_update_health(self.health)
+        if self.health <= 0:
+            self.game_end_func()

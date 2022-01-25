@@ -101,7 +101,7 @@ class Overlay:
         self.screen.set_font(self.bold_font)
         self.screen.text(self.screen_width/2, (self.screen_height/5) * 2.8, f"You survived {self.score} hours")
         self.screen.set_font(self.small_font)
-        self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press [left] or [z] to quit)")
+        self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press [esc] to quit)")
 
     def update_end(self, score: int = -1):
         """

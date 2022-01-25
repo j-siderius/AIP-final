@@ -16,7 +16,7 @@ class Program:
         self.field = Field(self.screen, hex_width=4 * 11, field_size=(self.screen.get_size()))
         self.player = Player(self.screen, field_size=(self.screen.get_size()), field=self.field, time_ticker_func=self.tick_timer)
         self.serial = Serial('COM14', controller_moved_func=self.controller_moved, controller_pressed_func=self.controller_pressed)  # COM14 is PC, /dev/cu.wchusbserial1410 is MAC
-        self.controller = Gamecontroller(self.screen, self.serial, timescale=12, game_duration=12 * 2, game_end_func=self.end_game_state)
+        self.controller = Gamecontroller(self.screen, self.serial, timescale=12, game_duration=4, game_end_func=self.end_game_state)
         self.overlay = Overlay(self.screen, self.controller)
         self.input = Input(self.player, self.overlay, self.quit_game)
 

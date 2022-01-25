@@ -2,12 +2,12 @@ import pygame
 
 
 class Gamecontroller:
-	def __init__(self, screen, serial, game_end_func, timescale: int = 12, game_duration: int = 24):
+	def __init__(self, screen, serial, game_end_func, timescale: int = 12, game_duration: int = 4):
 		"""
 		The gamecontroller manages miscellaneous functions like keeping track of time and the day/night cycle
 		:param screen: pygame screen obj to blit to
 		:param timescale: how quickly or slowly time progresses in the game (e.g. timescale=12 -> day lasts 12 ticks)
-		:param game_duration: how long the game lasts (e.g. if timescale=12 and game_duration=24 -> game lasts 2 days)
+		:param game_duration: how long the game lasts (e.g. game_duration=4 -> game lasts 4 days)
 		"""
 		# make local variables for all objects
 		self.screen = screen
@@ -16,6 +16,7 @@ class Gamecontroller:
 
 		# counter variables
 		self.game_time = 0
+		self.game_day = 0
 		self.day_night_time = 0  # always start game at beginning of day
 		self.timescale = timescale
 
@@ -37,12 +38,13 @@ class Gamecontroller:
 		self.game_time += 1
 		if self.day_night_time >= self.timescale - 1:
 			self.day_night_time = 0  # reset daytime
+			self.game_day += 1
 		else:
 			self.day_night_time += 1  # increment time
 		self.update_day_night()
 
 		# check if game is done
-		if self.game_time >= self.game_duration:
+		if self.game_day >= self.game_duration:
 			self.game_end_func()
 
 		# TODO: add zombie update function here

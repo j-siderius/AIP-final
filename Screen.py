@@ -1,15 +1,3 @@
-# todo
-#  - alphas :)
-#       + text
-#  - rotation to rectangles, like dashed line
-#  - correct logging
-#  - a lot
-# -
-
-"""
- NOTE: Strokes don't support alpha
-"""
-
 import math
 import pygame
 from pygame import gfxdraw as draw
@@ -17,6 +5,11 @@ from enum import Enum
 import time
 import numpy as np
 from pygame.locals import *
+
+
+"""
+Screen class was adapted and heavily extended from the Pong game of Frank Bosman (AIP assignment 4) 
+"""
 
 
 class Screen:

@@ -42,6 +42,8 @@ class Overlay:
         self.tutorial_slide = 0
 
         self.background = pygame.Surface(self.screen.get_size())
+        self.background.fill((150, 150, 150))
+        self.background.set_alpha(75)
 
         # initializing fonts
         self.regular_font = pygame.font.Font("Data/Fonts/Athelas-Regular.ttf", 40)
@@ -64,26 +66,24 @@ class Overlay:
             self.screen.get_screen().blit(self.tut0, (self.img_pos[0], self.img_pos[1]))
 
             self.screen.set_font(self.small_font)
-            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press mouse or [z] to continue)")
+            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3.2, "Press [left] or [z] to continue")
         elif self.tutorial_slide == 1:
             self.screen.get_screen().blit(self.tut1, (self.img_pos[0], self.img_pos[1]))
 
             self.screen.set_font(self.small_font)
-            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press mouse or [z] to continue)")
+            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3.2, "Press [left] or [z] to continue")
         elif self.tutorial_slide == 2:
             self.screen.get_screen().blit(self.tut2, (self.img_pos[0], self.img_pos[1]))
 
             self.screen.set_font(self.small_font)
-            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press mouse or [z] to continue)")
+            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3.2, "Press [left] or [z] to continue")
         else:
             self.screen.get_screen().blit(self.tut3, (self.img_pos[0], self.img_pos[1]))
 
             self.screen.set_font(self.small_font)
-            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press mouse or [z] to continue)")
+            self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3.2, "Press [left] or [z] to start")
 
     def end_screen(self):
-        self.background.fill((150, 150, 150))
-        self.background.set_alpha(75)
         self.screen.get_screen().blit(self.background, (0, 0))
 
         if self.score < self.game_duration:
@@ -94,12 +94,17 @@ class Overlay:
         self.screen.set_font(self.bold_font)
         self.screen.text(self.screen_width/2, (self.screen_height/5) * 2.8, f"You survived {self.score} hours")
         self.screen.set_font(self.small_font)
-        self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press mouse or [z] to quit)")
+        self.screen.text(self.screen_width / 2, (self.screen_height / 5) * 3, "(Press [left] or [z] to quit)")
 
-    def stop_start(self):
-        self.start = False
-
-    def run_end(self, score: int = -1):
+    def update_end(self, score: int = -1):
         self.end = True
         self.score = score
+
+    def update_start(self):
+        if self.tutorial_slide < 3:
+            self.tutorial_slide += 1
+        else:
+            self.start = False
+            self.background.set_alpha(0)
+            self.screen.get_screen().blit(self.background, (0, 0))
 

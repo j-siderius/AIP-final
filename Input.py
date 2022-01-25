@@ -5,14 +5,18 @@ import time
 
 
 class Input:
-    def __init__(self, player):
+    def __init__(self, player, overlay, quit_game_func = None):
         """
         Processes all the different inputs into usable variables
         :param player: pass the main player object here:
         """
         self.selected_tile = 5
         self.prev_selected_tile = -1
+
         self.player = player
+        self.overlay = overlay
+        self.quit_game_func = None
+
         self.elapsed_time = 0
         self.old_time = time.perf_counter()
 
@@ -116,8 +120,13 @@ class Input:
             self.prev_selected_tile = self.selected_tile
 
     def move_player(self, tile):
-        self.player.move_player(tile.get_position())
-        self.prev_selected_tile = -1
+        if self.overlay.start:  # check for starting tutorial
+            self.overlay.update_start()
+        elif self.overlay.end:  # check for end screen
+            self.quit_game_func()
+        else:
+            self.player.move_player(tile.get_position())
+            self.prev_selected_tile = -1
 
     def build_mine(self, tile):
         self.player.mine_build(tile)

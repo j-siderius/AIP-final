@@ -2,7 +2,7 @@ import pygame
 
 
 class Gamecontroller:
-    def __init__(self, screen, serial, timescale: int = 12, game_duration: int = 24):
+    def __init__(self, screen, serial, timescale: int = 12, game_duration: int = 24, game_end_func = None):
         """
         The gamecontroller manages miscellaneous functions like keeping track of time and the day/night cycle
         :param screen: pygame screen obj to blit to
@@ -20,6 +20,8 @@ class Gamecontroller:
         self.game_duration = game_duration
         self.start_night = int(self.timescale / 2) - 1
 
+        self.game_end_func = game_end_func
+
         self.sky_color = (0, 0, 0)
         self.sky_opacity = 0
         self.sky = pygame.Surface(self.screen.get_size())
@@ -34,6 +36,10 @@ class Gamecontroller:
         else:
             self.day_night_time += 1  # increment time
         self.update_day_night()
+
+        # check if game is done
+        if self.game_time >= self.game_duration:
+            self.game_end_func()
 
     # TODO: add zombie update function here
 

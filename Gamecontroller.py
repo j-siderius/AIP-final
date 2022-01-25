@@ -18,13 +18,14 @@ class Gamecontroller:
 		:param timescale: how quickly or slowly time progresses in the game (e.g. timescale=12 -> day lasts 12 ticks)
 		:param game_duration: how long the game lasts (e.g. if timescale=12 and game_duration=24 -> game lasts 2 days)
 		"""
+		# save the references to the objects as class members
 		self.player = player
 		self.screen = screen
 		self.screen_size = self.screen.get_size()
 		self.serial = serial
 		self.field = field
 
-		# time
+		# counter variables
 		self.game_time = 0
 		self.game_day = 0
 		self.day_night_time = 0  # always start game at beginning of day
@@ -33,8 +34,10 @@ class Gamecontroller:
 		self.game_duration = game_duration
 		self.start_night = int(self.timescale / 2) - 1
 
+		# assign external functions
 		self.game_end_func = game_end_func
 
+		# variables for skybox
 		self.sky_color = (0, 0, 0)
 		self.sky_opacity = 0
 		self.sky = pygame.Surface(self.screen.get_size())
@@ -81,6 +84,7 @@ class Gamecontroller:
 		elif self.day_night_time >= (11 / 12) * self.timescale:
 			self.sky_opacity = 75
 
+		# spawn zombies
 		if (9 / 12) * self.timescale > self.day_night_time >= (6 / 12) * self.timescale:
 			tile_list = self.field.get_land_tiles()
 			for i in range(Settings.SPAWN_TRY_AMOUNT[self.game_day]):
@@ -92,7 +96,7 @@ class Gamecontroller:
 
 	def update_sky(self):
 		"""draw sky over the screen"""
-
+		# change opacity so night gradually fades in
 		self.sky.fill(self.sky_color)
 		self.sky.set_alpha(self.sky_opacity)
 		# blit overlay over whole screen

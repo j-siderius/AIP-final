@@ -26,6 +26,7 @@ class Program:
 
         self.fps = []
 
+        self.screen.set_serial_func(self.serial.update)
         self.screen.start()
 
     def loop(self):

@@ -1,7 +1,7 @@
 import bisect
 import math
 import random
-from queue import PriorityQueue
+import pygame
 import Tile
 from Data.settings import Settings
 
@@ -14,7 +14,6 @@ class Zombie:
 
     def __init__(self, tile, screen: Screen, field: Field, player: Player, zombies_tiles: list):
         self.field = field
-        # self.pos = pos
         self.screen = screen
         self.color = (0, 0, 255)
         self.radius = self.field.hex_size / 2.3  # base this on hex_size of Tiles
@@ -24,7 +23,6 @@ class Zombie:
         self.is_walking = False
         self.target_tile: Tile = None
 
-        # self.current_tile = self.field.get_tile_from_point(pos)  # TODO change tho start tile
         self.current_tile = tile
         self.pos = tile.get_center()
 
@@ -37,10 +35,49 @@ class Zombie:
         self.health = random.randint(0, 15)
         self.health += len(self.path)
 
+        self.idle_sprite = [[
+            pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_f0.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_f1.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_f2.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_f3.png").convert_alpha()
+        ], [
+            pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_left_f0.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_left_f1.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_left_f2.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_idle_anim_left_f3.png").convert_alpha()
+        ]]
+        self.run_sprite = [[
+            pygame.image.load("Data/Sprites/Zombie/chort_run_anim_f0.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_run_anim_f1.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_run_anim_f2.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_run_anim_f3.png").convert_alpha()
+        ], [
+            pygame.image.load("Data/Sprites/Zombie/chort_run_anim_left_f0.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_run_anim_left_f1.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_run_anim_left_f2.png").convert_alpha(),
+            pygame.image.load("Data/Sprites/Zombie/chort_run_anim_left_f3.png").convert_alpha()
+        ]]
+        self.image = self.idle_sprite[1][0]
+        self.rect = self.image.get_rect()
+        self.look_direction = 1
+        self.frame = random.randint(0, 3)
+        self.timer: float = 0.0
+
     def display(self):
-        self.screen.stroke_size(0)
-        self.screen.stroke(self.color)
-        self.screen.circle(self.pos[0], self.pos[1], self.radius, self.color)
+        self.timer += self.screen.get_elapsed_time()
+        if self.timer > 0.10:
+            self.timer: float = 0.0
+            if self.frame < 3:
+                self.frame += 1
+            else:
+                self.frame = 0
+
+        if self.is_walking:
+            self.image = self.run_sprite[self.look_direction][self.frame]
+        else:
+            self.image = self.idle_sprite[self.look_direction][self.frame]
+
+        self.screen.get_screen().blit(self.image, (self.pos[0] - 8, self.pos[1] - 16))
 
     def update(self):
         if self.is_walking:  # walking
@@ -50,6 +87,7 @@ class Zombie:
             if self.walk_timer <= 0:
                 self.is_walking = False
                 self.align_enemy(self.target_tile)
+                self.look_player()  # updating look direction
             else:
                 self.pos = lerp_2D(self.current_tile.get_center(), self.target_tile.get_center(), factor)
 
@@ -65,6 +103,12 @@ class Zombie:
     def align_enemy(self, tile: Tile):
         self.current_tile = tile
         self.pos = self.current_tile.get_center()
+
+    def look_player(self):
+        if self.pos[0] > self.player.get_player_position()[0]:
+            self.look_direction = 1
+        else:
+            self.look_direction = 0
 
     def a_star(self, target_tile: Tile, zombies_tiles: list):
         start_node: Node = Node(self.current_tile, 0, None)
@@ -121,7 +165,6 @@ class Zombie:
         if len(self.path) > 0 and self.path[0].is_walkable():
             zombies_tiles.append(self.path[0])
         else:
-            print("hoi")
             zombies_tiles.append(self.current_tile)
 
         # debugging and showing the AI path

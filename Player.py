@@ -100,7 +100,7 @@ class Player:
     def update(self):
         if self.is_walking:  # walking
             factor = 1 - self.walk_timer / Settings.PLAYER_WALKING_TIME
-            walkspeed = lerp(self.current_tile.is_walkable(), self.target_tile.is_walkable(), factor)
+            walkspeed = lerp(self.from_tile.is_walkable(), self.target_tile.is_walkable(), factor)
             self.walk_timer -= self.screen.get_elapsed_time() * walkspeed
             if self.walk_timer <= 0:
                 self.is_walking = False
@@ -167,7 +167,6 @@ class Player:
 
     # called when the player starts an action, not called when the player moves
     def start_action(self):
-        # TODO !!!! @JANNICK set here your time tick thingy, deze is called when an action is started !!!!!!!
         self.time_ticker()
         # implementation ^ Work In Progress
         self.doing_an_action = True

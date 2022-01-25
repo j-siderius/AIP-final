@@ -181,7 +181,7 @@ class Zombie:
         """Moves the player to the clicked tile (if valid move)"""
         if targetTile.is_wall:
             targetTile.attack_wall(self.attack_damage)
-        elif self.player.current_tile == targetTile:
+        elif self.player.current_tile == targetTile or self.player.current_tile == self.current_tile:
             self.player.attack_player(self.attack_damage)
         elif targetTile.is_walkable():
             self.target_tile = targetTile
